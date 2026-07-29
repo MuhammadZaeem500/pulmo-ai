@@ -18,7 +18,6 @@ const STATS = [
   { value: "24/7", label: "AI Support" },
 ];
 
-// Bar heights for the "Symptoms Tracked" sparkline — purely decorative data.
 const TRACKED_BARS = [24, 56, 32, 68, 28, 74, 26];
 
 export default function Hero() {
