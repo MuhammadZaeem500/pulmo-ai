@@ -3,6 +3,9 @@ import WhyChooseUs from "@/src/components/landing/WhyChooseUs";
 import PowerfulFeatures from "@/src/components/landing/PowerfulFeatures";
 import HowItWorks from "@/src/components/landing/HowItWorks";
 import NearbySpecialists from "@/src/components/landing/NearbySpecialists";
+import Testimonials from "@/src/components/landing/Testimonials";
+import CtaSection from "@/src/components/landing/CtaSection";
+import Footer from "@/src/components/landing/Footer";
 
 export default function LandingPage() {
   return (
@@ -12,6 +15,9 @@ export default function LandingPage() {
       <PowerfulFeatures />
       <HowItWorks />
       <NearbySpecialists />
+      <Testimonials/>
+      <CtaSection/>
+      <Footer/>
     </main>
   );
 }
