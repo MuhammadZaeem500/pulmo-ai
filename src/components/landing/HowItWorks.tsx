@@ -1,5 +1,5 @@
 // src/components/landing/HowItWorks.tsx
-import FeatureCard from "@/src/components/common/FeatureCard";
+import FeatureCard from "@/components/common/FeatureCard";
 import { UserPlus, MessageSquareText, Activity, TrendingUp } from "lucide-react";
 
 const stepsData = [

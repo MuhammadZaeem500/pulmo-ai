@@ -1,5 +1,5 @@
 // src/components/landing/PowerfulFeatures.tsx
-import FeatureCard from "@/src/components/common/FeatureCard";
+import FeatureCard from "@/components/common/FeatureCard";
 import { 
   MessageSquare, 
   FileText, 

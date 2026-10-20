@@ -1,5 +1,5 @@
 // src/components/landing/WhyChooseUs.tsx
-import FeatureCard from "@/src/components/common/FeatureCard";
+import FeatureCard from "@/components/common/FeatureCard";
 import { Brain, ShieldCheck, Zap, Stethoscope, Sparkles } from "lucide-react";
 
 const features = [

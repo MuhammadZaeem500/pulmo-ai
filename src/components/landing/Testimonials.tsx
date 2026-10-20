@@ -1,5 +1,5 @@
 // src/components/landing/Testimonials.tsx
-import TestimonialCard from "@/src/components/common/TestimonialCard";
+import TestimonialCard from "@/components/common/TestimonialCard";
 import { Star } from "lucide-react";
 
 const testimonialsData = [

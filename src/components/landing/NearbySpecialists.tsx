@@ -1,4 +1,4 @@
-import DoctorClinicCard from "@/src/components/common/DoctorClinicCard";
+import DoctorClinicCard from "@/components/common/DoctorClinicCard";
 import { MapPin, User, ChevronRight } from "lucide-react";
 
 const clinicsData = [
