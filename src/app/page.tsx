@@ -1,11 +1,12 @@
-import HeroSection from "@/src/components/landing/HeroSection";
-import WhyChooseUs from "@/src/components/landing/WhyChooseUs";
-import PowerfulFeatures from "@/src/components/landing/PowerfulFeatures";
-import HowItWorks from "@/src/components/landing/HowItWorks";
-import NearbySpecialists from "@/src/components/landing/NearbySpecialists";
-import Testimonials from "@/src/components/landing/Testimonials";
-import CtaSection from "@/src/components/landing/CtaSection";
-import Footer from "@/src/components/landing/Footer";
+// src/app/page.tsx
+import HeroSection from "@/components/landing/HeroSection";
+import WhyChooseUs from "@/components/landing/WhyChooseUs";
+import PowerfulFeatures from "@/components/landing/PowerfulFeatures";
+import HowItWorks from "@/components/landing/HowItWorks";
+import NearbySpecialists from "@/components/landing/NearbySpecialists";
+import Testimonials from "@/components/landing/Testimonials";
+import CtaSection from "@/components/landing/CtaSection";
+import Footer from "@/components/landing/Footer";
 
 export default function LandingPage() {
   return (
@@ -15,9 +16,9 @@ export default function LandingPage() {
       <PowerfulFeatures />
       <HowItWorks />
       <NearbySpecialists />
-      <Testimonials/>
-      <CtaSection/>
-      <Footer/>
+      <Testimonials />
+      <CtaSection />
+      <Footer />
     </main>
   );
 }
