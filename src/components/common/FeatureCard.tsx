@@ -9,6 +9,7 @@ interface FeatureCardProps {
   badge?: string;
   isPopular?: boolean;
   linkText?: string;
+  stepNumber?: string; // Added for step-by-step cards
 }
 
 export default function FeatureCard({
@@ -17,7 +18,8 @@ export default function FeatureCard({
   description,
   badge,
   isPopular,
-  linkText = "Learn More",
+  linkText,
+  stepNumber,
 }: FeatureCardProps) {
   return (
     <div
@@ -34,8 +36,15 @@ export default function FeatureCard({
         </span>
       )}
 
+      {/* Step Number Badge (e.g., 01, 02, 03) */}
+      {stepNumber && (
+        <div className="absolute -top-4 left-8 h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-600 to-teal-500 text-white font-bold text-sm flex items-center justify-center shadow-md shadow-blue-500/25">
+          {stepNumber}
+        </div>
+      )}
+
       {/* Icon Container */}
-      <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-teal-400 text-white shadow-md shadow-blue-500/20">
+      <div className="mb-6 mt-2 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-teal-400 text-white shadow-md shadow-blue-500/20">
         {icon}
       </div>
 
@@ -43,13 +52,15 @@ export default function FeatureCard({
       <h3 className="text-xl font-bold text-slate-900 mb-2">{title}</h3>
 
       {/* Description */}
-      <p className="text-sm text-slate-600 leading-relaxed mb-6">{description}</p>
+      <p className="text-sm text-slate-600 leading-relaxed mb-4">{description}</p>
 
-      {/* Learn More Link */}
-      <div className="mt-auto pt-2 flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700 cursor-pointer group">
-        <span>{linkText}</span>
-        <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-      </div>
+      {/* Optional Link */}
+      {linkText && (
+        <div className="mt-auto pt-2 flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700 cursor-pointer group">
+          <span>{linkText}</span>
+          <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+        </div>
+      )}
     </div>
   );
 }

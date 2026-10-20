@@ -1,4 +1,3 @@
-// src/components/landing/HeroSection.tsx
 import Link from "next/link";
 import { Stethoscope, Sparkles, ArrowRight, Activity, FileText, MessageSquare } from "lucide-react";
 
