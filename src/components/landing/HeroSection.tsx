@@ -28,13 +28,13 @@ export default function HeroSection() {
               Doctor Portal
             </Link>
             <Link 
-              href="/sign-in" 
+              href="/auth/sign-in" 
               className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition"
             >
               Login
             </Link>
             <Link 
-              href="/sign-up" 
+              href="/auth/sign-up" 
               className="rounded-full bg-gradient-to-r from-teal-400 to-teal-500 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-teal-500/25 hover:from-teal-500 hover:to-teal-600 transition transform hover:-translate-y-0.5"
             >
               Get Started

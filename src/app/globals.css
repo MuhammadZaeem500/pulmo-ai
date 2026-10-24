@@ -8,7 +8,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: "Montserrat Alternates", sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
@@ -19,8 +19,13 @@
   }
 }
 
+/* Force the font on body and catch-all elements so sub-layouts inherit it */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans);
+  font-family: var(--font-sans) !important;
+}
+
+* {
+  font-family: inherit;
 }

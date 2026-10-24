@@ -8,7 +8,7 @@ export default function SignUp() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     fullName: '',
-    email: '',ß
+    email: '',
     age: '',
     gender: '',
     phone: '',
