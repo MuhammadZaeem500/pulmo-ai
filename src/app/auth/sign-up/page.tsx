@@ -8,7 +8,7 @@ export default function SignUp() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     fullName: '',
-    email: '',
+    email: '',ß
     age: '',
     gender: '',
     phone: '',
@@ -26,7 +26,7 @@ export default function SignUp() {
       alert("Passwords do not match!");
       return;
     }
-    router.push('/sign-in');
+    router.push('/auth/sign-in');
   };
 
   return (
