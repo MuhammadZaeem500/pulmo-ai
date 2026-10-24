@@ -71,7 +71,7 @@ export default function HeroSection() {
           {/* Action Buttons */}
           <div className="flex flex-wrap items-center gap-4 mb-12">
             <Link
-              href="/sign-up"
+              href="/auth/sign-up"
               className="group rounded-xl bg-white px-7 py-4 text-sm font-bold text-blue-700 shadow-xl shadow-black/10 hover:bg-blue-50 transition flex items-center gap-2"
             >
               <span>Get Started Now</span>
