@@ -30,7 +30,7 @@ export default function CtaSection() {
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
           <Link
-            href="/auth/sign-up"
+            href="/auth/patient/sign-up"
             className="rounded-xl bg-white px-7 py-4 text-sm font-bold text-blue-700 shadow-xl shadow-black/10 hover:bg-blue-50 transition transform hover:-translate-y-0.5"
           >
             Get Started Today

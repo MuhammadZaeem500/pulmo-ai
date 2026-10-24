@@ -6,7 +6,6 @@ export default function Footer() {
     <footer className="bg-[#0b132b] text-slate-400 pt-16 pb-12 border-t border-slate-800">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         
-        {/* Top Grid (Brand Info & Link Columns) */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 pb-16 border-b border-slate-800/80">
           
           {/* Brand Info (Left Column - 4 Spans) */}
@@ -28,7 +27,7 @@ export default function Footer() {
             <div className="flex items-center gap-3">
               {/* GitHub */}
               <a 
-                href="https://github.com" 
+                href="https://github.com/MuhammadZaeem500" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 aria-label="GitHub"
@@ -54,7 +53,7 @@ export default function Footer() {
 
               {/* LinkedIn */}
               <a 
-                href="https://linkedin.com" 
+                href="https://www.linkedin.com/in/muhammad-zaeem-sheikh/" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 aria-label="LinkedIn"

@@ -26,7 +26,7 @@ export default function SignUp() {
       alert("Passwords do not match!");
       return;
     }
-    router.push('/auth/sign-in');
+    router.push('/auth/patient/sign-in');
   };
 
   return (
@@ -169,7 +169,7 @@ export default function SignUp() {
             Already have an account?{' '}
             <button
               type="button"
-              onClick={() => router.push('/sign-in')}
+              onClick={() => router.push('/auth/patient/sign-in')}
               className="text-[#2F80ED] hover:underline font-medium"
             >
               Sign In

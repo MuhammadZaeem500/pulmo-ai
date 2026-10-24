@@ -22,19 +22,19 @@ export default function HeroSection() {
           {/* Right Navigation & Actions */}
           <div className="flex items-center gap-6">
             <Link 
-              href="/doctor-portal" 
+              href="/auth/doctor/sign-in" 
               className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition hidden sm:block"
             >
               Doctor Portal
             </Link>
             <Link 
-              href="/auth/sign-in" 
+              href="/auth/patient/sign-in" 
               className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition"
             >
               Login
             </Link>
             <Link 
-              href="/auth/sign-up" 
+              href="/auth/patient/sign-up" 
               className="rounded-full bg-gradient-to-r from-teal-400 to-teal-500 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-teal-500/25 hover:from-teal-500 hover:to-teal-600 transition transform hover:-translate-y-0.5"
             >
               Get Started
@@ -71,7 +71,7 @@ export default function HeroSection() {
           {/* Action Buttons */}
           <div className="flex flex-wrap items-center gap-4 mb-12">
             <Link
-              href="/auth/sign-up"
+              href="/auth/patient/sign-up"
               className="group rounded-xl bg-white px-7 py-4 text-sm font-bold text-blue-700 shadow-xl shadow-black/10 hover:bg-blue-50 transition flex items-center gap-2"
             >
               <span>Get Started Now</span>

@@ -1,4 +1,3 @@
-// src/app/sign-in/page.tsx
 "use client";
 
 import { useState } from 'react';
@@ -13,7 +12,7 @@ export default function Login() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    router.push('/dashboard');
+    router.push('/patient/dashboard');
   };
 
   return (
@@ -140,7 +139,7 @@ export default function Login() {
             Don't have an account?{' '}
             <button
               type="button"
-              onClick={() => router.push('/auth/sign-up')}
+              onClick={() => router.push('/auth/patient/sign-up')}
               className="text-[#2F80ED] hover:underline font-medium"
             >
               Sign up

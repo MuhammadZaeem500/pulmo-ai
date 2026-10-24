@@ -34,7 +34,7 @@ export default function Sidebar() {
   ];
 
   const handleLogout = () => {
-    router.push('/auth/sign-in');
+    router.push('/auth/patient/sign-in');
   };
 
   return (
