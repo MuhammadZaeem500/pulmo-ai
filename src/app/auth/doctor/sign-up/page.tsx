@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Stethoscope, ArrowLeft, Eye, EyeOff, ChevronRight, Upload, ShieldCheck } from "lucide-react";
-import AuthHeroBanner from "@/components/doctor/auth/AuthHeroBanner";
-import AuthStepper from "@/components/doctor/auth/AuthStepper";
+import AuthHeroBanner from "@/components/doctor/AuthHeroBanner";
+import AuthStepper from "@/components/doctor/AuthStepper";
 
 export default function DoctorRegisterPage() {
   const [showPassword, setShowPassword] = useState(false);

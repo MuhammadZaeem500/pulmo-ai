@@ -1,7 +1,7 @@
 // src/app/doctor/dashboard/page.tsx
 "use client";
 
-import DashboardCard from "@/components/doctor/dashboard/DashboardCard";
+import DashboardCard from "@/components/doctor/DashboardCard";
 import { 
   Calendar, 
   Users, 

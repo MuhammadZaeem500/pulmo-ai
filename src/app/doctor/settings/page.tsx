@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import DashboardCard from "@/components/doctor/dashboard/DashboardCard";
+import DashboardCard from "@/components/doctor/DashboardCard";
 import { Shield, Lock, Bell, Palette, Sun, Moon, Check, Globe } from "lucide-react";
 
 export default function DoctorSettingsPage() {
   const [activeTab, setActiveTab] = useState("account");
 
-  // Account State
   const [accountData, setAccountData] = useState({
     firstName: "Sarah",
     lastName: "Mitchell",
@@ -16,7 +15,6 @@ export default function DoctorSettingsPage() {
     specialty: "Pulmonologist",
   });
 
-  // Security State
   const [securityData, setSecurityData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -33,7 +31,6 @@ export default function DoctorSettingsPage() {
     systemAlerts: false,
   });
 
-  // Preferences State
   const [theme, setTheme] = useState("light");
   const [language, setLanguage] = useState("English");
   const [timezone, setTimezone] = useState("UTC-5 (Eastern Time)");

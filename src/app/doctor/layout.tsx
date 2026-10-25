@@ -1,6 +1,6 @@
 // src/app/doctor/layout.tsx
 import React from "react";
-import DoctorSidebar from "@/components/doctor/dashboard/DoctorSidebar";
+import DoctorSidebar from "@/components/doctor/DoctorSidebar";
 
 export default function DoctorLayout({
   children,

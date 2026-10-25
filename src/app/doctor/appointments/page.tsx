@@ -1,6 +1,6 @@
 "use client";
 
-import DashboardCard from "@/components/doctor/dashboard/DashboardCard";
+import DashboardCard from "@/components/doctor/DashboardCard";
 import { Calendar, CheckCircle2, Clock, Check, ChevronRight } from "lucide-react";
 
 export default function DoctorAppointmentsPage() {

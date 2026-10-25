@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import DashboardCard from "@/components/doctor/dashboard/DashboardCard";
+import DashboardCard from "@/components/doctor/DashboardCard";
 import { Edit3, Save, X, Shield, Award, Building2, Clock } from "lucide-react";
 
 export default function DoctorProfilePage() {
