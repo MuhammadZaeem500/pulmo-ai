@@ -76,65 +76,61 @@ export default function DoctorPatientsPage() {
   );
 
   return (
-    <div className="min-h-screen flex w-full bg-white font-sans">
+    <div className="space-y-6">
+      {/* Page Title */}
+      <div>
+        <h1 className="text-xl font-extrabold text-slate-900">Patients</h1>
+      </div>
 
-      {/* Main Content Area */}
-      <main className="flex-1 p-8 overflow-y-auto max-h-screen space-y-6 bg-white">
-        {/* Page Title */}
-        <div>
-          <h1 className="text-xl font-extrabold text-slate-900">Patients</h1>
-        </div>
+      {/* Search Bar */}
+      <div className="relative max-w-full">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <input
+          type="text"
+          placeholder="Search patients..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 bg-slate-50/50"
+        />
+      </div>
 
-        {/* Search Bar */}
-        <div className="relative max-w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search patients..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 bg-slate-50/50"
-          />
-        </div>
-
-        {/* Patients Grid using Reusable DashboardCard */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredPatients.map((patient, idx) => (
-            <DashboardCard key={idx} className="hover:border-blue-200 transition-all cursor-pointer">
-              {/* Top Row: Avatar and Status Badge */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">
-                  {patient.initials}
-                </div>
-                <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${patient.statusColor}`}>
-                  {patient.status}
-                </span>
+      {/* Patients Grid using Reusable DashboardCard */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredPatients.map((patient, idx) => (
+          <DashboardCard key={idx} className="hover:border-blue-200 transition-all cursor-pointer">
+            {/* Top Row: Avatar and Status Badge */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 rounded-xl bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">
+                {patient.initials}
               </div>
+              <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${patient.statusColor}`}>
+                {patient.status}
+              </span>
+            </div>
 
-              {/* Patient Name & Demographics */}
-              <div className="mb-4">
-                <h3 className="text-sm font-bold text-slate-900">{patient.name}</h3>
-                <p className="text-xs text-slate-400 font-medium mt-0.5">{patient.details}</p>
-              </div>
+            {/* Patient Name & Demographics */}
+            <div className="mb-4">
+              <h3 className="text-sm font-bold text-slate-900">{patient.name}</h3>
+              <p className="text-xs text-slate-400 font-medium mt-0.5">{patient.details}</p>
+            </div>
 
-              {/* Condition Details */}
-              <div className="space-y-0.5 mb-6">
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
-                  <span className="w-1.5 h-1.5 rounded-full bg-teal-500 inline-block" />
-                  {patient.condition}
-                </div>
-                <p className="text-xs text-slate-400 ml-3">{patient.severity}</p>
+            {/* Condition Details */}
+            <div className="space-y-0.5 mb-6">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+                <span className="w-1.5 h-1.5 rounded-full bg-teal-500 inline-block" />
+                {patient.condition}
               </div>
+              <p className="text-xs text-slate-400 ml-3">{patient.severity}</p>
+            </div>
 
-              {/* Footer: Last Visit & Arrow */}
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-                <span>Last: {patient.lastVisit}</span>
-                <ChevronRight className="w-4 h-4 text-slate-400 hover:text-blue-600 transition-colors" />
-              </div>
-            </DashboardCard>
-          ))}
-        </div>
-      </main>
+            {/* Footer: Last Visit & Arrow */}
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+              <span>Last: {patient.lastVisit}</span>
+              <ChevronRight className="w-4 h-4 text-slate-400 hover:text-blue-600 transition-colors" />
+            </div>
+          </DashboardCard>
+        ))}
+      </div>
     </div>
   );
 }

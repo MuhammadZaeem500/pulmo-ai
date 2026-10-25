@@ -1,3 +1,5 @@
+// src/app/doctor/layout.tsx
+import React from "react";
 import DoctorSidebar from "@/components/doctor/dashboard/DoctorSidebar";
 
 export default function DoctorLayout({
@@ -6,9 +8,13 @@ export default function DoctorLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-screen bg-[#F8FAFC] overflow-hidden font-['Ubuntu',sans-serif]">
+    <div className="flex min-h-screen bg-white font-sans">
       <DoctorSidebar />
-      <div className="flex-1 overflow-y-auto">{children}</div>
+      <main className="flex-1 p-8 lg:p-10 bg-white overflow-x-hidden">
+        <div className="mx-auto space-y-8">
+          {children}
+        </div>
+      </main>
     </div>
   );
 }
