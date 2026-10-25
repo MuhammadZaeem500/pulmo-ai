@@ -4,7 +4,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Stethoscope, Eye, EyeOff, ShieldCheck } from "lucide-react";
-import AuthHeroBanner from "@/components/admin/auth/AuthHeroBanner";
+import AuthHeroBanner from "@/components/admin/AuthHeroBanner";
 
 export default function AdminSignInPage() {
   const [showPassword, setShowPassword] = useState(false);
