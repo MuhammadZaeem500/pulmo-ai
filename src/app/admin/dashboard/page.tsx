@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import DashboardCard from "@/components/doctor/DashboardCard";
+import DashboardCard from "@/components/common/DashboardCard";
 import { 
   Users, 
   Activity, 

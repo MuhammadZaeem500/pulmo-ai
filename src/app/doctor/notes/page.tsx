@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import DashboardCard from "@/components/doctor/DashboardCard";
+import DashboardCard from "@/components/common/DashboardCard";
 import { Search, FileText, Plus, Edit2, ChevronRight } from "lucide-react";
 
 export default function DoctorConsultationNotesPage() {

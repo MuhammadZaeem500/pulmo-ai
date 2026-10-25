@@ -7,13 +7,13 @@ import { MessageCircle, FileText, Calendar, Pill, Activity } from "lucide-react"
 
 export default function PatientDashboard() {
   const router = useRouter();
-
+  
   return (
     <div className="p-8 lg:p-10 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">Dashboard</h1>
-        <p className="text-gray-500 text-sm">Welcome back! Here's your health overview</p>
+        <p className="text-gray-500 text-sm">Welcome back! Here&apos;s your health overview</p>
       </div>
 
       {/* Cards Grid */}
@@ -22,6 +22,7 @@ export default function PatientDashboard() {
         <DashboardCard
           title="Continue Last Conversation"
           icon={MessageCircle}
+          iconGradient={true}
           actionText="Open AI Chatbot →"
           onAction={() => router.push('/patient/chatbot')}
         >
@@ -32,6 +33,7 @@ export default function PatientDashboard() {
         <DashboardCard
           title="Recent Medical History"
           icon={FileText}
+          iconGradient={true}
           actionText="View History →"
           onAction={() => router.push('/patient/medical-history')}
         >
@@ -43,6 +45,7 @@ export default function PatientDashboard() {
         <DashboardCard
           title="Upcoming Appointment"
           icon={Calendar}
+          iconGradient={true}
           actionText="View Details →"
           onAction={() => router.push('/patient/appointments')}
         >
@@ -54,6 +57,7 @@ export default function PatientDashboard() {
         <DashboardCard
           title="Recent Prescription"
           icon={Pill}
+          iconGradient={true}
           actionText="View All →"
           onAction={() => router.push('/patient/prescriptions')}
         >
@@ -65,6 +69,7 @@ export default function PatientDashboard() {
         <DashboardCard
           title="Symptom Tracker Summary"
           icon={Activity}
+          iconGradient={true}
           actionText="Track Symptoms →"
           onAction={() => router.push('/patient/symptom-tracker')}
           className="md:col-span-2"

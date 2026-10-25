@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import DashboardCard from "@/components/doctor/DashboardCard";
+import DashboardCard from "@/components/common/DashboardCard";
 import { Search, Plus, TestTube } from "lucide-react";
 
 export default function DoctorRecommendedTestsPage() {
