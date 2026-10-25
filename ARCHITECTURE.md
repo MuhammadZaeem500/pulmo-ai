@@ -2,40 +2,148 @@
 
 ## 1. Directory Structure
 ```
-pulmoai-frontend/
-├── src/
-│   ├── app/
-│   │   ├── (auth)/
-│   │   │   ├── login/page.tsx
-│   │   │   └── signup/page.tsx
-│   │   ├── patient/
-│   │   │   ├── dashboard/page.tsx
-│   │   │   ├── chatbot/page.tsx
-│   │   │   ├── records/page.tsx
-│   │   │   └── clinics/page.tsx
-│   │   ├── doctor/
-│   │   │   ├── dashboard/page.tsx
-│   │   │   └── consultations/page.tsx
-│   │   ├── admin/
-│   │   │   └── dashboard/page.tsx
+pulmo-ai
+├── .gitignore
+├── AGENTS.md
+├── ARCHITECTURE.md
+├── CLAUDE.md
+├── Folder Structure Script.sh
+├── README.md
+├── eslint.config.mjs
+├── next-env.d.ts
+├── next.config.ts
+├── package-lock.json
+├── package.json
+├── postcss.config.mjs
+├── public
+│   ├── favicon.ico
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+├── src
+│   ├── app
+│   │   ├── admin
+│   │   │   ├── analytics
+│   │   │   │   └── page.tsx
+│   │   │   ├── clinics
+│   │   │   │   └── page.tsx
+│   │   │   ├── dashboard
+│   │   │   │   └── page.tsx
+│   │   │   ├── layout.tsx
+│   │   │   ├── notifications
+│   │   │   │   └── page.tsx
+│   │   │   ├── reports
+│   │   │   │   └── page.tsx
+│   │   │   ├── security
+│   │   │   │   └── page.tsx
+│   │   │   ├── settings
+│   │   │   │   └── page.tsx
+│   │   │   └── users
+│   │   │       └── page.tsx
+│   │   ├── auth
+│   │   │   ├── admin
+│   │   │   │   ├── sign-in
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── sign-up
+│   │   │   │       └── page.tsx
+│   │   │   ├── doctor
+│   │   │   │   ├── sign-in
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── sign-up
+│   │   │   │       └── page.tsx
+│   │   │   └── patient
+│   │   │       ├── sign-in
+│   │   │       │   └── page.tsx
+│   │   │       └── sign-up
+│   │   │           └── page.tsx
+│   │   ├── doctor
+│   │   │   ├── appointments
+│   │   │   │   └── page.tsx
+│   │   │   ├── dashboard
+│   │   │   │   └── page.tsx
+│   │   │   ├── layout.tsx
+│   │   │   ├── notes
+│   │   │   │   └── page.tsx
+│   │   │   ├── patients
+│   │   │   │   └── page.tsx
+│   │   │   ├── prescriptions
+│   │   │   │   └── page.tsx
+│   │   │   ├── profile
+│   │   │   │   └── page.tsx
+│   │   │   ├── settings
+│   │   │   │   └── page.tsx
+│   │   │   └── tests
+│   │   │       └── page.tsx
+│   │   ├── globals.css
 │   │   ├── layout.tsx
-│   │   └── page.tsx
-│   ├── components/
-│   │   ├── ui/               # Reusable atomic components
-│   │   ├── chat/             # Chatbot interface components
-│   │   └── portals/          # Portal-specific layout wrappers
-│   ├── store/
-│   │   ├── hooks.ts          # Typed useDispatch & useSelector
-│   │   ├── store.ts          # Redux store configuration
-│   │   └── slices/
-│   │       ├── authSlice.ts  # User session & role management
-│   │       └── chatSlice.ts  # Symptom analysis & chatbot state
-│   ├── services/
-│   │   └── api.ts            # Axios/Fetch client targeting backend API
-│   └── types/
-│       └── index.ts          # Shared TypeScript interfaces
-├── tailwind.config.ts
-└── package.json
+│   │   ├── page.tsx
+│   │   └── patient
+│   │       ├── appointments
+│   │       │   └── page.tsx
+│   │       ├── chatbot
+│   │       │   └── page.tsx
+│   │       ├── clinics-specialists
+│   │       │   └── page.tsx
+│   │       ├── dashboard
+│   │       │   └── page.tsx
+│   │       ├── know-your-medicine
+│   │       │   └── page.tsx
+│   │       ├── layout.tsx
+│   │       ├── medical-history
+│   │       │   └── page.tsx
+│   │       ├── prescriptions
+│   │       │   └── page.tsx
+│   │       ├── profile
+│   │       │   └── page.tsx
+│   │       ├── settings
+│   │       │   └── page.tsx
+│   │       └── symptom-tracker
+│   │           └── page.tsx
+│   ├── components
+│   │   ├── admin
+│   │   │   ├── AddClinicModal.tsx
+│   │   │   ├── AdminSidebar.tsx
+│   │   │   ├── AuthHeroBanner.tsx
+│   │   │   ├── SecurityAlertModal.tsx
+│   │   │   └── UserDetailsModal.tsx
+│   │   ├── common
+│   │   │   ├── AvailableDoctorCard.tsx
+│   │   │   ├── ChatHistoryItem.tsx
+│   │   │   ├── DashboardCard.tsx
+│   │   │   ├── DoctorClinicCard.tsx
+│   │   │   ├── FeatureCard.tsx
+│   │   │   ├── MedicalRecordCard.tsx
+│   │   │   ├── MedicineColorCard.tsx
+│   │   │   ├── MedicineShapeCard.tsx
+│   │   │   ├── MetricCard.tsx
+│   │   │   ├── PrescriptionCard.tsx
+│   │   │   ├── PreviousAppointmentCard.tsx
+│   │   │   ├── ProfileField.tsx
+│   │   │   ├── ProfilePrescriptionItem.tsx
+│   │   │   ├── SettingSectionCard.tsx
+│   │   │   ├── SettingToggleItem.tsx
+│   │   │   ├── SymptomCard.tsx
+│   │   │   └── TestimonialCard.tsx
+│   │   ├── doctor
+│   │   │   ├── AuthHeroBanner.tsx
+│   │   │   ├── AuthStepper.tsx
+│   │   │   └── DoctorSidebar.tsx
+│   │   ├── landing
+│   │   │   ├── CtaSection.tsx
+│   │   │   ├── Footer.tsx
+│   │   │   ├── HeroSection.tsx
+│   │   │   ├── HowItWorks.tsx
+│   │   │   ├── NearbySpecialists.tsx
+│   │   │   ├── PowerfulFeatures.tsx
+│   │   │   ├── Testimonials.tsx
+│   │   │   └── WhyChooseUs.tsx
+│   │   └── paitient
+│   │       ├── AuthHeroBanner.tsx
+│   │       └── PatientSidebar.tsx
+│   └── store
+└── tsconfig.json
 ```
 
 ## 2. Redux Store Configuration (`store.ts`)
