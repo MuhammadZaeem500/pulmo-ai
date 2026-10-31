@@ -1,11 +1,16 @@
 "use client";
 
+import { authService } from "@/services/auth.service";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import Link from "next/link";
 import { Stethoscope, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import AuthHeroBanner from "@/components/doctor/AuthHeroBanner";
 
 export default function DoctorLoginPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -29,10 +34,33 @@ export default function DoctorLoginPage() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic or redirect to doctor dashboard
-    alert("Signed in successfully!");
+    setError("");
+    setLoading(true);
+
+    try {
+      const response = await authService.login({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      // Verify that the logged-in user has a DOCTOR role
+      if (response.user && response.user.role && response.user.role !== "DOCTOR") {
+        setError("Access denied. This portal is for doctors only.");
+        setLoading(false);
+        return;
+      }
+
+      // Redirect to doctor dashboard on success
+      router.push("/doctor/dashboard");
+    } catch (err: any) {
+      setError(
+        err.response?.data?.message || "Invalid email or password. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -59,12 +87,18 @@ export default function DoctorLoginPage() {
             </div>
           </div>
 
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+         <h2 className="text-2xl font-bold tracking-tight text-slate-900">
             Welcome back, Doctor
           </h2>
-          <p className="text-sm text-slate-500 mt-1 mb-8">
+          <p className="text-sm text-slate-500 mt-1 mb-6">
             Sign in to access your patient management dashboard.
           </p>
+
+          {error && (
+            <div className="mb-4 max-w-md p-3 bg-red-50 border border-red-200 text-red-600 text-xs rounded-xl font-medium">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
             <div>
@@ -127,13 +161,15 @@ export default function DoctorLoginPage() {
             </div>
 
             {/* Submit Button */}
-            <button
+           <button
               type="submit"
-              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 text-white font-semibold text-sm hover:opacity-95 transition-opacity flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25"
+              disabled={loading}
+              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 text-white font-semibold text-sm hover:opacity-95 transition-opacity flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 disabled:opacity-50"
             >
-              Sign In to Doctor Portal
+              {loading ? "Signing in..." : "Sign In to Doctor Portal"}
             </button>
           </form>
+          
 
           {/* Register Prompt */}
           <div className="mt-6 max-w-md flex items-center justify-center gap-1.5 text-xs text-slate-500">
