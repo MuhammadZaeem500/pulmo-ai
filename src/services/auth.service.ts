@@ -13,4 +13,9 @@ export const authService = {
     }
     return response.data;
   },
+
+  async signupAdmin(data: any) {
+    const response = await api.post('/auth/admin/sign-up', data);
+    return response.data;
+  },
 };

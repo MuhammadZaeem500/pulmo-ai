@@ -1,8 +1,9 @@
-// src/app/(auth)/admin/sign-up/page.tsx
 "use client";
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { authService } from "@/services/auth.service";
+import { useRouter } from "next/navigation";
 import { Stethoscope, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import AuthHeroBanner from "@/components/admin/AuthHeroBanner";
 
@@ -10,6 +11,9 @@ export default function AdminSignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreed, setAgreed] = useState(false);
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -20,13 +24,23 @@ export default function AdminSignUpPage() {
     confirmPassword: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreed) {
       alert("You must agree to the Terms of Service and Privacy Policy");
       return;
     }
-    alert(`Creating admin account for: ${formData.email}`);
+    setLoading(true);
+    setError("");
+
+    try {
+      await authService.signupAdmin(formData);
+      router.push("/auth/admin/sign-in");
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to create account");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -52,6 +66,12 @@ export default function AdminSignUpPage() {
             </div>
             <p className="text-xs text-slate-400 font-medium">Register as an administrator to access the platform.</p>
           </div>
+
+         {error && (
+            <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-xs rounded-xl font-medium">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -176,9 +196,10 @@ export default function AdminSignUpPage() {
 
             <button
               type="submit"
-              className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition-all"
+              disabled={loading}
+              className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition-all disabled:opacity-50"
             >
-              Create Account
+              {loading ? "Creating Account..." : "Create Account"}
             </button>
 
             <p className="text-center text-xs text-slate-500">
