@@ -17,7 +17,8 @@ import {
   LogOut, 
   ChevronLeft, 
   ChevronRight,
-  X
+  X,
+  Stethoscope
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -38,6 +39,7 @@ export default function AdminSidebar({
   const navItems = [
     { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { label: "Clinics & Hospitals", href: "/admin/clinics", icon: Building2 },
+    { label: "Doctor Verification", href: "/admin/doctor-verification", icon: Stethoscope },
     { label: "Users", href: "/admin/users", icon: Users },
     { label: "Healthcare Analytics", href: "/admin/analytics", icon: BarChart3 },
     { label: "Security Center", href: "/admin/security", icon: ShieldCheck },
