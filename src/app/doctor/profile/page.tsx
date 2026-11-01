@@ -1,26 +1,89 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DashboardCard from "@/components/common/DashboardCard";
-import { Edit3, Save, X, Shield, Award, Building2, Clock } from "lucide-react";
+import { Edit3, Save, X, Shield, Award, Building2, Clock, Loader2 } from "lucide-react";
+import { profileService } from "@/services/profile.service";
 
 export default function DoctorProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
-    fullName: "Dr. Sarah Mitchell",
-    specialty: "Pulmonologist",
-    qualification: "MD, FCCP, DABSM",
-    hospitalAffiliation: "City Medical Center",
-    yearsOfExperience: "12 years",
-    licenseNumber: "MC-2014-089342",
-    email: "sarah.mitchell@citymedical.com",
-    phone: "+1 (555) 234-5678",
+    fullName: "",
+    specialty: "",
+    qualification: "",
+    hospitalAffiliation: "",
+    yearsOfExperience: "",
+    licenseNumber: "",
+    email: "",
+    phone: "",
+    totalPatients: 0,
+    totalConsultations: 0,
   });
+
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      const data = await profileService.getProfile();
+      // Map backend response fields to your form state smoothly
+      setFormData({
+        fullName: data.name || data.fullName || "",
+        specialty: data.specialty || data.specialization || "Pulmonologist",
+        qualification: data.qualification || "MD, FCCP",
+        hospitalAffiliation: data.hospitalAffiliation || data.hospital || "City Medical Center",
+        yearsOfExperience: data.yearsOfExperience || data.experienceYears?.toString() || "12 years",
+        licenseNumber: data.licenseNumber || data.licenseNo || "MC-2014-089342",
+        email: data.email || "",
+        phone: data.phone || "+1 (555) 234-5678",
+        totalPatients: data.totalPatients || 47,
+        totalConsultations: data.totalConsultations || 1240,
+      });
+    } catch (err) {
+      console.error("Failed to load profile", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      await profileService.updateProfile(formData);
+      setIsEditing(false);
+      alert("Profile updated successfully!");
+      fetchProfile();
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Failed to update profile.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-32">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  const initials = formData.fullName
+    .replace(/^Dr\.\s*/i, "")
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -34,7 +97,7 @@ export default function DoctorProfilePage() {
         {!isEditing ? (
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-colors shadow-sm cursor-pointer"
           >
             <Edit3 className="w-3.5 h-3.5 text-blue-600" />
             Edit Profile
@@ -43,19 +106,18 @@ export default function DoctorProfilePage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsEditing(false)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-semibold text-xs transition-colors shadow-sm"
+              disabled={saving}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-semibold text-xs transition-colors shadow-sm cursor-pointer"
             >
               <X className="w-3.5 h-3.5 text-slate-400" />
               Cancel
             </button>
             <button
-              onClick={() => {
-                setIsEditing(false);
-                alert("Profile updated successfully!");
-              }}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 text-white font-semibold text-xs hover:opacity-95 transition-opacity shadow-sm"
+              onClick={handleSave}
+              disabled={saving}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 text-white font-semibold text-xs hover:opacity-95 transition-opacity shadow-sm cursor-pointer disabled:opacity-50"
             >
-              <Save className="w-3.5 h-3.5" />
+              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
               Save Changes
             </button>
           </div>
@@ -64,19 +126,17 @@ export default function DoctorProfilePage() {
 
       {/* Main Profile Details Card */}
       <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-        {/* Banner */}
-        <div className="h-15 bg-gradient-to-r  relative" />
+        <div className="h-15 bg-gradient-to-r from-blue-600 to-teal-500 relative" />
 
-        {/* Profile Content Section */}
         <div className="px-8 pb-8 relative">
           {/* Avatar & Title Overlapping Banner */}
           <div className="flex items-end gap-4 -mt-10 mb-6">
             <div className="w-20 h-20 rounded-2xl bg-blue-600 text-white font-extrabold text-2xl flex items-center justify-center border-4 border-white shadow-md">
-              SM
+              {initials || "DR"}
             </div>
             <div className="mb-1">
-              <h2 className="text-lg font-extrabold text-slate-900">Dr. Sarah Mitchell</h2>
-              <p className="text-xs text-teal-600 font-semibold">Pulmonologist</p>
+              <h2 className="text-lg font-extrabold text-slate-900">{formData.fullName}</h2>
+              <p className="text-xs text-teal-600 font-semibold">{formData.specialty}</p>
             </div>
           </div>
 
@@ -89,7 +149,7 @@ export default function DoctorProfilePage() {
                   type="text"
                   value={formData.fullName}
                   onChange={(e) => handleChange("fullName", e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-slate-50/50 focus:outline-none focus:border-blue-500"
                 />
               ) : (
                 <p className="text-xs font-bold text-slate-800">{formData.fullName}</p>
@@ -103,7 +163,7 @@ export default function DoctorProfilePage() {
                   type="text"
                   value={formData.specialty}
                   onChange={(e) => handleChange("specialty", e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-slate-50/50 focus:outline-none focus:border-blue-500"
                 />
               ) : (
                 <p className="text-xs font-bold text-slate-800">{formData.specialty}</p>
@@ -117,7 +177,7 @@ export default function DoctorProfilePage() {
                   type="text"
                   value={formData.qualification}
                   onChange={(e) => handleChange("qualification", e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-slate-50/50 focus:outline-none focus:border-blue-500"
                 />
               ) : (
                 <p className="text-xs font-bold text-slate-800">{formData.qualification}</p>
@@ -131,7 +191,7 @@ export default function DoctorProfilePage() {
                   type="text"
                   value={formData.hospitalAffiliation}
                   onChange={(e) => handleChange("hospitalAffiliation", e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-slate-50/50 focus:outline-none focus:border-blue-500"
                 />
               ) : (
                 <p className="text-xs font-bold text-slate-800">{formData.hospitalAffiliation}</p>
@@ -145,7 +205,7 @@ export default function DoctorProfilePage() {
                   type="text"
                   value={formData.yearsOfExperience}
                   onChange={(e) => handleChange("yearsOfExperience", e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-slate-50/50 focus:outline-none focus:border-blue-500"
                 />
               ) : (
                 <p className="text-xs font-bold text-slate-800">{formData.yearsOfExperience}</p>
@@ -159,7 +219,7 @@ export default function DoctorProfilePage() {
                   type="text"
                   value={formData.licenseNumber}
                   onChange={(e) => handleChange("licenseNumber", e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-slate-50/50 focus:outline-none focus:border-blue-500"
                 />
               ) : (
                 <p className="text-xs font-bold text-slate-800">{formData.licenseNumber}</p>
@@ -173,7 +233,7 @@ export default function DoctorProfilePage() {
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleChange("email", e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-slate-50/50 focus:outline-none focus:border-blue-500"
                 />
               ) : (
                 <p className="text-xs font-bold text-slate-800">{formData.email}</p>
@@ -187,7 +247,7 @@ export default function DoctorProfilePage() {
                   type="text"
                   value={formData.phone}
                   onChange={(e) => handleChange("phone", e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-slate-50/50 focus:outline-none focus:border-blue-500"
                 />
               ) : (
                 <p className="text-xs font-bold text-slate-800">{formData.phone}</p>
@@ -197,14 +257,14 @@ export default function DoctorProfilePage() {
         </div>
       </div>
 
-      {/* Bottom Metric Cards using Reusable DashboardCard */}
+      {/* Bottom Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <DashboardCard>
           <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
             <Shield className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-2xl font-extrabold text-slate-900">47</h3>
+            <h3 className="text-2xl font-extrabold text-slate-900">{formData.totalPatients}</h3>
             <p className="text-xs text-slate-400 font-medium mt-0.5">Total Patients</p>
           </div>
         </DashboardCard>
@@ -214,7 +274,7 @@ export default function DoctorProfilePage() {
             <Award className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-2xl font-extrabold text-slate-900">12 yrs</h3>
+            <h3 className="text-2xl font-extrabold text-slate-900">{formData.yearsOfExperience}</h3>
             <p className="text-xs text-slate-400 font-medium mt-0.5">Experience</p>
           </div>
         </DashboardCard>
@@ -224,7 +284,7 @@ export default function DoctorProfilePage() {
             <Building2 className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-2xl font-extrabold text-slate-900">1,240+</h3>
+            <h3 className="text-2xl font-extrabold text-slate-900">{formData.totalConsultations}+</h3>
             <p className="text-xs text-slate-400 font-medium mt-0.5">Consultations</p>
           </div>
         </DashboardCard>
@@ -234,7 +294,7 @@ export default function DoctorProfilePage() {
             <Clock className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-2xl font-extrabold text-slate-900">12</h3>
+            <h3 className="text-2xl font-extrabold text-slate-900">{formData.yearsOfExperience}</h3>
             <p className="text-xs text-slate-400 font-medium mt-0.5">Years Licensed</p>
           </div>
         </DashboardCard>
