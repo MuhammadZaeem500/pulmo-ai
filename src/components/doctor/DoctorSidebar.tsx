@@ -1,9 +1,8 @@
-// src/components/doctor/dashboard/DoctorSidebar.tsx
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { 
   LayoutDashboard, 
   Users, 
@@ -17,6 +16,7 @@ import {
   Stethoscope,
   X
 } from "lucide-react";
+import { doctorPortalService } from "@/services/doctor.service";
 
 interface DoctorSidebarProps {
   mobileOpen: boolean;
@@ -25,6 +25,28 @@ interface DoctorSidebarProps {
 
 export default function DoctorSidebar({ mobileOpen, setMobileOpen }: DoctorSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  
+  const [doctor, setDoctor] = useState({
+    name: "Dr. Doctor",
+    initials: "DR",
+    specialty: "Pulmonologist",
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    doctorPortalService.getProfile()
+      .then((data) => {
+        if (data) setDoctor(data);
+      })
+      .catch((err) => console.error("Failed to load doctor profile", err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    router.push("/auth/sign-in");
+  };
 
   const navItems = [
     { name: "Dashboard", href: "/doctor/dashboard", icon: LayoutDashboard },
@@ -77,12 +99,16 @@ export default function DoctorSidebar({ mobileOpen, setMobileOpen }: DoctorSideb
 
           {/* Doctor Info Card */}
           <div className="flex items-center gap-3 p-3 rounded-2xl bg-white border border-slate-200/80 shadow-sm mb-6">
-            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white font-bold flex items-center justify-center text-sm">
-              SM
+            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">
+              {loading ? "..." : doctor.initials}
             </div>
             <div className="overflow-hidden">
-              <h4 className="text-xs font-bold text-slate-800 truncate">Dr. Sarah Mitchell</h4>
-              <p className="text-[11px] text-slate-400 truncate">Pulmonologist</p>
+              <h4 className="text-xs font-bold text-slate-800 truncate">
+                {loading ? "Loading..." : doctor.name}
+              </h4>
+              <p className="text-[11px] text-slate-400 truncate">
+                {loading ? "..." : doctor.specialty}
+              </p>
             </div>
           </div>
 
@@ -133,7 +159,7 @@ export default function DoctorSidebar({ mobileOpen, setMobileOpen }: DoctorSideb
           })}
 
           <button
-            onClick={() => alert("Logged out successfully")}
+            onClick={handleLogout}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
           >
             <LogOut className="w-4 h-4 text-rose-500" />

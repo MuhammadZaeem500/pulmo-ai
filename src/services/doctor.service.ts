@@ -10,3 +10,10 @@ export const doctorService = {
     return response.data;
   },
 };
+
+export const doctorPortalService = {
+  async getProfile() {
+    const response = await api.get('/doctor/profile');
+    return response.data;
+  },
+};
