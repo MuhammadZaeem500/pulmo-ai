@@ -1,50 +1,59 @@
 "use client";
 
-import { useState } from "react";
-import DashboardCard from "@/components/common/DashboardCard";
-import { Search, FileText, Plus, Edit2, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, ChevronRight, FileText, Plus, Loader2, Edit2 } from "lucide-react";
+import { consultationService } from "@/services/consultation.service";
+import AddConsultationNoteModal from "@/components/common/AddConsultationNoteModal";
 
-export default function DoctorConsultationNotesPage() {
+export default function ConsultationNotesPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [notes, setNotes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedNote, setSelectedNote] = useState<any | null>(null);
 
-  const notes = [
-    {
-      patient: "James Wilson",
-      date: "2026-06-08",
-      diagnosis: "COPD Stage II — Stable",
-      description: "Mild dyspnea on exertion, productive cough in mornings, no haemoptysis",
-    },
-    {
-      patient: "Maria Santos",
-      date: "2026-06-10",
-      diagnosis: "Moderate Persistent Asthma — Partially Controlled",
-      description: "Nocturnal cough 3–4 nights/week, wheezing after exercise, morning chest tightness",
-    },
-    {
-      patient: "Robert Kim",
-      date: "2026-06-05",
-      diagnosis: "IPF — Progressive Decline",
-      description: "Worsening dyspnea at rest, dry cough, significant fatigue, reduced exercise tolerance",
-    },
-  ];
+  const fetchNotes = async () => {
+    try {
+      setLoading(true);
+      const data = await consultationService.getNotes(searchQuery);
+      setNotes(data);
+    } catch (err) {
+      console.error("Failed to load notes", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const filteredNotes = notes.filter(
-    (n) =>
-      n.patient.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      n.diagnosis.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    const timer = setTimeout(fetchNotes, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const handleOpenCreateModal = () => {
+    setSelectedNote(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (note: any) => {
+    setSelectedNote(note);
+    setIsModalOpen(true);
+  };
+
+  const handleNoteSaved = () => {
+    fetchNotes();
+  };
 
   return (
     <div className="space-y-6">
-      {/* Top Header & New Note Button */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-extrabold text-slate-900">Consultation Notes</h1>
-          <p className="text-xs text-slate-400 font-medium mt-0.5">3 total notes</p>
+          <p className="text-xs text-slate-400 mt-0.5">{notes.length} total notes</p>
         </div>
         <button
-          onClick={() => alert("Open New Note modal")}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 text-white font-semibold text-xs hover:opacity-95 transition-opacity shadow-sm"
+          onClick={handleOpenCreateModal}
+          className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           New Note
@@ -63,37 +72,53 @@ export default function DoctorConsultationNotesPage() {
         />
       </div>
 
-      {/* Notes List using Reusable DashboardCard */}
-      <div className="space-y-4">
-        {filteredNotes.map((note, idx) => (
-          <DashboardCard key={idx} className="hover:border-blue-200 transition-all cursor-pointer">
-            <div className="flex items-center justify-between">
-              {/* Left side: Icon, Patient, Diagnosis & Description */}
+      {loading ? (
+        <div className="flex justify-center items-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {notes.map((note) => (
+            <div key={note.id} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-xs hover:border-blue-200 transition-all flex items-center justify-between">
               <div className="flex items-start gap-4">
-                <div className="p-3 rounded-xl bg-blue-50 text-blue-600 shrink-0 mt-0.5">
+                <div className="p-3 bg-blue-50 text-blue-600 rounded-xl mt-0.5">
                   <FileText className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-bold text-slate-900">{note.patient}</h3>
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-sm font-bold text-slate-900">{note.patientName}</h3>
                     <span className="text-xs text-slate-400 font-medium">{note.date}</span>
                   </div>
-                  <p className="text-xs font-bold text-blue-600 mt-0.5">{note.diagnosis}</p>
-                  <p className="text-xs text-slate-500 mt-1">{note.description}</p>
+                  <p className="text-xs font-bold text-blue-600 mt-1">{note.diagnosis} — {note.status}</p>
+                  <p className="text-xs text-slate-500 mt-1">{note.notes}</p>
                 </div>
               </div>
-
-              {/* Right side: Action icons */}
-              <div className="flex items-center gap-3 text-slate-400">
-                <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors hover:text-blue-600">
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => handleOpenEditModal(note)}
+                  className="p-2 text-slate-400 hover:text-blue-600 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer"
+                >
                   <Edit2 className="w-4 h-4" />
                 </button>
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-4 h-4 text-slate-400" />
               </div>
             </div>
-          </DashboardCard>
-        ))}
-      </div>
+          ))}
+
+          {notes.length === 0 && (
+            <div className="text-center py-12 bg-white rounded-2xl border border-slate-100">
+              <p className="text-slate-500 text-sm">No consultation notes found.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      <AddConsultationNoteModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleNoteSaved}
+        noteToEdit={selectedNote}
+      />
     </div>
   );
 }
