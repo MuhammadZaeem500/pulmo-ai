@@ -27,18 +27,20 @@ export default function DoctorProfilePage() {
     try {
       setLoading(true);
       const data = await profileService.getProfile();
-      // Map backend response fields to your form state smoothly
+      
+      console.log("API Response Data:", data);
+
       setFormData({
         fullName: data.name || data.fullName || "",
         specialty: data.specialty || data.specialization || "Pulmonologist",
-        qualification: data.qualification || "MD, FCCP",
-        hospitalAffiliation: data.hospitalAffiliation || data.hospital || "City Medical Center",
-        yearsOfExperience: data.yearsOfExperience || data.experienceYears?.toString() || "12 years",
-        licenseNumber: data.licenseNumber || data.licenseNo || "MC-2014-089342",
+        qualification: data.qualification || "",
+        hospitalAffiliation: data.hospitalAffiliation || "",
+        yearsOfExperience: data.yearsOfExperience || "0 years",
+        licenseNumber: data.licenseNumber || "",
         email: data.email || "",
-        phone: data.phone || "+1 (555) 234-5678",
-        totalPatients: data.totalPatients || 47,
-        totalConsultations: data.totalConsultations || 1240,
+        phone: data.phone || "",
+        totalPatients: data.totalPatients ?? 0,
+        totalConsultations: data.totalConsultations ?? 0,
       });
     } catch (err) {
       console.error("Failed to load profile", err);
@@ -126,7 +128,7 @@ export default function DoctorProfilePage() {
 
       {/* Main Profile Details Card */}
       <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-        <div className="h-15 bg-gradient-to-r from-blue-600 to-teal-500 relative" />
+        <div className="h-15 relative" />
 
         <div className="px-8 pb-8 relative">
           {/* Avatar & Title Overlapping Banner */}
@@ -284,7 +286,7 @@ export default function DoctorProfilePage() {
             <Building2 className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-2xl font-extrabold text-slate-900">{formData.totalConsultations}+</h3>
+            <h3 className="text-2xl font-extrabold text-slate-900">{formData.totalConsultations}</h3>
             <p className="text-xs text-slate-400 font-medium mt-0.5">Consultations</p>
           </div>
         </DashboardCard>
@@ -294,8 +296,8 @@ export default function DoctorProfilePage() {
             <Clock className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-2xl font-extrabold text-slate-900">{formData.yearsOfExperience}</h3>
-            <p className="text-xs text-slate-400 font-medium mt-0.5">Years Licensed</p>
+            <h3 className="text-base font-extrabold text-slate-900 truncate">{formData.licenseNumber}</h3>
+            <p className="text-xs text-slate-400 font-medium mt-0.5">License Number</p>
           </div>
         </DashboardCard>
       </div>
