@@ -34,13 +34,33 @@ export default function DoctorSidebar({ mobileOpen, setMobileOpen }: DoctorSideb
   });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchDoctorProfile = () => {
     doctorPortalService.getProfile()
       .then((data) => {
-        if (data) setDoctor(data);
+        if (data) {
+          setDoctor({
+            name: data.fullName || data.name,
+            initials: data.initials,
+            specialty: data.specialty,
+          });
+        }
       })
       .catch((err) => console.error("Failed to load doctor profile", err))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchDoctorProfile();
+
+    // Listen for custom profile update events triggered from the profile page
+    const handleProfileUpdate = () => {
+      fetchDoctorProfile();
+    };
+
+    window.addEventListener("profileUpdated", handleProfileUpdate);
+    return () => {
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
+    };
   }, []);
 
   const handleLogout = () => {
