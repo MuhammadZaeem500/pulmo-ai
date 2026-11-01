@@ -16,4 +16,11 @@ export const doctorPortalService = {
     const response = await api.get('/doctor/profile');
     return response.data;
   },
+}; // ✅ Closed correctly
+
+export const doctorDashboardService = {
+  async getDashboardData() {
+    const response = await api.get("/doctor/dashboard");
+    return response.data;
+  },
 };

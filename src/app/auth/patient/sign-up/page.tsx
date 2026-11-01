@@ -213,6 +213,7 @@ export default function SignUp() {
               Already have an account?{" "}
               <button
                 type="button"
+                onClick={() => router.push("/auth/patient/sign-in")}
                 className="text-[#2F80ED] hover:underline font-bold"
               >
                 Sign In
