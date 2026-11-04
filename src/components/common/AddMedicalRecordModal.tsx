@@ -1,17 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Loader2, Stethoscope } from "lucide-react";
 import { medicalRecordsService } from "@/services/medical-records.service";
 import { AddMedicalRecordModalProps } from "@/types/modal.types";
 
-export default function AddMedicalRecordModal({ isOpen, onClose, onSave }: AddMedicalRecordModalProps) {
+export default function AddMedicalRecordModal({ isOpen, onClose, onSave, recordToEdit }: AddMedicalRecordModalProps & { recordToEdit?: any }) {
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     primarySymptom: "",
     durationInDays: 1,
+    diagnosis: "",
+    symptomsDiscussed: "",
+    recommendations: "",
+    confidenceScore: 0.95,
+    urgencyLevel: "Medium",
     medicalHistory: "",
   });
+
+  useEffect(() => {
+    if (recordToEdit) {
+      setFormData({
+        primarySymptom: recordToEdit.primarySymptom || "",
+        durationInDays: recordToEdit.durationInDays || 1,
+        diagnosis: recordToEdit.diagnosis || "",
+        symptomsDiscussed: recordToEdit.symptomsDiscussed || "",
+        recommendations: recordToEdit.recommendations || "",
+        confidenceScore: recordToEdit.confidenceScore || 0.95,
+        urgencyLevel: recordToEdit.urgencyLevel || "Medium",
+        medicalHistory: recordToEdit.medicalHistory || "",
+      });
+    } else {
+      setFormData({
+        primarySymptom: "",
+        durationInDays: 1,
+        diagnosis: "",
+        symptomsDiscussed: "",
+        recommendations: "",
+        confidenceScore: 0.95,
+        urgencyLevel: "Medium",
+        medicalHistory: "",
+      });
+    }
+  }, [recordToEdit, isOpen]);
 
   if (!isOpen) return null;
 
@@ -20,11 +51,14 @@ export default function AddMedicalRecordModal({ isOpen, onClose, onSave }: AddMe
     try {
       setSubmitting(true);
 
-      const savedRecord = await medicalRecordsService.createRecord(formData);
+      let savedRecord;
+      if (recordToEdit?.id) {
+        savedRecord = await medicalRecordsService.updateRecord(recordToEdit.id, formData);
+      } else {
+        savedRecord = await medicalRecordsService.createRecord(formData);
+      }
 
       onSave(savedRecord);
-
-      setFormData({ primarySymptom: "", durationInDays: 1, medicalHistory: "" });
       onClose();
     } catch (err: any) {
       alert(err.response?.data?.message || "Failed to save record.");
@@ -34,16 +68,18 @@ export default function AddMedicalRecordModal({ isOpen, onClose, onSave }: AddMe
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
-      <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs overflow-y-auto">
+      <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl relative my-8 animate-in fade-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-blue-50 text-[#2F80ED] rounded-xl">
               <Stethoscope className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">Add Medical Record</h2>
-              <p className="text-xs text-gray-500">Record primary symptoms and medical history intake</p>
+              <h2 className="text-xl font-bold text-gray-950">
+                {recordToEdit ? "Edit Medical Record" : "Add Medical Record"}
+              </h2>
+              <p className="text-xs text-gray-500">Record comprehensive intake details and AI assessments</p>
             </div>
           </div>
           <button
@@ -54,32 +90,91 @@ export default function AddMedicalRecordModal({ isOpen, onClose, onSave }: AddMe
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 text-left">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+                Primary Symptom *
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.primarySymptom}
+                onChange={(e) => setFormData({ ...formData, primarySymptom: e.target.value })}
+                placeholder="e.g. Persistent cough"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-950 focus:outline-none focus:border-[#2F80ED]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+                Duration (Days) *
+              </label>
+              <input
+                type="number"
+                required
+                min={1}
+                value={formData.durationInDays}
+                onChange={(e) => setFormData({ ...formData, durationInDays: parseInt(e.target.value) || 1 })}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-950 focus:outline-none focus:border-[#2F80ED]"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+                Diagnosis
+              </label>
+              <input
+                type="text"
+                value={formData.diagnosis}
+                onChange={(e) => setFormData({ ...formData, diagnosis: e.target.value })}
+                placeholder="e.g. Mild Bronchitis"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-950 focus:outline-none focus:border-[#2F80ED]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+                Urgency Level
+              </label>
+              <select
+                value={formData.urgencyLevel}
+                onChange={(e) => setFormData({ ...formData, urgencyLevel: e.target.value })}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-950 bg-white focus:outline-none focus:border-[#2F80ED]"
+              >
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+                <option value="Emergency">Emergency</option>
+              </select>
+            </div>
+          </div>
+
           <div>
             <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-              Primary Symptom
+              Symptoms Discussed
             </label>
             <input
               type="text"
-              required
-              value={formData.primarySymptom}
-              onChange={(e) => setFormData({ ...formData, primarySymptom: e.target.value })}
-              placeholder="e.g. Persistent cough, shortness of breath"
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20"
+              value={formData.symptomsDiscussed}
+              onChange={(e) => setFormData({ ...formData, symptomsDiscussed: e.target.value })}
+              placeholder="e.g. Shortness of breath, fatigue"
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-950 focus:outline-none focus:border-[#2F80ED]"
             />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-              Duration (in Days)
+              Recommendations
             </label>
-            <input
-              type="number"
-              required
-              min={1}
-              value={formData.durationInDays}
-              onChange={(e) => setFormData({ ...formData, durationInDays: parseInt(e.target.value) || 1 })}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20"
+            <textarea
+              rows={2}
+              value={formData.recommendations}
+              onChange={(e) => setFormData({ ...formData, recommendations: e.target.value })}
+              placeholder="e.g. Rest, stay hydrated, use inhaler"
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-950 focus:outline-none focus:border-[#2F80ED] resize-none"
             />
           </div>
 
@@ -88,11 +183,11 @@ export default function AddMedicalRecordModal({ isOpen, onClose, onSave }: AddMe
               Medical History / Notes
             </label>
             <textarea
-              rows={3}
+              rows={2}
               value={formData.medicalHistory}
               onChange={(e) => setFormData({ ...formData, medicalHistory: e.target.value })}
-              placeholder="e.g. Previous asthma diagnosis, smoker..."
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20 resize-none"
+              placeholder="e.g. Previous asthma history"
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-950 focus:outline-none focus:border-[#2F80ED] resize-none"
             />
           </div>
 
@@ -110,7 +205,7 @@ export default function AddMedicalRecordModal({ isOpen, onClose, onSave }: AddMe
               className="flex items-center gap-2 px-6 py-2.5 bg-[#2F80ED] text-white text-sm font-medium rounded-lg hover:bg-[#2668c7] transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
             >
               {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-              Save Medical Record
+              {recordToEdit ? "Update Record" : "Save Record"}
             </button>
           </div>
         </form>

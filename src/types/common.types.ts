@@ -86,7 +86,7 @@ export default interface MetricCardProps {
   className?: string;
 }
 
-export default interface PrescriptionCardProps {
+export interface PrescriptionCardProps {
   medicine: string;
   doctor: string;
   date: string;

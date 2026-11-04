@@ -1,21 +1,40 @@
-import api from './api';
+import axios from 'axios';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
+const getToken = () => {
+  return localStorage.getItem('token');
+};
 
 export const medicalRecordsService = {
   async getMyRecords() {
-    const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-
-    const response = await api.get('/medical-records/records', { // <--- Changed from '/my-records' to '/records'
-      headers: {
-        Authorization: token ? `Bearer ${token}` : '',
-      },
+    const token = getToken();
+    const response = await axios.get(`${API_URL}/medical-records/records`, {
+      headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
   },
 
-  async createRecord(recordData: any) {
-    const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-    const response = await api.post('/medical-records/intake', recordData, { // <--- Changed from '/' to '/intake'
-      headers: { Authorization: token ? `Bearer ${token}` : '' },
+  async createRecord(dto: any) {
+    const token = getToken();
+    const response = await axios.post(`${API_URL}/medical-records/intake`, dto, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  },
+
+  async updateRecord(id: string, dto: any) {
+    const token = getToken();
+    const response = await axios.patch(`${API_URL}/medical-records/records/${id}`, dto, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  },
+
+  async deleteRecord(id: string) {
+    const token = getToken();
+    const response = await axios.delete(`${API_URL}/medical-records/records/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
   },

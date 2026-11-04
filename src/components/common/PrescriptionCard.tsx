@@ -1,5 +1,5 @@
 import { FileText, User, Calendar, Download } from 'lucide-react';
-import PrescriptionCardProps from '@/types/common.types';
+import {PrescriptionCardProps} from '@/types/common.types';
 
 
 export default function PrescriptionCard({
