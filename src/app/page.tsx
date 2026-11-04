@@ -1,4 +1,3 @@
-// src/app/page.tsx
 import HeroSection from "@/components/landing/HeroSection";
 import WhyChooseUs from "@/components/landing/WhyChooseUs";
 import PowerfulFeatures from "@/components/landing/PowerfulFeatures";

@@ -1,11 +1,4 @@
-// src/components/common/ProfilePrescriptionItem.tsx
-import React from 'react';
-
-interface ProfilePrescriptionItemProps {
-  medicine: string;
-  prescribedDate: string;
-  status: string;
-}
+import ProfilePrescriptionItemProps from "@/types/common.types";
 
 export default function ProfilePrescriptionItem({
   medicine,

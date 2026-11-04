@@ -1,4 +1,3 @@
-// src/app/admin/reports/page.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -12,25 +11,9 @@ import {
   FileCode, 
   Database 
 } from "lucide-react";
+import { ReportItem, RecentDownload } from "@/types/admin.types";
 
-interface ReportItem {
-  id: string;
-  title: string;
-  description: string;
-  lastDate: string;
-  fileSize: string;
-  status: string;
-  icon: any;
-  buttonBg: string;
-  buttonText: string;
-}
 
-interface RecentDownload {
-  id: string;
-  title: string;
-  date: string;
-  format: "PDF" | "CSV" | "XLSX";
-}
 
 export default function AdminReportsPage() {
   const [reports, setReports] = useState<ReportItem[]>([
@@ -97,13 +80,13 @@ export default function AdminReportsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+     
       <div>
         <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Reports</h1>
         <p className="text-xs text-slate-400 font-medium mt-0.5">Generate, download, and export administrative reports.</p>
       </div>
 
-      {/* Reports Grid (Using Reusable DashboardCard with Gradient Icons) */}
+     
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {reports.map((report) => (
           <DashboardCard key={report.id} icon={report.icon} iconGradient={true}>
@@ -121,7 +104,7 @@ export default function AdminReportsPage() {
                 </span>
               </div>
 
-              {/* Action Buttons */}
+             
               <div className="flex items-center gap-2 pt-4">
                 <button
                   onClick={() => handleAction(report.id)}
@@ -141,7 +124,7 @@ export default function AdminReportsPage() {
         ))}
       </div>
 
-      {/* Export Data Card (Using Reusable DashboardCard) */}
+     
       <DashboardCard title="Export Data">
         <p className="text-xs text-slate-400 font-medium pb-4">Export raw data in your preferred format for external analysis.</p>
         
@@ -173,7 +156,7 @@ export default function AdminReportsPage() {
         </div>
       </DashboardCard>
 
-      {/* Recent Downloads Section (Using Reusable DashboardCard) */}
+     
       <DashboardCard title="Recent Downloads">
         <div className="divide-y divide-slate-100">
           {recentDownloads.map((item) => (

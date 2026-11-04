@@ -1,13 +1,6 @@
-// src/components/common/AvailableDoctorCard.tsx
-import React from 'react';
 import { Calendar } from 'lucide-react';
+import AvailableDoctorCardProps from '@/types/common.types';
 
-interface AvailableDoctorCardProps {
-  name: string;
-  specialty: string;
-  nextAvailable: string;
-  onBook: () => void;
-}
 
 export default function AvailableDoctorCard({
   name,

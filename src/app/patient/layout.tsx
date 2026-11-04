@@ -1,8 +1,7 @@
-// src/app/patient/layout.tsx
 "use client";
 
 import React, { useState } from "react";
-import Sidebar from "@/components/paitient/PatientSidebar";
+import Sidebar from "@/components/patient/PatientSidebar";
 import { Menu, Bell } from "lucide-react";
 
 export default function PatientLayout({
@@ -17,7 +16,7 @@ export default function PatientLayout({
       <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
       <div className="flex-1 flex flex-col overflow-hidden w-full">
-        {/* Top Header Bar for Mobile Hamburger & Profile Actions */}
+       
         <header className="h-16 bg-white border-b border-slate-200 px-4 sm:px-8 flex items-center justify-between shrink-0 shadow-xs">
           <div className="flex items-center gap-3">
             <button
@@ -42,7 +41,7 @@ export default function PatientLayout({
           </div>
         </header>
 
-        {/* Scrollable Main Content */}
+       
         <main className="flex-1 overflow-y-auto p-4 sm:p-8 bg-[#F8FAFC]">
           <div className="mx-auto max-w-7xl space-y-6">
             {children}

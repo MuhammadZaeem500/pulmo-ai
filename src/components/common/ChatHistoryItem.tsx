@@ -1,13 +1,6 @@
-// src/components/common/ChatHistoryItem.tsx
 import React from 'react';
 import { MessageSquare } from 'lucide-react';
-
-interface ChatHistoryItemProps {
-  title: string;
-  date: string;
-  isActive?: boolean;
-  onClick: () => void;
-}
+import  ChatHistoryItemProps  from '@/types/common.types';
 
 export default function ChatHistoryItem({
   title,

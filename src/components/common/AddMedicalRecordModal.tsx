@@ -3,21 +3,14 @@
 import { useState } from "react";
 import { X, Loader2, Stethoscope } from "lucide-react";
 import { medicalRecordsService } from "@/services/medical-records.service";
-
-interface AddMedicalRecordModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (newRecord: any) => void;
-}
+import { AddMedicalRecordModalProps } from "@/types/modal.types";
 
 export default function AddMedicalRecordModal({ isOpen, onClose, onSave }: AddMedicalRecordModalProps) {
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    diagnosis: "",
     primarySymptom: "",
-    confidence: "95%",
-    urgency: "Normal",
-    recommendations: "",
+    durationInDays: 1,
+    medicalHistory: "",
   });
 
   if (!isOpen) return null;
@@ -27,14 +20,11 @@ export default function AddMedicalRecordModal({ isOpen, onClose, onSave }: AddMe
     try {
       setSubmitting(true);
 
-      // Call your backend API to save the record in PostgreSQL
       const savedRecord = await medicalRecordsService.createRecord(formData);
 
-      // Pass the saved record back to parent component to update the UI instantly
       onSave(savedRecord);
 
-      // Reset form and close modal
-      setFormData({ diagnosis: "", primarySymptom: "", confidence: "95%", urgency: "Normal", recommendations: "" });
+      setFormData({ primarySymptom: "", durationInDays: 1, medicalHistory: "" });
       onClose();
     } catch (err: any) {
       alert(err.response?.data?.message || "Failed to save record.");
@@ -53,7 +43,7 @@ export default function AddMedicalRecordModal({ isOpen, onClose, onSave }: AddMe
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900">Add Medical Record</h2>
-              <p className="text-xs text-gray-500">Record diagnosis, symptoms, and clinical recommendations</p>
+              <p className="text-xs text-gray-500">Record primary symptoms and medical history intake</p>
             </div>
           </div>
           <button
@@ -65,38 +55,9 @@ export default function AddMedicalRecordModal({ isOpen, onClose, onSave }: AddMe
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-                Diagnosis / Title
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.diagnosis}
-                onChange={(e) => setFormData({ ...formData, diagnosis: e.target.value })}
-                placeholder="e.g. Mild Bronchitis"
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-                Confidence Score
-              </label>
-              <input
-                type="text"
-                value={formData.confidence}
-                onChange={(e) => setFormData({ ...formData, confidence: e.target.value })}
-                placeholder="e.g. 92%"
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20"
-              />
-            </div>
-          </div>
-
           <div>
             <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-              Symptoms Discussed
+              Primary Symptom
             </label>
             <input
               type="text"
@@ -110,30 +71,27 @@ export default function AddMedicalRecordModal({ isOpen, onClose, onSave }: AddMe
 
           <div>
             <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-              Urgency Level
+              Duration (in Days)
             </label>
-            <select
-              value={formData.urgency}
-              onChange={(e) => setFormData({ ...formData, urgency: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20"
-            >
-              <option value="Low">Low</option>
-              <option value="Normal">Normal</option>
-              <option value="Moderate">Moderate</option>
-              <option value="Urgent">Urgent</option>
-              <option value="Critical">Critical</option>
-            </select>
+            <input
+              type="number"
+              required
+              min={1}
+              value={formData.durationInDays}
+              onChange={(e) => setFormData({ ...formData, durationInDays: parseInt(e.target.value) || 1 })}
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20"
+            />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-              Recommendations
+              Medical History / Notes
             </label>
             <textarea
               rows={3}
-              value={formData.recommendations}
-              onChange={(e) => setFormData({ ...formData, recommendations: e.target.value })}
-              placeholder="e.g. Rest, stay hydrated, use prescribed inhaler"
+              value={formData.medicalHistory}
+              onChange={(e) => setFormData({ ...formData, medicalHistory: e.target.value })}
+              placeholder="e.g. Previous asthma diagnosis, smoker..."
               className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20 resize-none"
             />
           </div>

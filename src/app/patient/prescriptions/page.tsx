@@ -1,4 +1,3 @@
-// src/app/patient/prescriptions/page.tsx
 "use client";
 
 import PrescriptionCard from "@/components/common/PrescriptionCard";
@@ -33,13 +32,13 @@ export default function PrescriptionsPage() {
 
   return (
     <div className="p-8 lg:p-10 max-w-7xl mx-auto space-y-8">
-      {/* Top Header */}
+     
       <div>
         <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">Prescriptions</h1>
         <p className="text-gray-500 text-sm">View and manage all your prescriptions</p>
       </div>
 
-      {/* Prescriptions List */}
+     
       <div className="space-y-4">
         {prescriptions.map((prescription) => (
           <PrescriptionCard

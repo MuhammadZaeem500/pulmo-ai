@@ -1,17 +1,6 @@
-// src/components/common/PreviousAppointmentCard.tsx
 import React from 'react';
 import { Calendar, Clock, MapPin, MessageCircle } from 'lucide-react';
-
-interface PreviousAppointmentCardProps {
-  doctor: string;
-  specialty: string;
-  date: string;
-  time: string;
-  clinic: string;
-  status: string;
-  notes: string;
-  onChat: () => void;
-}
+import PreviousAppointmentCardProps from '@/types/common.types';
 
 export default function PreviousAppointmentCard({
   doctor,

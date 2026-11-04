@@ -1,11 +1,7 @@
 import React, { ReactNode } from 'react';
 import { LucideIcon } from 'lucide-react';
+import { SettingSectionCardProps } from '@/types/common.types';
 
-interface SettingSectionCardProps {
-  icon: LucideIcon;
-  title: string;
-  children: ReactNode;
-}
 
 export default function SettingSectionCard({ icon: Icon, title, children }: SettingSectionCardProps) {
   return (

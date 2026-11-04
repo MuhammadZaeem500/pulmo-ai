@@ -1,4 +1,3 @@
-// src/app/patient/chatbot/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -18,15 +17,15 @@ export default function ChatbotPage() {
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
-    // Add send message logic here
+
     setMessage("");
   };
 
   return (
     <div className="flex h-full bg-white overflow-hidden">
-      {/* Left Pane: Chat History Sidebar */}
+     
       <div className="w-80 border-r border-gray-100 flex flex-col bg-white">
-        {/* New Chat Button */}
+       
         <div className="p-4 border-b border-gray-100">
           <button
             onClick={() => {}}
@@ -37,7 +36,7 @@ export default function ChatbotPage() {
           </button>
         </div>
 
-        {/* History List */}
+       
         <div className="flex-1 overflow-y-auto p-4">
           <p className="text-xs font-semibold text-gray-400 tracking-wider uppercase mb-3 px-1">
             Chat History
@@ -56,9 +55,9 @@ export default function ChatbotPage() {
         </div>
       </div>
 
-      {/* Right Pane: Active Chat Area */}
+     
       <div className="flex-1 flex flex-col bg-white">
-        {/* Chat Header */}
+       
         <div className="px-8 py-6 border-b border-gray-100">
           <h1 className="text-xl font-bold text-gray-900 mb-1">AI Healthcare Chatbot</h1>
           <p className="text-gray-500 text-sm">
@@ -66,7 +65,7 @@ export default function ChatbotPage() {
           </p>
         </div>
 
-        {/* Message Bubble Area */}
+       
         <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-gray-50/50">
           <div className="flex items-start gap-3 max-w-2xl">
             <div className="bg-white rounded-2xl rounded-tl-sm p-5 shadow-xs border border-gray-100 text-gray-800 text-sm leading-relaxed space-y-2">
@@ -78,7 +77,7 @@ export default function ChatbotPage() {
           </div>
         </div>
 
-        {/* Message Input Box */}
+       
         <div className="p-6 bg-white border-t border-gray-100">
           <form onSubmit={handleSend} className="max-w-4xl mx-auto space-y-2">
             <div className="relative flex items-center bg-white rounded-xl border border-gray-200 shadow-xs focus-within:border-blue-500 transition-all">

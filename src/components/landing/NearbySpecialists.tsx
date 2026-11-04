@@ -44,7 +44,7 @@ export default function NearbySpecialists() {
     <section className="py-24 lg:py-32 bg-slate-50/60 relative overflow-hidden">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         
-        {/* Section Header */}
+       
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12">
           <div>
             <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-4 py-1 text-xs font-semibold text-blue-600 ring-1 ring-inset ring-blue-600/10">
@@ -68,7 +68,7 @@ export default function NearbySpecialists() {
           </a>
         </div>
 
-        {/* Clinics Grid (2 columns) */}
+       
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 mb-6">
           {clinicsData.map((clinic, index) => (
             <DoctorClinicCard
@@ -83,7 +83,7 @@ export default function NearbySpecialists() {
           ))}
         </div>
 
-        {/* Doctors Grid (3 columns) */}
+       
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {doctorsData.map((doc, index) => (
             <DoctorClinicCard

@@ -1,12 +1,6 @@
-// src/components/common/SettingToggleItem.tsx
 import React from 'react';
+import { SettingToggleItemProps } from '@/types/common.types';
 
-interface SettingToggleItemProps {
-  title: string;
-  description: string;
-  enabled: boolean;
-  onToggle: () => void;
-}
 
 export default function SettingToggleItem({
   title,

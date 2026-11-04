@@ -1,4 +1,3 @@
-// src/app/admin/settings/page.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -16,14 +15,12 @@ import {
 export default function AdminSettingsPage() {
   const [activeTab, setActiveTab] = useState<"Account" | "Security" | "Notification" | "Language" | "Theme">("Account");
 
-  // Form states
   const [fullName, setFullName] = useState("Dr. Admin User");
   const [email, setEmail] = useState("admin@pulmoai.com");
   const [organization, setOrganization] = useState("PulmoAI Administration");
   const [role, setRole] = useState("Super Admin");
   const [bio, setBio] = useState("");
 
-  // Security toggles & passwords
   const [twoFactor, setTwoFactor] = useState(true);
   const [autoSession, setAutoSession] = useState(true);
   const [loginAlerts, setLoginAlerts] = useState(true);
@@ -32,7 +29,6 @@ export default function AdminSettingsPage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // Notification toggles
   const [notifVerification, setNotifVerification] = useState(true);
   const [notifSecurity, setNotifSecurity] = useState(true);
   const [notifSystem, setNotifSystem] = useState(true);
@@ -40,12 +36,10 @@ export default function AdminSettingsPage() {
   const [notifEmailDigest, setNotifEmailDigest] = useState(true);
   const [notifSms, setNotifSms] = useState(false);
 
-  // Language preferences
   const [language, setLanguage] = useState("English (US)");
   const [dateFormat, setDateFormat] = useState("MM/DD/YYYY");
   const [timeZone, setTimeZone] = useState("UTC");
 
-  // Theme preferences
   const [selectedTheme, setSelectedTheme] = useState<"Light" | "Blue Dark" | "Teal">("Light");
   const [sidebarWidth, setSidebarWidth] = useState<"Compact" | "Default" | "Wide">("Default");
 
@@ -63,14 +57,14 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      {/* Header */}
+     
       <div>
         <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Settings</h1>
         <p className="text-xs text-slate-400 font-medium mt-0.5">Manage your account preferences and platform configuration.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
-        {/* Left Navigation Sidebar (Using Reusable DashboardCard) */}
+       
         <div className="lg:col-span-1">
           <DashboardCard className="p-2">
             <nav className="space-y-1">
@@ -99,10 +93,10 @@ export default function AdminSettingsPage() {
           </DashboardCard>
         </div>
 
-        {/* Right Content Area */}
+       
         <div className="lg:col-span-3 space-y-6">
           <DashboardCard>
-            {/* TAB 1: ACCOUNT SETTINGS */}
+           
             {activeTab === "Account" && (
               <div className="space-y-6">
                 <h3 className="text-base font-extrabold text-slate-900 pb-4 border-b border-slate-100">Account Settings</h3>
@@ -164,7 +158,7 @@ export default function AdminSettingsPage() {
               </div>
             )}
 
-            {/* TAB 2: SECURITY SETTINGS */}
+           
             {activeTab === "Security" && (
               <div className="space-y-6">
                 <h3 className="text-base font-extrabold text-slate-900 pb-4 border-b border-slate-100">Security Settings</h3>
@@ -256,7 +250,7 @@ export default function AdminSettingsPage() {
               </div>
             )}
 
-            {/* TAB 3: NOTIFICATION PREFERENCES */}
+           
             {activeTab === "Notification" && (
               <div className="space-y-6">
                 <h3 className="text-base font-extrabold text-slate-900 pb-4 border-b border-slate-100">Notification Preferences</h3>
@@ -287,7 +281,7 @@ export default function AdminSettingsPage() {
               </div>
             )}
 
-            {/* TAB 4: LANGUAGE PREFERENCES */}
+           
             {activeTab === "Language" && (
               <div className="space-y-6">
                 <h3 className="text-base font-extrabold text-slate-900 pb-4 border-b border-slate-100">Language Preferences</h3>
@@ -336,7 +330,7 @@ export default function AdminSettingsPage() {
               </div>
             )}
 
-            {/* TAB 5: THEME PREFERENCES */}
+           
             {activeTab === "Theme" && (
               <div className="space-y-6">
                 <h3 className="text-base font-extrabold text-slate-900 pb-4 border-b border-slate-100">Theme Preferences</h3>
@@ -393,7 +387,7 @@ export default function AdminSettingsPage() {
               </div>
             )}
 
-            {/* Save Changes Button */}
+           
             <div className="flex justify-end pt-6 mt-6 border-t border-slate-100">
               <button
                 onClick={handleSave}

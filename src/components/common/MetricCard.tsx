@@ -1,17 +1,6 @@
-// src/components/common/MetricCard.tsx
 import React, { ReactNode } from "react";
 import { LucideIcon } from "lucide-react";
-
-interface MetricCardProps {
-  title: string;
-  value: string | number;
-  valueColor?: string;
-  trend?: string;
-  trendColor?: string;
-  icon?: LucideIcon | ReactNode;
-  iconBgColor?: string;
-  className?: string;
-}
+import MetricCardProps from "@/types/common.types";
 
 export default function MetricCard({
   title,
@@ -25,7 +14,7 @@ export default function MetricCard({
 }: MetricCardProps) {
   return (
     <div className={`bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between ${className}`}>
-      {/* Optional Top Header with Icon */}
+     
       {Icon ? (
         <div className="flex items-center justify-between mb-3">
           <span className="text-[11px] uppercase font-bold tracking-wider text-slate-400">
@@ -41,7 +30,7 @@ export default function MetricCard({
         <p className="text-sm font-medium text-gray-500 mb-2">{title}</p>
       )}
 
-      {/* Value & Trend */}
+     
       <div>
         <h3 className={`text-2xl lg:text-3xl font-bold tracking-tight ${valueColor}`}>
           {value}

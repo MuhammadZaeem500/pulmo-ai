@@ -11,7 +11,7 @@ import {
   CheckCircle2, 
   Loader2 
 } from "lucide-react";
-import api from "@/services/api"; // Adjust import to your project setup
+import api from "@/services/api"; 
 
 export default function DoctorDashboardPage() {
   const [loading, setLoading] = useState(true);
@@ -32,7 +32,7 @@ export default function DoctorDashboardPage() {
     const fetchDashboard = async () => {
       try {
         setLoading(true);
-        // Replace with your actual backend endpoint route
+
         const { data } = await api.get("/doctor/dashboard"); 
         setDashboardData(data);
       } catch (err) {
@@ -63,7 +63,7 @@ export default function DoctorDashboardPage() {
   return (
     <div className="min-h-screen flex w-full bg-white font-sans">
       <main className="flex-1 p-8 overflow-y-auto max-h-screen space-y-6 bg-white">
-        {/* Top Greeting */}
+       
         <div>
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-6 bg-blue-600 rounded-full" />
@@ -74,7 +74,7 @@ export default function DoctorDashboardPage() {
           </p>
         </div>
 
-        {/* Top Metrics Grid */}
+       
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <DashboardCard>
             <div className="flex items-center justify-between">
@@ -133,7 +133,7 @@ export default function DoctorDashboardPage() {
           </DashboardCard>
         </div>
 
-        {/* Second Row: Schedule & Recent Patients */}
+       
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <DashboardCard title="Today's Schedule" icon={<Clock className="w-4 h-4" />} viewAllLink="/doctor/appointments">
             {dashboardData.appointments.length === 0 ? (
@@ -183,7 +183,7 @@ export default function DoctorDashboardPage() {
           </DashboardCard>
         </div>
 
-        {/* Third Row: Pending Notes & Recent Prescriptions */}
+       
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <DashboardCard title="Pending Notes" icon={<FileText className="w-4 h-4" />} viewAllLink="/doctor/notes">
             {dashboardData.pendingNotes.length === 0 ? (

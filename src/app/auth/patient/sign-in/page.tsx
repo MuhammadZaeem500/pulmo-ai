@@ -44,7 +44,7 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Right Side - Login Form */}
+     
       <div className="flex items-center justify-center p-8 bg-[#F8FAFC]">
         <div className="w-full max-w-md">
           <div className="mb-8">
@@ -138,7 +138,7 @@ export default function Login() {
             </div>
 
             <div className="grid grid-cols-2 gap-4 mt-6">
-              {/* Google Button */}
+             
               <button
                 type="button"
                 className="flex items-center justify-center gap-2 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors bg-white cursor-pointer"
@@ -166,7 +166,7 @@ export default function Login() {
                 </span>
               </button>
 
-              {/* GitHub Button */}
+             
               <button
                 type="button"
                 className="flex items-center justify-center gap-2 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors bg-white cursor-pointer"

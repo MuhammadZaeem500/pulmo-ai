@@ -64,13 +64,11 @@ export default function DoctorRegisterPage() {
     e.preventDefault();
     setError("");
 
-    // Advance through steps 1, 2, and 3 locally
     if (step < 4) {
       setStep(step + 1);
       return;
     }
 
-    // Step 4: Final backend submission
     if (step === 4) {
       setLoading(true);
       try {
@@ -90,10 +88,10 @@ export default function DoctorRegisterPage() {
 
   return (
     <div className="min-h-screen flex w-full bg-white font-sans overflow-hidden">
-      {/* Left Banner Component */}
+     
       <AuthHeroBanner />
 
-      {/* Right Form Section */}
+     
       <div className="w-full lg:w-1/2 flex flex-col justify-between p-8 sm:p-12 overflow-y-auto max-h-screen">
         <div>
           <div className="flex flex-col items-start gap-3 mb-6">
@@ -122,7 +120,7 @@ export default function DoctorRegisterPage() {
               `Enter the 6-digit OTP sent to ${formData.phone || "+923414009812"}`}
           </p>
 
-          {/* Stepper Component */}
+         
           <AuthStepper currentStep={step} />
 
           {error && (
@@ -132,7 +130,7 @@ export default function DoctorRegisterPage() {
           )}
 
           <form onSubmit={handleContinue} className="space-y-4 max-w-md mt-4">
-            {/* STEP 1 */}
+           
             <div className={step !== 1 ? "hidden" : "space-y-4"}>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -244,7 +242,7 @@ export default function DoctorRegisterPage() {
               </div>
             </div>
 
-            {/* STEP 2 */}
+           
             <div className={step !== 2 ? "hidden" : "space-y-4"}>
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
@@ -344,7 +342,7 @@ export default function DoctorRegisterPage() {
               </div>
             </div>
 
-            {/* STEP 3 */}
+           
             <div className={step !== 3 ? "hidden" : "space-y-4"}>
               <div className="p-4 rounded-xl bg-amber-50/80 border border-amber-200 text-amber-800 text-xs leading-relaxed">
                 <span className="font-semibold">Verification required.</span> All
@@ -402,7 +400,7 @@ export default function DoctorRegisterPage() {
               ))}
             </div>
 
-            {/* STEP 4 */}
+           
             <div className={step !== 4 ? "hidden" : "space-y-6"}>
               <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 text-center flex flex-col items-center">
                 <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3 border border-blue-100">
@@ -436,7 +434,7 @@ export default function DoctorRegisterPage() {
               </div>
             </div>
 
-            {/* Buttons */}
+           
             <div className="flex gap-3 pt-2">
               {step > 1 && (
                 <button
@@ -463,7 +461,7 @@ export default function DoctorRegisterPage() {
           </form>
         </div>
 
-        {/* Footer */}
+       
         <div className="mt-8 w-full max-w-md flex items-center justify-center gap-1.5 text-xs text-slate-500">
           <span>Already registered?</span>
           <Link

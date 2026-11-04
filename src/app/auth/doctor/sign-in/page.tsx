@@ -45,14 +45,12 @@ const handleSubmit = async (e: React.FormEvent) => {
         password: formData.password,
       });
 
-      // Verify that the logged-in user has a DOCTOR role
       if (response.user && response.user.role && response.user.role !== "DOCTOR") {
         setError("Access denied. This portal is for doctors only.");
         setLoading(false);
         return;
       }
 
-      // Redirect to doctor dashboard on success
       router.push("/doctor/dashboard");
     } catch (err: any) {
       setError(
@@ -65,13 +63,13 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   return (
     <div className="min-h-screen flex w-full bg-white font-sans overflow-hidden">
-      {/* Reusable Left Hero Banner */}
+     
       <AuthHeroBanner />
 
-      {/* Right Login Form Section */}
+     
       <div className="w-full lg:w-1/2 flex flex-col justify-between p-8 sm:p-12 overflow-y-auto max-h-screen">
         <div>
-          {/* Top Nav: Stacked cleanly in a column */}
+         
           <div className="flex flex-col items-start gap-3 mb-6">
             <Link
               href="/"
@@ -140,7 +138,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               </div>
             </div>
 
-            {/* Remember Me & Forgot Password */}
+           
             <div className="flex items-center justify-between text-xs py-1">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -160,7 +158,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               </Link>
             </div>
 
-            {/* Submit Button */}
+           
            <button
               type="submit"
               disabled={loading}
@@ -171,7 +169,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           </form>
           
 
-          {/* Register Prompt */}
+         
           <div className="mt-6 max-w-md flex items-center justify-center gap-1.5 text-xs text-slate-500">
             <span>New doctor?</span>
             <Link
@@ -182,7 +180,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             </Link>
           </div>
 
-          {/* Demo Access Card */}
+         
           <div
             onClick={handleDemoAccess}
             className="mt-8 max-w-md p-4 rounded-2xl border border-slate-200 bg-slate-50/50 hover:bg-slate-100/80 transition-all cursor-pointer group"
@@ -201,7 +199,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           </div>
         </div>
 
-        {/* Footer spacing container */}
+       
         <div className="mt-8" />
       </div>
     </div>

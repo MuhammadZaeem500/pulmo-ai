@@ -1,14 +1,6 @@
-// src/components/common/SymptomCard.tsx
 import React from 'react';
 import { Calendar, ArrowRight, ArrowDown, ArrowUp, LucideIcon } from 'lucide-react';
-
-interface SymptomCardProps {
-  symptom: string;
-  severity: 'Mild' | 'Moderate' | 'Severe';
-  date: string;
-  trendIcon: 'right' | 'down' | 'up';
-  onViewHistory?: () => void;
-}
+import { SymptomCardProps } from '@/types/common.types';
 
 const severityConfig = {
   Mild: { bg: 'bg-emerald-50', text: 'text-emerald-700' },

@@ -4,14 +4,9 @@ import { useState, useEffect } from "react";
 import { X, Loader2, Pill } from "lucide-react";
 import { prescriptionService } from "@/services/prescription.service";
 import api from "@/services/api";
+import { AddMedicalRecordModalProps } from "@/types/modal.types";
 
-interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: () => void;
-}
-
-export default function AddPrescriptionModal({ isOpen, onClose, onSave }: ModalProps) {
+export default function AddPrescriptionModal({ isOpen, onClose, onSave }: AddMedicalRecordModalProps) {
   const [submitting, setSubmitting] = useState(false);
   const [patients, setPatients] = useState<any[]>([]);
   const [formData, setFormData] = useState({
@@ -28,7 +23,6 @@ export default function AddPrescriptionModal({ isOpen, onClose, onSave }: ModalP
       }).catch((err) => console.error("Failed to load patients list", err));
     }
   }, [isOpen]);
-  // Fetch actual patients when modal opens
 
   if (!isOpen) return null;
 
@@ -37,7 +31,7 @@ export default function AddPrescriptionModal({ isOpen, onClose, onSave }: ModalP
     try {
       setSubmitting(true);
       await prescriptionService.createPrescription(formData);
-      onSave();
+      onSave(formData);
       setFormData({ patientId: "", diagnosis: "", primarySymptom: "", medicalHistory: "" });
       onClose();
     } catch (err: any) {

@@ -8,7 +8,7 @@ export default function Footer() {
         
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 pb-16 border-b border-slate-800/80">
           
-          {/* Brand Info (Left Column - 4 Spans) */}
+         
           <div className="md:col-span-4 flex flex-col items-start">
             <Link href="/" className="flex items-center gap-2.5 mb-4 group">
               <div className="h-9 w-9 rounded-xl bg-linear-to-tr from-blue-600 to-teal-400 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
@@ -23,9 +23,9 @@ export default function Footer() {
               Your trusted AI-powered pulmonary health companion for better respiratory outcomes.
             </p>
 
-            {/* Social Icons (Inline SVGs) */}
+           
             <div className="flex items-center gap-3">
-              {/* GitHub */}
+             
               <a 
                 href="https://github.com/MuhammadZaeem500" 
                 target="_blank" 
@@ -38,7 +38,7 @@ export default function Footer() {
                 </svg>
               </a>
 
-              {/* Twitter / X */}
+             
               <a 
                 href="https://twitter.com" 
                 target="_blank" 
@@ -51,7 +51,7 @@ export default function Footer() {
                 </svg>
               </a>
 
-              {/* LinkedIn */}
+             
               <a 
                 href="https://www.linkedin.com/in/muhammad-zaeem-sheikh/" 
                 target="_blank" 
@@ -66,10 +66,10 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Links Columns (Right 8 Spans) */}
+         
           <div className="md:col-span-8 grid grid-cols-2 sm:grid-cols-3 gap-8">
             
-            {/* Features Column */}
+           
             <div>
               <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4">Features</h3>
               <ul className="space-y-3 text-sm">
@@ -81,7 +81,7 @@ export default function Footer() {
               </ul>
             </div>
 
-            {/* Company Column */}
+           
             <div>
               <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4">Company</h3>
               <ul className="space-y-3 text-sm">
@@ -93,7 +93,7 @@ export default function Footer() {
               </ul>
             </div>
 
-            {/* Support Column */}
+           
             <div>
               <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4">Support</h3>
               <ul className="space-y-3 text-sm">
@@ -109,7 +109,7 @@ export default function Footer() {
 
         </div>
 
-        {/* Bottom Copyright & Credit */}
+       
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
           <p>© {new Date().getFullYear()} PulmoAI. All rights reserved.</p>
           <p className="flex items-center gap-1">

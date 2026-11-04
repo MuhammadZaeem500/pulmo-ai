@@ -1,4 +1,3 @@
-// src/services/doctor.service.ts
 import api from './api';
 
 export const doctorService = {
@@ -16,7 +15,7 @@ export const doctorPortalService = {
     const response = await api.get('/doctor/profile');
     return response.data;
   },
-}; // ✅ Closed correctly
+};  
 
 export const doctorDashboardService = {
   async getDashboardData() {

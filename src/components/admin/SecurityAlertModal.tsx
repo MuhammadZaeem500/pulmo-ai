@@ -1,25 +1,8 @@
-// src/components/admin/SecurityAlertModal.tsx
 "use client";
 
-import React from "react";
 import { X, Lock, Star, User, Wifi } from "lucide-react";
+import SecurityAlertModalProps from "@/types/admin.types";
 
-interface SecurityAlert {
-  id: number;
-  title: string;
-  severity: "Critical" | "High" | "Medium" | "Low";
-  status: "Open" | "Investigating" | "Resolved";
-  description: string;
-  date: string;
-  icon: any;
-}
-
-interface SecurityAlertModalProps {
-  alert: SecurityAlert | null;
-  isOpen: boolean;
-  onClose: () => void;
-  onResolve: (alertId: number) => void;
-}
 
 export default function SecurityAlertModal({
   alert,
@@ -34,7 +17,7 @@ export default function SecurityAlertModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
       <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-md p-6 relative animate-in fade-in zoom-in-95 duration-200">
-        {/* Close Button */}
+       
         <button
           onClick={onClose}
           className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
@@ -42,7 +25,7 @@ export default function SecurityAlertModal({
           <X className="w-4 h-4" />
         </button>
 
-        {/* Alert Header Info */}
+       
         <div className="flex items-center gap-4 mb-5 pb-5 border-b border-slate-100">
           <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shadow-xs shrink-0">
             <AlertIcon className="w-6 h-6" />
@@ -53,12 +36,12 @@ export default function SecurityAlertModal({
           </div>
         </div>
 
-        {/* Description Box */}
+       
         <div className="bg-slate-50 border border-slate-100 rounded-xl p-3.5 mb-6 text-xs text-slate-700 leading-relaxed font-medium">
           {alert.description}
         </div>
 
-        {/* Alert Attributes */}
+       
         <div className="space-y-4 text-xs">
           <div className="flex items-center justify-between py-2 border-b border-slate-100">
             <span className="font-bold text-slate-400 uppercase tracking-wider text-[11px]">Severity</span>
@@ -84,7 +67,7 @@ export default function SecurityAlertModal({
           </div>
         </div>
 
-        {/* Modal Action Buttons */}
+       
         <div className="flex items-center justify-end gap-3 pt-6 mt-6 border-t border-slate-100">
           <button
             type="button"

@@ -1,4 +1,3 @@
-// src/app/patient/know-your-medicine/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -30,13 +29,13 @@ export default function KnowYourMedicinePage() {
 
   return (
     <div className="p-8 lg:p-10 max-w-7xl mx-auto space-y-8">
-      {/* Top Header */}
+     
       <div>
         <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">Know Your Medicine</h1>
         <p className="text-gray-500 text-sm">Identify medicines by their visual characteristics</p>
       </div>
 
-      {/* Select Shape Section */}
+     
       <div className="bg-white rounded-2xl p-6 lg:p-8 border border-gray-100 shadow-xs space-y-6">
         <h2 className="text-base font-bold text-gray-900">Select Medicine Shape</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -52,7 +51,7 @@ export default function KnowYourMedicinePage() {
         </div>
       </div>
 
-      {/* Select Color Section */}
+     
       <div className="bg-white rounded-2xl p-6 lg:p-8 border border-gray-100 shadow-xs space-y-6">
         <h2 className="text-base font-bold text-gray-900">Select Color</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -68,7 +67,7 @@ export default function KnowYourMedicinePage() {
         </div>
       </div>
 
-      {/* Additional Details (Optional) Section */}
+     
       <div className="bg-white rounded-2xl p-6 lg:p-8 border border-gray-100 shadow-xs space-y-4">
         <div>
           <h2 className="text-base font-bold text-gray-900 mb-1">Additional Details (Optional)</h2>

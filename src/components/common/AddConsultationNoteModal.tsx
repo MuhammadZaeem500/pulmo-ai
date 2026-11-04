@@ -4,17 +4,12 @@ import { useState, useEffect } from "react";
 import { X, Loader2, FileText } from "lucide-react";
 import { consultationService } from "@/services/consultation.service";
 import api from "@/services/api";
+import ModalProps from "@/types/common.types";
 
-interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (savedNote: any) => void;
-  noteToEdit?: any | null;
-}
 
 export default function AddConsultationNoteModal({ isOpen, onClose, onSave, noteToEdit }: ModalProps) {
   const [submitting, setSubmitting] = useState(false);
-  const [patients, setPatients] = useState<any[]>([]); // <--- Added missing state
+  const [patients, setPatients] = useState<any[]>([]); 
   const [formData, setFormData] = useState({
     patientId: "",
     diagnosis: "",

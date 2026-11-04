@@ -1,4 +1,3 @@
-// src/app/admin/notifications/page.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -12,19 +11,7 @@ import {
   X, 
   CheckCheck 
 } from "lucide-react";
-
-interface Notification {
-  id: string;
-  title: string;
-  description: string;
-  time: string;
-  type: "Verification" | "Security" | "System" | "Update";
-  isRead: boolean;
-  isUrgent?: boolean;
-  icon: any;
-  badgeBg: string;
-  borderColor?: string;
-}
+import {Notification} from "@/types/admin.types";
 
 export default function AdminNotificationsPage() {
   const [activeTab, setActiveTab] = useState<"All" | "Verification" | "Security" | "System" | "Update">("All");
@@ -141,7 +128,7 @@ export default function AdminNotificationsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top Header & Mark All Read */}
+     
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Notifications</h1>
@@ -157,7 +144,7 @@ export default function AdminNotificationsPage() {
         </button>
       </div>
 
-      {/* Tabs Filter */}
+     
       <div className="flex items-center gap-2 bg-white p-1.5 rounded-2xl border border-slate-200/80 w-fit shadow-xs overflow-x-auto">
         {(["All", "Verification", "Security", "System", "Update"] as const).map((tab) => {
           const count = tab === "All" ? notifications.length : notifications.filter(n => n.type === tab).length;
@@ -184,7 +171,7 @@ export default function AdminNotificationsPage() {
         })}
       </div>
 
-      {/* Notifications List using Reusable DashboardCard */}
+     
       <div className="space-y-3">
         {filteredNotifications.length > 0 ? (
           filteredNotifications.map((notif) => {
@@ -196,22 +183,22 @@ export default function AdminNotificationsPage() {
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4">
-                    {/* Icon Box */}
+                   
                     <div className={`w-10 h-10 rounded-xl ${notif.badgeBg} flex items-center justify-center shrink-0 mt-0.5 shadow-xs`}>
                       <NotifIcon className="w-5 h-5" />
                     </div>
 
-                    {/* Content */}
+                   
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="text-sm font-bold text-slate-900">{notif.title}</h3>
                         
-                        {/* Unread / Urgent Indicator Dot */}
+                       
                         {notif.isUrgent && (
                           <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
                         )}
 
-                        {/* Type Badge */}
+                       
                         <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${notif.badgeBg}`}>
                           {notif.type}
                         </span>
@@ -222,7 +209,7 @@ export default function AdminNotificationsPage() {
                     </div>
                   </div>
 
-                  {/* Actions (Mark Read & Dismiss) */}
+                 
                   <div className="flex items-center gap-1 shrink-0">
                     {!notif.isRead && (
                       <button

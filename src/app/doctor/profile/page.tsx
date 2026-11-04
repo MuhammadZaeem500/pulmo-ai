@@ -89,7 +89,7 @@ export default function DoctorProfilePage() {
 
   return (
     <div className="space-y-6 max-w-5xl">
-      {/* Top Header & Edit/Save Actions */}
+     
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-extrabold text-slate-900">Profile</h1>
@@ -126,12 +126,12 @@ export default function DoctorProfilePage() {
         )}
       </div>
 
-      {/* Main Profile Details Card */}
+     
       <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
         <div className="h-15 relative" />
 
         <div className="px-8 pb-8 relative">
-          {/* Avatar & Title Overlapping Banner */}
+         
           <div className="flex items-end gap-4 -mt-10 mb-6">
             <div className="w-20 h-20 rounded-2xl bg-blue-600 text-white font-extrabold text-2xl flex items-center justify-center border-4 border-white shadow-md">
               {initials || "DR"}
@@ -142,7 +142,7 @@ export default function DoctorProfilePage() {
             </div>
           </div>
 
-          {/* Details Grid */}
+         
           <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
             <div>
               <label className="text-[10px] uppercase font-extrabold tracking-wider text-slate-400 block mb-1">Full Name</label>
@@ -259,7 +259,7 @@ export default function DoctorProfilePage() {
         </div>
       </div>
 
-      {/* Bottom Metric Cards */}
+     
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <DashboardCard>
           <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3">

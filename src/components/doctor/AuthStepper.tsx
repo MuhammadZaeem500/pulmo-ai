@@ -1,10 +1,7 @@
-// src/components/doctor/auth/AuthStepper.tsx
 import React from "react";
 import { Check } from "lucide-react";
+import AuthStepperProps from "@/types/doctor.types";
 
-interface AuthStepperProps {
-  currentStep: number;
-}
 
 export default function AuthStepper({ currentStep }: AuthStepperProps) {
   return (

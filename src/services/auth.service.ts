@@ -25,8 +25,8 @@ async signupDoctor(data: any) {
       phone: data.phone,
       password: data.password,
       licenseNumber: data.pmdcNumber,
-      specialty: data.specialty, // Explicitly mapped
-      specialization: data.specialty, // Maps to backend DTO key just in case
+      specialty: data.specialty, 
+      specialization: data.specialty, 
       hospital: data.hospital,
       qualifications: data.qualifications || "",
       experience: Number(data.experience) || 0,

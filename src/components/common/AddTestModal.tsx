@@ -4,14 +4,9 @@ import { useState, useEffect } from "react";
 import { X, Loader2, FlaskConical } from "lucide-react";
 import { testService } from "@/services/test.service";
 import api from "@/services/api";
+import { AddMedicalRecordModalProps } from "@/types/modal.types";
 
-interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: () => void;
-}
-
-export default function AddTestModal({ isOpen, onClose, onSave }: ModalProps) {
+export default function AddTestModal({ isOpen, onClose, onSave }: AddMedicalRecordModalProps) {
   const [submitting, setSubmitting] = useState(false);
   const [patients, setPatients] = useState<any[]>([]);
   const [formData, setFormData] = useState({
@@ -36,7 +31,7 @@ export default function AddTestModal({ isOpen, onClose, onSave }: ModalProps) {
     try {
       setSubmitting(true);
       await testService.createTest(formData);
-      onSave();
+      onSave(formData); // Passed formData here to match the expected parameter type
       setFormData({ patientId: "", testName: "", description: "", status: "Pending" });
       onClose();
     } catch (err: any) {

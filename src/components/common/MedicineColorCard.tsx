@@ -1,12 +1,4 @@
-// src/components/common/MedicineColorCard.tsx
-import React from 'react';
-
-interface MedicineColorCardProps {
-  label: string;
-  colorBg: string; // e.g., 'bg-yellow-300' or 'border border-gray-300 bg-white'
-  isSelected?: boolean;
-  onClick: () => void;
-}
+import {MedicineColorCardProps} from '@/types/common.types';
 
 export default function MedicineColorCard({
   label,

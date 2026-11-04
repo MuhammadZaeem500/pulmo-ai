@@ -1,16 +1,6 @@
-// src/components/common/PrescriptionCard.tsx
-import React from 'react';
 import { FileText, User, Calendar, Download } from 'lucide-react';
+import PrescriptionCardProps from '@/types/common.types';
 
-interface PrescriptionCardProps {
-  medicine: string;
-  doctor: string;
-  date: string;
-  dosage: string;
-  duration: string;
-  onDownload?: () => void;
-  onViewFull?: () => void;
-}
 
 export default function PrescriptionCard({
   medicine,

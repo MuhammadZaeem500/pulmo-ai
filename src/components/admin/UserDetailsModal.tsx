@@ -1,27 +1,9 @@
-// src/components/admin/UserDetailsModal.tsx
 "use client";
 
 import React from "react";
 import { X, CheckCircle2, Clock, XCircle } from "lucide-react";
+import UserDetailsModalProps from "@/types/admin.types";
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  registered: string;
-  lastLogin: string;
-  status: "Active" | "Pending" | "Suspended";
-  avatarBg: string;
-  initials: string;
-}
-
-interface UserDetailsModalProps {
-  user: User | null;
-  isOpen: boolean;
-  onClose: () => void;
-  onToggleSuspend: (userId: number) => void;
-}
 
 export default function UserDetailsModal({
   user,
@@ -34,7 +16,7 @@ export default function UserDetailsModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
       <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-md p-6 relative animate-in fade-in zoom-in-95 duration-200">
-        {/* Close Button */}
+       
         <button
           onClick={onClose}
           className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
@@ -42,7 +24,7 @@ export default function UserDetailsModal({
           <X className="w-4 h-4" />
         </button>
 
-        {/* User Header Info */}
+       
         <div className="flex items-center gap-4 mb-6 pb-5 border-b border-slate-100">
           <div className={`w-14 h-14 rounded-2xl ${user.avatarBg} text-white font-extrabold text-lg flex items-center justify-center shadow-md`}>
             {user.initials}
@@ -53,7 +35,7 @@ export default function UserDetailsModal({
           </div>
         </div>
 
-        {/* User Attributes */}
+       
         <div className="space-y-4 text-xs">
           <div className="flex items-center justify-between py-2 border-b border-slate-100">
             <span className="font-bold text-slate-400 uppercase tracking-wider text-[11px]">Role</span>
@@ -89,7 +71,7 @@ export default function UserDetailsModal({
           </div>
         </div>
 
-        {/* Modal Action Buttons */}
+       
         <div className="flex items-center justify-end gap-3 pt-6 mt-6 border-t border-slate-100">
           <button
             type="button"

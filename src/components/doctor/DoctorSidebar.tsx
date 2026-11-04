@@ -17,11 +17,8 @@ import {
   X
 } from "lucide-react";
 import { doctorPortalService } from "@/services/doctor.service";
+import DoctorSidebarProps from "@/types/doctor.types";
 
-interface DoctorSidebarProps {
-  mobileOpen: boolean;
-  setMobileOpen: (val: boolean) => void;
-}
 
 export default function DoctorSidebar({ mobileOpen, setMobileOpen }: DoctorSidebarProps) {
   const pathname = usePathname();
@@ -52,7 +49,6 @@ export default function DoctorSidebar({ mobileOpen, setMobileOpen }: DoctorSideb
   useEffect(() => {
     fetchDoctorProfile();
 
-    // Listen for custom profile update events triggered from the profile page
     const handleProfileUpdate = () => {
       fetchDoctorProfile();
     };
@@ -84,7 +80,7 @@ export default function DoctorSidebar({ mobileOpen, setMobileOpen }: DoctorSideb
 
   return (
     <>
-      {/* Mobile Backdrop */}
+     
       {mobileOpen && (
         <div 
           onClick={() => setMobileOpen(false)}
@@ -92,12 +88,12 @@ export default function DoctorSidebar({ mobileOpen, setMobileOpen }: DoctorSideb
         />
       )}
 
-      {/* Sidebar Container */}
+     
       <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 min-h-screen bg-white border-r border-slate-200/80 flex flex-col justify-between p-6 select-none shrink-0 transition-transform duration-300 ${
         mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       }`}>
         <div>
-          {/* Brand Header */}
+         
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
@@ -108,7 +104,7 @@ export default function DoctorSidebar({ mobileOpen, setMobileOpen }: DoctorSideb
                 <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Doctor Portal</span>
               </div>
             </div>
-            {/* Mobile Close Button */}
+           
             <button
               onClick={() => setMobileOpen(false)}
               className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
@@ -117,7 +113,7 @@ export default function DoctorSidebar({ mobileOpen, setMobileOpen }: DoctorSideb
             </button>
           </div>
 
-          {/* Doctor Info Card */}
+         
           <div className="flex items-center gap-3 p-3 rounded-2xl bg-white border border-slate-200/80 shadow-sm mb-6">
             <div className="w-10 h-10 rounded-xl bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">
               {loading ? "..." : doctor.initials}
@@ -132,7 +128,7 @@ export default function DoctorSidebar({ mobileOpen, setMobileOpen }: DoctorSideb
             </div>
           </div>
 
-          {/* Navigation Links */}
+         
           <nav className="space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -156,7 +152,7 @@ export default function DoctorSidebar({ mobileOpen, setMobileOpen }: DoctorSideb
           </nav>
         </div>
 
-        {/* Bottom Profile, Settings & Logout */}
+       
         <div className="space-y-1 pt-4 border-t border-slate-200/60">
           {bottomNavItems.map((item) => {
             const Icon = item.icon;

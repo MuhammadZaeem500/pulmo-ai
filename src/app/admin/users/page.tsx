@@ -12,18 +12,8 @@ import {
   Clock, 
   XCircle 
 } from "lucide-react";
+import { User } from "@/types/admin.types";
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  registered: string;
-  lastLogin: string;
-  status: "Active" | "Pending" | "Suspended";
-  avatarBg: string;
-  initials: string;
-}
 
 export default function AdminUsersPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -63,13 +53,13 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+     
       <div>
         <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Users</h1>
         <p className="text-xs text-slate-400 font-medium mt-0.5">Manage user accounts, profiles, and access controls.</p>
       </div>
 
-      {/* Metric Cards Grid using Unified DashboardCard */}
+     
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <DashboardCard>
           <span className="text-[11px] uppercase font-bold tracking-wider text-slate-400 block mb-2">Total Users</span>
@@ -89,7 +79,7 @@ export default function AdminUsersPage() {
         </DashboardCard>
       </div>
 
-      {/* Filter & Search Bar */}
+     
       <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm space-y-4">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="relative w-full sm:w-96">
@@ -121,7 +111,7 @@ export default function AdminUsersPage() {
           </div>
         </div>
 
-        {/* Users Table */}
+       
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -203,7 +193,7 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      {/* User Details & Suspension Modal */}
+     
       <UserDetailsModal
         user={selectedUser}
         isOpen={isModalOpen}

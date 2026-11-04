@@ -1,17 +1,6 @@
-// src/components/common/DoctorClinicCard.tsx
 import { ReactNode } from "react";
 import { Star } from "lucide-react";
-
-interface DoctorClinicCardProps {
-  icon?: ReactNode;
-  title: string;
-  subtitle: string;
-  metaText: string;     // e.g., "2.3 km away" or "15 years experience"
-  rating: string;       // e.g., "4.9"
-  availability?: string; // e.g., "Available: Mon, Wed, Fri"
-  actionText?: string;  // e.g., "Book Appointment" or "View Details & Book"
-  onActionClick?: () => void;
-}
+import DoctorClinicCardProps from "@/types/common.types";
 
 export default function DoctorClinicCard({
   icon,
@@ -26,7 +15,7 @@ export default function DoctorClinicCard({
   return (
     <div className="rounded-2xl bg-white p-6 shadow-xs border border-gray-100 hover:shadow-md transition-all flex flex-col justify-between w-full space-y-6">
       
-      {/* Top Row */}
+     
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-4">
           {icon && (
@@ -41,7 +30,7 @@ export default function DoctorClinicCard({
           </div>
         </div>
 
-        {/* Rating & Availability */}
+       
         <div className="text-right shrink-0">
           <div className="flex items-center justify-end gap-1 font-bold text-gray-900 mb-0.5">
             <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
@@ -53,7 +42,7 @@ export default function DoctorClinicCard({
         </div>
       </div>
 
-      {/* Action Button */}
+     
       {actionText && (
         <button
           onClick={onActionClick}

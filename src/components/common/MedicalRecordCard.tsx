@@ -1,17 +1,6 @@
-// src/components/common/MedicalRecordCard.tsx
-import React from 'react';
 import { FileText, Calendar } from 'lucide-react';
+import {MedicalRecordCardProps} from '@/types/common.types';
 
-interface MedicalRecordCardProps {
-  date: string;
-  diagnosis: string;
-  symptoms: string;
-  confidence: string;
-  urgency: string;
-  recommendations: string;
-  onViewDetails?: () => void;
-  onDownloadReport?: () => void;
-}
 
 export default function MedicalRecordCard({
   date,

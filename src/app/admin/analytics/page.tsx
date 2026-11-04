@@ -1,4 +1,3 @@
-// src/app/admin/analytics/page.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -11,13 +10,13 @@ export default function AdminAnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top Header */}
+
       <div>
         <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Healthcare Analytics</h1>
         <p className="text-xs text-slate-400 font-medium mt-0.5">Monitor health trends, disease patterns, and user engagement across the platform.</p>
       </div>
 
-      {/* Metric Cards Grid using Unified MetricCard */}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           title="Avg. Daily Queries"
@@ -53,7 +52,6 @@ export default function AdminAnalyticsPage() {
         />
       </div>
 
-      {/* Horizontally Scrollable Tabs Filter */}
       <div className="flex items-center gap-2 bg-white p-1.5 rounded-2xl border border-slate-200/80 w-full sm:w-fit shadow-xs overflow-x-auto whitespace-nowrap scrollbar-none">
         {(["Symptom Trends", "Conditions", "Seasonal Trends", "User Engagement"] as const).map((tab) => (
           <button
@@ -70,7 +68,6 @@ export default function AdminAnalyticsPage() {
         ))}
       </div>
 
-      {/* Tab 1: Symptom Trends */}
       {activeTab === "Symptom Trends" && (
         <DashboardCard title="Symptom Trend Analysis">
           <p className="text-xs text-slate-400 font-medium pb-2">Reported symptoms per month across all registered patients.</p>
@@ -104,7 +101,6 @@ export default function AdminAnalyticsPage() {
         </DashboardCard>
       )}
 
-      {/* Tab 2: Conditions */}
       {activeTab === "Conditions" && (
         <DashboardCard title="Frequently Reported Pulmonary Conditions">
           <p className="text-xs text-slate-400 font-medium pb-4">Total diagnosed conditions across the patient base.</p>
@@ -140,7 +136,6 @@ export default function AdminAnalyticsPage() {
         </DashboardCard>
       )}
 
-      {/* Tab 3: Seasonal Trends */}
       {activeTab === "Seasonal Trends" && (
         <DashboardCard title="Seasonal Health Trends">
           <p className="text-xs text-slate-400 font-medium pb-2">Monthly case volume comparison — current year vs. previous year.</p>
@@ -170,7 +165,6 @@ export default function AdminAnalyticsPage() {
         </DashboardCard>
       )}
 
-      {/* Tab 4: User Engagement */}
       {activeTab === "User Engagement" && (
         <DashboardCard title="User Engagement Trends">
           <p className="text-xs text-slate-400 font-medium pb-2">Weekly active users, sessions, and AI queries over the past 6 weeks.</p>

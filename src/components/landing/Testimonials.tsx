@@ -1,4 +1,3 @@
-// src/components/landing/Testimonials.tsx
 import TestimonialCard from "@/components/common/TestimonialCard";
 import { Star } from "lucide-react";
 
@@ -28,7 +27,7 @@ export default function Testimonials() {
     <section className="py-24 lg:py-32 bg-slate-50/50 relative overflow-hidden">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         
-        {/* Section Header */}
+       
         <div className="mx-auto max-w-2xl text-center mb-16">
           <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-4 py-1 text-xs font-semibold text-blue-600 ring-1 ring-inset ring-blue-600/10">
             <Star className="h-3.5 w-3.5 fill-blue-600 text-blue-600" />
@@ -44,7 +43,7 @@ export default function Testimonials() {
           </p>
         </div>
 
-        {/* Testimonials Grid (3 columns) */}
+       
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           {testimonialsData.map((item, index) => (
             <TestimonialCard

@@ -1,4 +1,3 @@
-// src/app/patient/profile/page.tsx
 "use client";
 
 import { Mail, Phone, Calendar, User, MapPin, Edit3 } from "lucide-react";
@@ -24,13 +23,13 @@ export default function ProfilePage() {
 
   return (
     <div className="p-8 lg:p-10 max-w-7xl mx-auto space-y-8">
-      {/* Top Header */}
+     
       <div>
         <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">Profile</h1>
         <p className="text-gray-500 text-sm">Manage your personal information and medical profile</p>
       </div>
 
-      {/* Main Profile Card */}
+     
       <div className="bg-white rounded-2xl p-6 lg:p-8 border border-gray-100 shadow-xs space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-5">
@@ -52,7 +51,7 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        {/* Profile Fields Grid */}
+       
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-100">
           <ProfileField icon={Mail} label="Email" value={profileData.email} />
           <ProfileField icon={Phone} label="Phone" value={profileData.phone} />
@@ -64,7 +63,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Medical History Summary Metrics */}
+     
       <div className="space-y-4">
         <h3 className="text-lg font-bold text-gray-900 px-1">Medical History Summary</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -74,7 +73,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Recent Prescriptions Section */}
+     
       <div className="bg-white rounded-2xl p-6 lg:p-8 border border-gray-100 shadow-xs space-y-4">
         <h3 className="text-lg font-bold text-gray-900">Recent Prescriptions</h3>
         <div className="space-y-3">

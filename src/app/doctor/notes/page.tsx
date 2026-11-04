@@ -45,7 +45,7 @@ export default function ConsultationNotesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+     
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-extrabold text-slate-900">Consultation Notes</h1>
@@ -60,7 +60,7 @@ export default function ConsultationNotesPage() {
         </button>
       </div>
 
-      {/* Search Bar */}
+     
       <div className="relative max-w-full">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
         <input

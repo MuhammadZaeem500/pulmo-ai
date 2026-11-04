@@ -2,18 +2,8 @@
 
 import React, { useState } from "react";
 import { X } from "lucide-react";
+import AddClinicModalProps from "@/types/admin.types";
 
-interface AddClinicModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onAddClinic: (clinic: {
-    name: string;
-    location: string;
-    phone: string;
-    specialists: number;
-    type: string;
-  }) => void;
-}
 
 export default function AddClinicModal({ isOpen, onClose, onAddClinic }: AddClinicModalProps) {
   const [newClinic, setNewClinic] = useState({

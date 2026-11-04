@@ -1,4 +1,3 @@
-// src/app/admin/security/page.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -16,16 +15,7 @@ import {
   Wifi, 
   Eye 
 } from "lucide-react";
-
-interface SecurityAlert {
-  id: number;
-  title: string;
-  severity: "Critical" | "High" | "Medium" | "Low";
-  status: "Open" | "Investigating" | "Resolved";
-  description: string;
-  date: string;
-  icon: any;
-}
+import { SecurityAlert } from "@/types/admin.types";
 
 export default function SecurityCenterPage() {
   const [selectedFilter, setSelectedFilter] = useState<string>("All");
@@ -54,13 +44,13 @@ export default function SecurityCenterPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+     
       <div>
         <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Security Center</h1>
         <p className="text-xs text-slate-400 font-medium mt-0.5">Monitor platform integrity, suspicious activity, and unauthorized access.</p>
       </div>
 
-      {/* Top Status Metric Cards */}
+     
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           title="Total Alerts"
@@ -92,7 +82,7 @@ export default function SecurityCenterPage() {
         />
       </div>
 
-      {/* Severity Overview Card */}
+     
       <DashboardCard title="Severity Overview">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
           <div className="bg-rose-50/50 border border-rose-100 rounded-2xl p-4 text-center">
@@ -122,7 +112,7 @@ export default function SecurityCenterPage() {
         </div>
       </DashboardCard>
 
-      {/* Filter Chips */}
+     
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
         {["All", "Critical", "High", "Medium", "Low", "Open", "Investigating", "Resolved"].map((filter) => (
           <button
@@ -139,7 +129,7 @@ export default function SecurityCenterPage() {
         ))}
       </div>
 
-      {/* Security Alerts List */}
+     
       <div className="space-y-3">
         {filteredAlerts.map((alert) => {
           const AlertIcon = alert.icon;
@@ -193,7 +183,7 @@ export default function SecurityCenterPage() {
         })}
       </div>
 
-      {/* Security Alert Modal */}
+     
       <SecurityAlertModal
         alert={selectedAlert}
         isOpen={isModalOpen}

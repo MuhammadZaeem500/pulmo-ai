@@ -1,19 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import api from "@/services/api"; // Adjust this to your API service path
+import api from "@/services/api";
 import { ShieldCheck, UserCheck, XCircle, Stethoscope, Mail } from "lucide-react";
-
-interface DoctorRequest {
-  userId: string;
-  email: string;
-  createdAt: string;
-  profile?: {
-    fullName: string;
-    licenseNumber: string;
-    specialization: string;
-  };
-}
+import DoctorRequest from "@/types/admin.types";
 
 export default function DoctorVerificationPage() {
   const [pendingDoctors, setPendingDoctors] = useState<DoctorRequest[]>([]);
@@ -21,12 +11,10 @@ export default function DoctorVerificationPage() {
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  // 1. Fetch pending doctors from backend
   useEffect(() => {
     const fetchPendingDoctors = async () => {
       try {
         setLoading(true);
-        // Assuming this endpoint exists on your NestJS backend
         const response = await api.get("/auth/admin/pending-doctors");
         setPendingDoctors(response.data);
       } catch (err: any) {
@@ -39,17 +27,14 @@ export default function DoctorVerificationPage() {
     fetchPendingDoctors();
   }, []);
 
-  // 2. Handle Approve or Reject actions
   const handleStatusUpdate = async (userId: string, status: "ACTIVE" | "REJECTED") => {
     try {
       setActionLoading(userId);
-      // Assuming this endpoint exists on your NestJS backend
+
       await api.patch(`/auth/admin/doctor-status/${userId}`, { status });
       
-      // Remove the handled request from the local state to update the UI immediately
       setPendingDoctors((prev) => prev.filter((doc) => doc.userId !== userId));
       
-      // Optional: Show a success toast notification here
     } catch (err: any) {
       alert(err.response?.data?.message || "Failed to update doctor status. Please try again.");
     } finally {
@@ -71,7 +56,7 @@ export default function DoctorVerificationPage() {
   return (
     <div className="min-h-screen bg-slate-50 p-6 md:p-8 font-sans">
       <div className="max-w-7xl mx-auto">
-        {/* Header Section */}
+       
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
           <div>
             <p className="text-xs font-semibold tracking-wider text-blue-600/80 uppercase mb-1">
@@ -97,7 +82,7 @@ export default function DoctorVerificationPage() {
           </div>
         )}
 
-        {/* Empty State */}
+       
         {pendingDoctors.length === 0 && !error ? (
           <div className="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-lg flex flex-col items-center justify-center">
             <Stethoscope className="w-16 h-16 text-slate-300 mb-6" />
@@ -115,7 +100,7 @@ export default function DoctorVerificationPage() {
                 key={doc.userId}
                 className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:border-blue-100 hover:shadow-md transition-all duration-200 flex flex-col md:flex-row md:items-center md:justify-between gap-6"
               >
-                {/* Doctor Info Left Side */}
+               
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 p-3 rounded-xl bg-slate-100 border border-slate-200 text-slate-500">
                     <Stethoscope className="w-6 h-6" />
@@ -133,9 +118,9 @@ export default function DoctorVerificationPage() {
                   </div>
                 </div>
 
-                {/* Credentials Right Side - Flex layout for alignment */}
+               
                 <div className="flex flex-col sm:flex-row sm:items-center gap-6 w-full md:w-auto">
-                  {/* Credentials Metadata */}
+                 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-8 text-sm text-slate-700">
                      <div className="bg-slate-50 px-4 py-2.5 rounded-lg border border-slate-100 sm:bg-transparent sm:border-none sm:px-0 sm:py-0">
                       <span className="text-slate-500 text-xs block sm:hidden">Specialization</span>
@@ -153,7 +138,7 @@ export default function DoctorVerificationPage() {
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
+                 
                   <div className="flex items-center gap-3 pt-3 sm:pt-0 w-full sm:w-auto justify-end border-t border-slate-100 sm:border-none">
                     <button
                       onClick={() => handleStatusUpdate(doc.userId, "REJECTED")}

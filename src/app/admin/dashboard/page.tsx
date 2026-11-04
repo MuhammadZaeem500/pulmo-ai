@@ -1,4 +1,3 @@
-// src/app/admin/dashboard/page.tsx
 "use client";
 
 import React from "react";
@@ -20,13 +19,13 @@ import {
 export default function AdminDashboardPage() {
   return (
     <div className="space-y-6">
-      {/* Top Title & Welcome */}
+     
       <div>
         <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Dashboard</h1>
         <p className="text-xs text-slate-400 font-medium mt-0.5">Welcome back. Here&apos;s what&apos;s happening on the platform.</p>
       </div>
 
-      {/* Top Metric Cards Grid */}
+     
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <DashboardCard>
           <div className="flex items-center justify-between mb-3">
@@ -73,9 +72,9 @@ export default function AdminDashboardPage() {
         </DashboardCard>
       </div>
 
-      {/* Main Grid: Recent Activities & Quick Actions / Notifications */}
+     
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Recent Activities (Spans 2 cols) */}
+       
         <div className="lg:col-span-2">
           <DashboardCard>
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
@@ -112,9 +111,9 @@ export default function AdminDashboardPage() {
           </DashboardCard>
         </div>
 
-        {/* Right Column: Quick Actions & Notifications */}
+       
         <div className="space-y-6">
-          {/* Quick Actions Card */}
+         
           <DashboardCard title="Quick Actions">
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button onClick={() => alert("Add Clinic modal")} className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/80 transition-all text-center flex flex-col items-center justify-center gap-2 group">
@@ -147,7 +146,7 @@ export default function AdminDashboardPage() {
             </div>
           </DashboardCard>
 
-          {/* Notifications Card */}
+         
           <DashboardCard>
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
               <h3 className="text-sm font-bold text-slate-900">Notifications</h3>

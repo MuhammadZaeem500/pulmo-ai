@@ -23,7 +23,7 @@ export default function AdminSignInPage() {
 
     try {
       await authService.login({ email, password });
-      router.push("/admin/dashboard"); // Or your target admin dashboard route
+      router.push("/admin/dashboard");
     } catch (err: any) {
       setError(err.response?.data?.message || "Invalid email or password");
     } finally {
@@ -33,10 +33,10 @@ export default function AdminSignInPage() {
 
   return (
     <div className="min-h-screen flex w-full bg-white font-sans overflow-hidden">
-      {/* Reusable Hero Banner */}
+     
       <AuthHeroBanner />
 
-      {/* Right Sign-In Form Side */}
+     
       <div className="flex-1 flex items-center justify-center p-8 lg:p-16 bg-white overflow-y-auto max-h-screen">
         <div className="w-full max-w-md space-y-8">
           <div className="flex items-center gap-3">

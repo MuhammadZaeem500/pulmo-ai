@@ -1,4 +1,3 @@
-// src/components/patient/Sidebar.tsx
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
@@ -16,11 +15,8 @@ import {
   LogOut,
   X
 } from "lucide-react";
+import  SidebarProps  from "@/types/patient.types";
 
-interface SidebarProps {
-  mobileOpen: boolean;
-  setMobileOpen: (val: boolean) => void;
-}
 
 export default function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
   const router = useRouter();
@@ -45,7 +41,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile Backdrop */}
+     
       {mobileOpen && (
         <div 
           onClick={() => setMobileOpen(false)}
@@ -53,7 +49,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
         />
       )}
 
-      {/* Sidebar Container */}
+     
       <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-[#2F80ED] to-[#14B8A6] flex flex-col h-screen shrink-0 transition-transform duration-300 ${
         mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       }`}>
@@ -64,7 +60,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
             </div>
             <span className="font-semibold text-lg text-white">PulmoAI</span>
           </div>
-          {/* Mobile Close Button */}
+         
           <button
             onClick={() => setMobileOpen(false)}
             className="lg:hidden p-1.5 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"

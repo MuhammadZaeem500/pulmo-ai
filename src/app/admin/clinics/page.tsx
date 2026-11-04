@@ -1,8 +1,8 @@
-// src/app/admin/clinics/page.tsx
 "use client";
 
 import React, { useState } from "react";
 import DashboardCard from "@/components/common/DashboardCard";
+import Clinic from "@/types/admin.types";
 import AddClinicModal from "@/components/admin/AddClinicModal";
 import { 
   Building2, 
@@ -17,16 +17,7 @@ import {
   MoreVertical 
 } from "lucide-react";
 
-interface Clinic {
-  id: number;
-  name: string;
-  phone: string;
-  location: string;
-  status: "Verified" | "Pending" | "Suspended";
-  specialists: number;
-  type: string;
-  since: string;
-}
+
 
 export default function AdminClinicsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -71,7 +62,7 @@ export default function AdminClinicsPage() {
 
   return (
     <div className="space-y-6 relative">
-      {/* Top Header & Add Clinic Button */}
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Clinics & Hospitals</h1>
@@ -86,7 +77,6 @@ export default function AdminClinicsPage() {
         </button>
       </div>
 
-      {/* Metric Cards Grid using Reusable DashboardCard */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <DashboardCard>
           <span className="text-[11px] uppercase font-bold tracking-wider text-slate-400 block mb-2">Total Facilities</span>
@@ -102,7 +92,6 @@ export default function AdminClinicsPage() {
         </DashboardCard>
       </div>
 
-      {/* Filter & Search Bar */}
       <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm space-y-4">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="relative w-full sm:w-96">
@@ -134,7 +123,6 @@ export default function AdminClinicsPage() {
           </div>
         </div>
 
-        {/* Clinics Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -212,7 +200,6 @@ export default function AdminClinicsPage() {
         </div>
       </div>
 
-      {/* Reusable Add Clinic Modal Component */}
       <AddClinicModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

@@ -1,4 +1,3 @@
-// src/app/patient/settings/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -7,28 +6,24 @@ import SettingSectionCard from "@/components/common/SettingSectionCard";
 import SettingToggleItem from "@/components/common/SettingToggleItem";
 
 export default function SettingsPage() {
-  // Notification States
+
   const [emailNotifs, setEmailNotifs] = useState(true);
   const [appointmentReminders, setAppointmentReminders] = useState(true);
   const [healthTips, setHealthTips] = useState(false);
-
-  // Theme State
   const [darkMode, setDarkMode] = useState(false);
-
-  // Region States
   const [language, setLanguage] = useState("English");
   const [timeZone, setTimeZone] = useState("EST (UTC-5)");
 
   return (
     <div className="p-8 lg:p-10 max-w-7xl mx-auto space-y-8">
-      {/* Top Header */}
+     
       <div>
         <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">Settings</h1>
         <p className="text-gray-500 text-sm">Manage your account preferences and privacy settings</p>
       </div>
 
       <div className="space-y-6">
-        {/* Account Settings Section */}
+       
         <SettingSectionCard icon={User} title="Account Settings">
           <div className="flex items-center justify-between">
             <div>
@@ -70,7 +65,7 @@ export default function SettingsPage() {
           </div>
         </SettingSectionCard>
 
-        {/* Notification Preferences Section */}
+       
         <SettingSectionCard icon={Bell} title="Notification Preferences">
           <SettingToggleItem
             title="Email Notifications"
@@ -96,7 +91,7 @@ export default function SettingsPage() {
           </div>
         </SettingSectionCard>
 
-        {/* Language & Region Section */}
+       
         <SettingSectionCard icon={Globe} title="Language & Region">
           <div className="flex items-center justify-between">
             <div>
@@ -132,7 +127,7 @@ export default function SettingsPage() {
           </div>
         </SettingSectionCard>
 
-        {/* Theme Preferences Section */}
+       
         <SettingSectionCard icon={Moon} title="Theme Preferences">
           <SettingToggleItem
             title="Dark Mode"

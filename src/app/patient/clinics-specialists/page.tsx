@@ -1,19 +1,10 @@
-// src/app/patient/clinics-specialists/page.tsx
 "use client";
 
 import { useState } from "react";
 import DoctorClinicCard from "@/components/common/DoctorClinicCard";
 import { Search, Building2, User } from "lucide-react";
+import ItemData from "@/types/patient.types";
 
-interface ItemData {
-  id: number;
-  title: string;
-  subtitle: string;
-  metaText: string;
-  rating: string;
-  actionText: string;
-  availability?: string;
-}
 
 export default function ClinicsSpecialistsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -69,13 +60,13 @@ export default function ClinicsSpecialistsPage() {
 
   return (
     <div className="p-8 lg:p-10 max-w-7xl mx-auto space-y-8">
-      {/* Top Header */}
+     
       <div>
         <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">Clinics & Specialists</h1>
         <p className="text-gray-500 text-sm">Find nearby clinics and pulmonary specialists</p>
       </div>
 
-      {/* Search Input */}
+     
       <div className="relative">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
         <input
@@ -87,7 +78,7 @@ export default function ClinicsSpecialistsPage() {
         />
       </div>
 
-      {/* Tabs */}
+     
       <div className="flex items-center gap-3">
         <button
           onClick={() => setActiveTab("clinics")}
@@ -111,7 +102,7 @@ export default function ClinicsSpecialistsPage() {
         </button>
       </div>
 
-      {/* Full-Width Cards List */}
+     
       <div className="space-y-4">
         {filteredData.map((item) => (
           <DoctorClinicCard

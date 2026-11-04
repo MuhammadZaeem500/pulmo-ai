@@ -1,4 +1,3 @@
-// src/app/admin/layout.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -15,7 +14,7 @@ export default function AdminLayout({
 
   return (
     <div className="flex h-screen bg-[#F8FAFC] font-sans overflow-hidden">
-      {/* Sidebar Component */}
+
       <AdminSidebar
         collapsed={collapsed}
         setCollapsed={setCollapsed}
@@ -23,12 +22,11 @@ export default function AdminLayout({
         setMobileOpen={setMobileOpen}
       />
 
-      {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden w-full">
-        {/* Top Header Bar */}
+
         <header className="h-16 bg-white border-b border-slate-200/80 px-4 sm:px-8 flex items-center justify-between shrink-0 shadow-xs">
           <div className="flex items-center gap-3">
-            {/* Mobile Hamburger Button */}
+
             <button
               onClick={() => setMobileOpen(true)}
               className="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
@@ -62,7 +60,6 @@ export default function AdminLayout({
           </div>
         </header>
 
-        {/* Scrollable Page Content */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-8 bg-[#F8FAFC]">
           <div className="mx-auto space-y-6 max-w-7xl">
             {children}

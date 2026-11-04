@@ -40,7 +40,6 @@ export default function DoctorAppointmentsPage() {
     }
   };
 
-  // Compute metrics dynamically from live data
   const totalToday = appointments.length;
   const completedCount = appointments.filter((a) => a.status === "Completed").length;
   const remainingCount = totalToday - completedCount;
@@ -48,14 +47,14 @@ export default function DoctorAppointmentsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top Header & Metrics Cards */}
+     
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-extrabold text-slate-900">Appointments</h1>
           <p className="text-xs text-slate-400 font-medium mt-0.5">Live Schedule Overview</p>
         </div>
 
-        {/* Quick Stats Badges */}
+       
         <div className="flex items-center gap-3">
           <div className="bg-white rounded-xl border border-slate-200/80 px-4 py-2 text-center shadow-sm">
             <span className="text-sm font-extrabold text-blue-600 block">{totalToday}</span>
@@ -72,7 +71,7 @@ export default function DoctorAppointmentsPage() {
         </div>
       </div>
 
-      {/* Progress Bar Card */}
+     
       <DashboardCard>
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2 text-slate-800 font-bold text-xs">

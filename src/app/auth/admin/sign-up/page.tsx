@@ -45,13 +45,13 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   return (
     <div className="min-h-screen flex w-full bg-white font-sans overflow-hidden">
-      {/* Reusable Hero Banner */}
+     
       <AuthHeroBanner />
 
-      {/* Right Sign-Up Form Side */}
+     
       <div className="flex-1 flex items-center justify-center p-8 lg:p-16 bg-white overflow-y-auto max-h-screen">
         <div className="w-full max-w-md space-y-6">
-          {/* Back to login link */}
+         
           <Link href="/auth/admin/sign-in" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors">
             <ArrowLeft className="w-4 h-4" />
             Back to login

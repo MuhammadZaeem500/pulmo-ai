@@ -1,4 +1,3 @@
-// src/app/patient/appointments/page.tsx
 "use client";
 
 import { useState } from 'react';
@@ -48,13 +47,13 @@ export default function AppointmentsPage() {
 
   return (
     <div className="p-8 lg:p-10 max-w-7xl mx-auto space-y-8">
-      {/* Top Header */}
+     
       <div>
         <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">Appointments</h1>
         <p className="text-gray-500 text-sm">Book new appointments or view your appointment history</p>
       </div>
 
-      {/* Tabs */}
+     
       <div className="flex gap-3">
         <button
           onClick={() => setActiveTab('book')}
@@ -78,7 +77,7 @@ export default function AppointmentsPage() {
         </button>
       </div>
 
-      {/* Book Appointment View */}
+     
       {activeTab === 'book' && (
         <div className="space-y-6">
           <div className="bg-white rounded-2xl p-6 lg:p-8 border border-gray-100 shadow-xs space-y-4">
@@ -96,7 +95,7 @@ export default function AppointmentsPage() {
             </div>
           </div>
 
-          {/* Booking Form */}
+         
           <div className="bg-white rounded-2xl p-6 lg:p-8 border border-gray-100 shadow-xs space-y-4">
             <h2 className="text-lg font-bold text-gray-900">Booking Details</h2>
             <div className="space-y-4">
@@ -133,7 +132,7 @@ export default function AppointmentsPage() {
         </div>
       )}
 
-      {/* Previous Appointments View */}
+     
       {activeTab === 'previous' && (
         <div className="space-y-4">
           {previousAppointments.map((appointment) => (

@@ -1,12 +1,8 @@
-// src/components/common/ProfileField.tsx
-import React from 'react';
-import { LucideIcon } from 'lucide-react';
+"use client";
 
-interface ProfileFieldProps {
-  icon: LucideIcon;
-  label: string;
-  value: string;
-}
+import React from "react";
+import { LucideIcon } from "lucide-react";
+import { ProfileFieldProps } from "@/types/common.types"; 
 
 export default function ProfileField({ icon: Icon, label, value }: ProfileFieldProps) {
   return (

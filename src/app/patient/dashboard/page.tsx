@@ -1,4 +1,3 @@
-// src/app/patient/dashboard/page.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -10,15 +9,15 @@ export default function PatientDashboard() {
   
   return (
     <div className="p-8 lg:p-10 max-w-7xl mx-auto">
-      {/* Header */}
+     
       <div className="mb-8">
         <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">Dashboard</h1>
         <p className="text-gray-500 text-sm">Welcome back! Here&apos;s your health overview</p>
       </div>
 
-      {/* Cards Grid */}
+     
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Continue Last Conversation */}
+       
         <DashboardCard
           title="Continue Last Conversation"
           icon={MessageCircle}
@@ -29,7 +28,7 @@ export default function PatientDashboard() {
           <p>Resume your chat about respiratory symptoms</p>
         </DashboardCard>
 
-        {/* Recent Medical History */}
+       
         <DashboardCard
           title="Recent Medical History"
           icon={FileText}
@@ -41,7 +40,7 @@ export default function PatientDashboard() {
           <p>Diagnosis: Mild bronchitis</p>
         </DashboardCard>
 
-        {/* Upcoming Appointment */}
+       
         <DashboardCard
           title="Upcoming Appointment"
           icon={Calendar}
@@ -53,7 +52,7 @@ export default function PatientDashboard() {
           <p>June 5, 2026 at 2:00 PM</p>
         </DashboardCard>
 
-        {/* Recent Prescription */}
+       
         <DashboardCard
           title="Recent Prescription"
           icon={Pill}
@@ -65,7 +64,7 @@ export default function PatientDashboard() {
           <p>Prescribed: May 25, 2026</p>
         </DashboardCard>
 
-        {/* Symptom Tracker Summary */}
+       
         <DashboardCard
           title="Symptom Tracker Summary"
           icon={Activity}

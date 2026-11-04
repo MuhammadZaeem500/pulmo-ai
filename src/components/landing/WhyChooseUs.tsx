@@ -1,4 +1,3 @@
-// src/components/landing/WhyChooseUs.tsx
 import FeatureCard from "@/components/common/FeatureCard";
 import { Brain, ShieldCheck, Zap, Stethoscope, Sparkles } from "lucide-react";
 
@@ -30,26 +29,26 @@ export default function WhyChooseUs() {
     <section className="py-20 lg:py-28 bg-slate-50/50">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         
-        {/* Header Content */}
+       
         <div className="mx-auto max-w-2xl text-center mb-16">
-          {/* Top Pill Badge */}
+         
           <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-4 py-1 text-xs font-semibold text-blue-600 ring-1 ring-inset ring-blue-600/10">
             <Sparkles className="h-3.5 w-3.5" />
             <span>Why PulmoAI</span>
           </div>
 
-          {/* Main Heading */}
+         
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
             Why Choose PulmoAI?
           </h2>
 
-          {/* Subtitle */}
+         
           <p className="mt-4 text-base text-slate-600">
             Advanced AI technology meets pulmonary care expertise for superior respiratory health management
           </p>
         </div>
 
-        {/* Cards Grid */}
+       
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((feature, index) => (
             <FeatureCard

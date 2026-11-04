@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Activity, User, Mail, Phone, Lock, Calendar } from "lucide-react";
-import AuthHeroBanner from "@/components/paitient/AuthHeroBanner";
+import AuthHeroBanner from "@/components/patient/AuthHeroBanner";
 import { authService } from "@/services/auth.service";
 
 export default function SignUp() {
@@ -50,10 +50,10 @@ export default function SignUp() {
 
   return (
     <div className="min-h-screen flex w-full bg-white font-sans overflow-hidden">
-      {/* Reusable Left Hero Banner */}
+     
       <AuthHeroBanner />
 
-      {/* Right Form Section - Constrained to max-w-md for perfect symmetry */}
+     
       <div className="flex-1 flex items-center justify-center p-8 lg:p-12 bg-white overflow-y-auto max-h-screen">
         <div className="w-full max-w-md">
           <div className="mb-6">

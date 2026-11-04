@@ -29,7 +29,6 @@ export default function MedicalHistory() {
     fetchRecords();
   }, []);
 
-  // Handles adding the saved record to state so it displays immediately
   const handleSaveRecord = (newRecord: any) => {
     setMedicalRecords((prevRecords) => [newRecord, ...prevRecords]);
   };
@@ -114,7 +113,7 @@ export default function MedicalHistory() {
         </div>
       )}
 
-      {/* Modal with handleSave integration */}
+     
       <AddMedicalRecordModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

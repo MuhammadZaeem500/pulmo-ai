@@ -21,7 +21,6 @@ export default function DoctorSettingsPage() {
     confirmPassword: "",
   });
 
-  // Notifications State
   const [notifications, setNotifications] = useState({
     newAppointment: true,
     appointmentReminders: true,
@@ -48,15 +47,15 @@ export default function DoctorSettingsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top Header */}
+     
       <div>
         <h1 className="text-xl font-extrabold text-slate-900">Settings</h1>
         <p className="text-xs text-slate-400 font-medium mt-0.5">Manage your account preferences</p>
       </div>
 
-      {/* Main Layout: Sub-navigation & Content Card */}
+     
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
-        {/* Left Sub-navigation */}
+       
         <div className="bg-white rounded-2xl border border-slate-200/80 p-2 shadow-sm space-y-1">
           {navTabs.map((tab) => {
             const Icon = tab.icon;
@@ -78,9 +77,9 @@ export default function DoctorSettingsPage() {
           })}
         </div>
 
-        {/* Right Content Area using Reusable DashboardCard */}
+       
         <div className="lg:col-span-3">
-          {/* TAB 1: ACCOUNT */}
+         
           {activeTab === "account" && (
             <DashboardCard title="Account Information">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
@@ -142,7 +141,7 @@ export default function DoctorSettingsPage() {
             </DashboardCard>
           )}
 
-          {/* TAB 2: SECURITY */}
+         
           {activeTab === "security" && (
             <DashboardCard title="Security Settings">
               <div className="space-y-4 pt-2">
@@ -177,7 +176,7 @@ export default function DoctorSettingsPage() {
                   />
                 </div>
 
-                {/* Two-Factor Authentication Box */}
+               
                 <div className="p-4 rounded-xl bg-blue-50/50 border border-blue-100 flex items-center justify-between">
                   <div>
                     <h4 className="text-xs font-bold text-blue-900">Two-Factor Authentication</h4>
@@ -200,7 +199,7 @@ export default function DoctorSettingsPage() {
             </DashboardCard>
           )}
 
-          {/* TAB 3: NOTIFICATIONS */}
+         
           {activeTab === "notifications" && (
             <DashboardCard title="Notification Preferences">
               <div className="space-y-4 pt-2">
@@ -249,11 +248,11 @@ export default function DoctorSettingsPage() {
             </DashboardCard>
           )}
 
-          {/* TAB 4: PREFERENCES */}
+         
           {activeTab === "preferences" && (
             <DashboardCard title="Preferences">
               <div className="space-y-6 pt-2">
-                {/* Theme Selector */}
+               
                 <div>
                   <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-2">Theme</label>
                   <div className="grid grid-cols-3 gap-3">
@@ -283,7 +282,7 @@ export default function DoctorSettingsPage() {
                   </div>
                 </div>
 
-                {/* Language */}
+               
                 <div>
                   <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-1">Language</label>
                   <select
@@ -298,7 +297,7 @@ export default function DoctorSettingsPage() {
                   </select>
                 </div>
 
-                {/* Time Zone */}
+               
                 <div>
                   <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-1">Time Zone</label>
                   <select
