@@ -31,7 +31,7 @@ export default function AddTestModal({ isOpen, onClose, onSave }: AddMedicalReco
     try {
       setSubmitting(true);
       await testService.createTest(formData);
-      onSave(formData); // Passed formData here to match the expected parameter type
+      onSave(formData);
       setFormData({ patientId: "", testName: "", description: "", status: "Pending" });
       onClose();
     } catch (err: any) {
@@ -66,7 +66,7 @@ export default function AddTestModal({ isOpen, onClose, onSave }: AddMedicalReco
               required
               value={formData.patientId}
               onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:border-teal-500"
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-900 focus:outline-none focus:border-teal-500"
             >
               <option value="">-- Choose Patient --</option>
               {patients.map((p) => (
@@ -86,7 +86,7 @@ export default function AddTestModal({ isOpen, onClose, onSave }: AddMedicalReco
                 value={formData.testName}
                 onChange={(e) => setFormData({ ...formData, testName: e.target.value })}
                 placeholder="e.g. HRCT Chest"
-                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-teal-500"
+                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-teal-500"
               />
             </div>
             <div>
@@ -94,7 +94,7 @@ export default function AddTestModal({ isOpen, onClose, onSave }: AddMedicalReco
               <select
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:border-teal-500"
+                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-900 focus:outline-none focus:border-teal-500"
               >
                 <option value="Pending">Pending</option>
                 <option value="In Progress">In Progress</option>
@@ -111,7 +111,7 @@ export default function AddTestModal({ isOpen, onClose, onSave }: AddMedicalReco
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="e.g. Compare with previous scan from March 2026..."
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-teal-500 resize-none"
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-teal-500 resize-none"
             />
           </div>
 

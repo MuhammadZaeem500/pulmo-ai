@@ -1,10 +1,15 @@
 import api from './api';
 
+// Helper to get token safely
+const getAuthHeader = () => {
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 export const doctorService = {
   async getPatients(searchQuery = "") {
-    const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
     const response = await api.get(`/doctor/patients${searchQuery ? `?search=${searchQuery}` : ''}`, {
-      headers: { Authorization: token ? `Bearer ${token}` : '' },
+      headers: getAuthHeader(),
     });
     return response.data;
   },
@@ -12,14 +17,20 @@ export const doctorService = {
 
 export const doctorPortalService = {
   async getProfile() {
-    const response = await api.get('/doctor/profile');
+    const response = await api.get('/doctor/profile', {
+      headers: getAuthHeader(), // Added auth headers here
+    });
     return response.data;
   },
 };  
 
 export const doctorDashboardService = {
   async getDashboardData() {
-    const response = await api.get("/doctor/dashboard");
+    const response = await api.get("/doctor/dashboard", {
+      headers: getAuthHeader(), // Added auth headers here
+    });
     return response.data;
   },
+
+  
 };

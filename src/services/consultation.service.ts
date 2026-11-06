@@ -1,5 +1,11 @@
 import api from './api';
 
+// Helper to get token safely
+const getAuthHeader = () => {
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 export const consultationService = {
   async getNotes(searchQuery = "") {
     const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
@@ -16,6 +22,7 @@ export const consultationService = {
     });
     return response.data;
   },
+  
   async updateNote(id: string, noteData: any) {
     const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
     const response = await api.patch(`/doctor/consultation-notes/${id}`, noteData, {
@@ -23,4 +30,11 @@ export const consultationService = {
     });
     return response.data;
   },
+
+  async deleteNote(id: string) {
+    const response = await api.delete(`/doctor/consultation-notes/${id}`, {
+      headers: getAuthHeader(),
+    });
+    return response.data;
+  }
 };

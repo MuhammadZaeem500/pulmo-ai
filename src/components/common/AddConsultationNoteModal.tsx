@@ -4,10 +4,10 @@ import { useState, useEffect } from "react";
 import { X, Loader2, FileText } from "lucide-react";
 import { consultationService } from "@/services/consultation.service";
 import api from "@/services/api";
-import ModalProps from "@/types/common.types";
+import {ModalProps} from "@/types/modal.types";
+import {ConsultationNoteModalProps} from "@/types/modal.types";
 
-
-export default function AddConsultationNoteModal({ isOpen, onClose, onSave, noteToEdit }: ModalProps) {
+export default function AddConsultationNoteModal({ isOpen, onClose, onSave, noteToEdit }: ConsultationNoteModalProps) {
   const [submitting, setSubmitting] = useState(false);
   const [patients, setPatients] = useState<any[]>([]); 
   const [formData, setFormData] = useState({

@@ -3,16 +3,14 @@
 import { useState, useEffect } from "react";
 import PrescriptionCard from "@/components/common/PrescriptionCard";
 import Modal from "@/components/common/Modal";
-import { Loader2, FileText, Calendar, User, Clock, Pill } from "lucide-react";
+import { Loader2, Calendar, User, Clock, Pill } from "lucide-react";
 import { prescriptionService } from "@/services/prescription.service";
-import PrescriptionCardProps from "@/types/common.types";
 
 export default function PrescriptionsPage() {
   const [prescriptions, setPrescriptions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Modal State for Viewing Full Prescription
   const [selectedPrescription, setSelectedPrescription] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -24,9 +22,13 @@ export default function PrescriptionsPage() {
     try {
       setLoading(true);
       const data = await prescriptionService.getMyPrescriptions();
-      setPrescriptions(Array.isArray(data) ? data : data?.data || []);
+      const items = Array.isArray(data) ? data : data?.data || [];
+      
+      console.log("-> Processed Patient Prescriptions:", items);
+      setPrescriptions(items);
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to load prescriptions");
+      console.error("-> Error loading prescriptions:", err);
+      setError(err.response?.data?.message || err.message || "Failed to load prescriptions");
     } finally {
       setLoading(false);
     }
@@ -64,14 +66,14 @@ export default function PrescriptionsPage() {
             <PrescriptionCard
               key={item.id}
               medicine={item.medicationName}
-              doctor={item.doctor?.fullName || "Assigned Physician"}
+              doctor={`${item.doctor?.fullName || "Assigned Physician"}${item.doctor?.specialization ? ` (${item.doctor.specialization})` : ""}`}
               date={new Date(item.createdAt).toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
                 year: "numeric",
               })}
-              dosage={item.dosage || "As directed"}
-              duration={item.duration || "N/A"}
+              dosage={item.dosage}
+              duration={item.duration}
               onDownload={() => console.log(`Download prescription ${item.id}`)}
               onViewFull={() => handleViewFull(item)}
             />
@@ -102,7 +104,10 @@ export default function PrescriptionsPage() {
                 <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Prescribed By</span>
                 <p className="font-semibold text-gray-800 flex items-center gap-2 pt-1">
                   <User className="w-4 h-4 text-[#2F80ED]" />
-                  {selectedPrescription.doctor?.fullName || "Physician"}
+                  {selectedPrescription.doctor?.fullName || "Assigned Physician"}
+                  {selectedPrescription.doctor?.specialization && (
+                    <span className="text-xs text-gray-400 font-normal">({selectedPrescription.doctor.specialization})</span>
+                  )}
                 </p>
               </div>
 

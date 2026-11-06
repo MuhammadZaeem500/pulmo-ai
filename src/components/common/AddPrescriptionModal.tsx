@@ -11,9 +11,11 @@ export default function AddPrescriptionModal({ isOpen, onClose, onSave }: AddMed
   const [patients, setPatients] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     patientId: "",
-    diagnosis: "",
-    primarySymptom: "",
-    medicalHistory: "",
+    medicationName: "",
+    dosage: "",
+    frequency: "",
+    duration: "",
+    instructions: "",
   });
 
   useEffect(() => {
@@ -32,7 +34,7 @@ export default function AddPrescriptionModal({ isOpen, onClose, onSave }: AddMed
       setSubmitting(true);
       await prescriptionService.createPrescription(formData);
       onSave(formData);
-      setFormData({ patientId: "", diagnosis: "", primarySymptom: "", medicalHistory: "" });
+      setFormData({ patientId: "", medicationName: "", dosage: "", frequency: "", duration: "", instructions: "" });
       onClose();
     } catch (err: any) {
       alert(err.response?.data?.message || "Failed to issue prescription.");
@@ -66,7 +68,7 @@ export default function AddPrescriptionModal({ isOpen, onClose, onSave }: AddMed
               required
               value={formData.patientId}
               onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:border-blue-500"
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-700 bg-white focus:outline-none focus:border-blue-500"
             >
               <option value="">-- Choose Patient --</option>
               {patients.map((p) => (
@@ -78,37 +80,61 @@ export default function AddPrescriptionModal({ isOpen, onClose, onSave }: AddMed
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase mb-1.5">Medication / Diagnosis</label>
+            <label className="block text-xs font-semibold text-slate-700 uppercase mb-1.5">Medication Name</label>
             <input
               type="text"
               required
-              value={formData.diagnosis}
-              onChange={(e) => setFormData({ ...formData, diagnosis: e.target.value })}
-              placeholder="e.g. Tiotropium (Spiriva) 18 mcg"
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-500"
+              value={formData.medicationName}
+              onChange={(e) => setFormData({ ...formData, medicationName: e.target.value })}
+              placeholder="e.g. Tiotropium (Spiriva)"
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-blue-500"
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase mb-1.5">Dosage & Frequency</label>
-            <input
-              type="text"
-              required
-              value={formData.primarySymptom}
-              onChange={(e) => setFormData({ ...formData, primarySymptom: e.target.value })}
-              placeholder="e.g. Once daily for 3 months"
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-500"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase mb-1.5">Dosage</label>
+              <input
+                type="text"
+                required
+                value={formData.dosage}
+                onChange={(e) => setFormData({ ...formData, dosage: e.target.value })}
+                placeholder="e.g. 18 mcg"
+                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-slate-700 text-sm focus:outline-none focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase mb-1.5">Frequency</label>
+              <input
+                type="text"
+                required
+                value={formData.frequency}
+                onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
+                placeholder="e.g. Once daily"
+                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase mb-1.5">Duration</label>
+              <input
+                type="text"
+                required
+                value={formData.duration}
+                onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                placeholder="e.g. 3 months"
+                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-blue-500"
+              />
+            </div>
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 uppercase mb-1.5">Instructions / Doctor Note</label>
             <textarea
               rows={3}
-              value={formData.medicalHistory}
-              onChange={(e) => setFormData({ ...formData, medicalHistory: e.target.value })}
+              value={formData.instructions}
+              onChange={(e) => setFormData({ ...formData, instructions: e.target.value })}
               placeholder="Enter patient instructions..."
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 resize-none"
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-blue-500 resize-none"
             />
           </div>
 
@@ -119,7 +145,7 @@ export default function AddPrescriptionModal({ isOpen, onClose, onSave }: AddMed
             <button
               type="submit"
               disabled={submitting}
-              className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
+              className="flex items-center gap-2 px-6 py-2.5  bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
             >
               {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
               Issue Prescription

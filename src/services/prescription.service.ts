@@ -1,24 +1,44 @@
-import axios from 'axios';
+import api from './api';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-
-const getToken = () => localStorage.getItem('token');
+// Helper to get token safely (or rely on an axios interceptor in ./api)
+const getAuthHeader = () => {
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
 export const prescriptionService = {
+  async getPrescriptions(searchQuery = '') {
+    const response = await api.get(`/doctor/prescriptions${searchQuery ? `?search=${searchQuery}` : ''}`, {
+      headers: getAuthHeader(),
+    });
+    return response.data;
+  },
+
+  async deletePrescription(id: string) {
+    const response = await api.delete(`/doctor/prescriptions/${id}`, {
+      headers: getAuthHeader(),
+    });
+    return response.data;
+  },
+
   async getMyPrescriptions() {
-    const token = getToken();
-    // Update this URL to match your NestJS Controller route prefix
-    const response = await axios.get(`${API_URL}/patient/prescriptions`, {
-      headers: { Authorization: `Bearer ${token}` },
+    const response = await api.get('/patient/prescriptions', {
+      headers: getAuthHeader(),
+    });
+    return response.data;
+  },
+
+  async createPrescription(data: any) {
+    const response = await api.post('/doctor/prescriptions', data, {
+      headers: getAuthHeader(),
     });
     return response.data;
   },
 
   async getPrescriptionById(id: string) {
-    const token = getToken();
-    const response = await axios.get(`${API_URL}/patient/prescriptions/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
+    const response = await api.get(`/patient/prescriptions/${id}`, {
+      headers: getAuthHeader(),
     });
     return response.data;
   },
-};
+};  

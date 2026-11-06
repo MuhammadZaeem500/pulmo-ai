@@ -61,7 +61,7 @@ export default function DoctorSidebar({ mobileOpen, setMobileOpen }: DoctorSideb
 
   const handleLogout = () => {
     localStorage.clear();
-    router.push("/auth/sign-in");
+    router.push("/auth/doctor/sign-in");
   };
 
   const navItems = [

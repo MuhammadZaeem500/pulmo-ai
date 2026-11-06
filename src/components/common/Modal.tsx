@@ -2,14 +2,7 @@
 
 import { useEffect, ReactNode } from "react";
 import { X } from "lucide-react";
-
-interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  children: ReactNode;
-  maxWidth?: string;
-}
+import { ModalProps } from "@/types/modal.types";
 
 export default function Modal({
   isOpen,

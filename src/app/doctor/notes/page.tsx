@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, ChevronRight, FileText, Plus, Loader2, Edit2 } from "lucide-react";
+import DashboardCard from "@/components/common/DashboardCard";
+import { Search, ChevronRight, FileText, Plus, Loader2, Edit2, Trash2 } from "lucide-react"; // 1. Import Trash2 icon
 import { consultationService } from "@/services/consultation.service";
 import AddConsultationNoteModal from "@/components/common/AddConsultationNoteModal";
 
@@ -43,9 +44,20 @@ export default function ConsultationNotesPage() {
     fetchNotes();
   };
 
+  // 2. Add delete note handler function
+  const handleDeleteNote = async (noteId: string, patientName: string) => {
+    if (!confirm(`Are you sure you want to delete the consultation note for ${patientName}?`)) return;
+
+    try {
+      await consultationService.deleteNote(noteId); // Ensure this method exists in your consultation.service.ts
+      setNotes(notes.filter((note) => note.id !== noteId));
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Failed to delete consultation note.");
+    }
+  };
+
   return (
     <div className="space-y-6">
-     
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-extrabold text-slate-900">Consultation Notes</h1>
@@ -60,7 +72,6 @@ export default function ConsultationNotesPage() {
         </button>
       </div>
 
-     
       <div className="relative max-w-full">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
         <input
@@ -94,13 +105,23 @@ export default function ConsultationNotesPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                {/* Edit Button */}
                 <button 
                   onClick={() => handleOpenEditModal(note)}
                   className="p-2 text-slate-400 hover:text-blue-600 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer"
+                  title="Edit Note"
                 >
                   <Edit2 className="w-4 h-4" />
                 </button>
-                <ChevronRight className="w-4 h-4 text-slate-400" />
+                
+                {/* Delete Button */}
+                <button
+                  onClick={() => handleDeleteNote(note.id, note.patientName)}
+                  className="p-2 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
+                  title="Delete Note"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
             </div>
           ))}
