@@ -1,17 +1,23 @@
 import { FileText, Calendar } from 'lucide-react';
-import {MedicalRecordCardProps} from '@/types/common.types';
+import { MedicalRecordCardProps } from '@/types/common.types';
 
+// Extend MedicalRecordCardProps and make confidence optional along with urgencyLabel
+interface ExtendedCardProps extends Omit<MedicalRecordCardProps, 'confidence'> {
+  urgencyLabel?: string;
+  confidence?: string;
+}
 
 export default function MedicalRecordCard({
   date,
   diagnosis,
   symptoms,
-  confidence,
+  // confidence = "N/A", // Commented out as requested
   urgency,
   recommendations,
   onViewDetails,
   onDownloadReport,
-}: MedicalRecordCardProps) {
+  urgencyLabel = "Urgency Level", // Default fallback label
+}: ExtendedCardProps) {
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between mb-4">
@@ -29,7 +35,7 @@ export default function MedicalRecordCard({
         </div>
         <button
           onClick={onViewDetails}
-          className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm cursor-pointer"
+          className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-slate-700 transition-colors text-sm cursor-pointer"
         >
           View Details
         </button>
@@ -47,12 +53,15 @@ export default function MedicalRecordCard({
       </div>
 
       <div className="flex items-center gap-6 pt-4 border-t border-gray-100">
+        {/* Confidence score block commented out */}
+        {/* 
         <div>
           <p className="text-xs text-gray-600">Confidence Score</p>
           <p className="text-sm font-bold text-[#14B8A6]">{confidence}</p>
-        </div>
+        </div> 
+        */}
         <div>
-          <p className="text-xs text-gray-600">Urgency Level</p>
+          <p className="text-xs text-gray-600">{urgencyLabel}</p>
           <p className="text-sm font-bold text-gray-800">{urgency}</p>
         </div>
         <button

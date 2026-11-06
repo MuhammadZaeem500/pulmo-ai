@@ -4,36 +4,43 @@ import { useState, useEffect } from "react";
 import MedicalRecordCard from "@/components/common/MedicalRecordCard";
 import AddMedicalRecordModal from "@/components/common/AddMedicalRecordModal";
 import Modal from "@/components/common/Modal";
-import { Search, Download, Plus, Loader2, Calendar, AlertTriangle, ShieldCheck, Edit3, Trash2 } from "lucide-react";
+import { Search, Download, Plus, Loader2, FileText, Stethoscope, FlaskConical, Trash2 } from "lucide-react";
 import { medicalRecordsService } from "@/services/medical-records.service";
 
 export default function MedicalHistory() {
   const [searchQuery, setSearchQuery] = useState("");
   const [medicalRecords, setMedicalRecords] = useState<any[]>([]);
+  const [consultations, setConsultations] = useState<any[]>([]);
+  const [tests, setTests] = useState<any[]>([]);
+  const [medicalFiles, setMedicalFiles] = useState<any[]>([]);
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<any | null>(null);
+  const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [recordToEdit, setRecordToEdit] = useState<any | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const fetchRecords = async () => {
+  const fetchHistory = async () => {
     try {
       setLoading(true);
-      const data = await medicalRecordsService.getMyRecords();
-      setMedicalRecords(Array.isArray(data) ? data : data?.data || []);
+      const data = await medicalRecordsService.getCompleteHistory();
+      setMedicalRecords(data?.medicalRecords || []);
+      setConsultations(data?.consultations || []);
+      setTests(data?.tests || []);
+      setMedicalFiles(data?.medicalFiles || []);
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to load medical records.");
+      setError(err.response?.data?.message || "Failed to load medical history.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchRecords();
+    fetchHistory();
   }, []);
 
   const handleSaveRecord = (savedRecord: any) => {
@@ -48,30 +55,32 @@ export default function MedicalHistory() {
     });
   };
 
-  const handleDeleteRecord = async (id: string) => {
+  const handleOpenDetails = (item: any, type: string) => {
+    setSelectedItem({ ...item, type });
+    setIsDetailsModalOpen(true);
+  };
+
+  const handleDeleteRecord = async (recordId: string) => {
     if (!confirm("Are you sure you want to delete this medical record?")) return;
+
     try {
       setDeleting(true);
-      await medicalRecordsService.deleteRecord(id);
-      setMedicalRecords((prev) => prev.filter((r) => r.id !== id));
+      await medicalRecordsService.deleteRecord(recordId); // Ensure this service method exists
+      setMedicalRecords((prev) => prev.filter((r) => r.id !== recordId));
       setIsDetailsModalOpen(false);
-      setSelectedRecord(null);
     } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to delete record.");
+      alert(err.response?.data?.message || "Failed to delete medical record.");
     } finally {
       setDeleting(false);
     }
   };
 
-  const handleOpenDetails = (record: any) => {
-    setSelectedRecord(record);
-    setIsDetailsModalOpen(true);
-  };
-
-  const handleOpenEdit = (record: any) => {
-    setRecordToEdit(record);
-    setIsDetailsModalOpen(false);
-    setIsAddModalOpen(true);
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
   };
 
   const filteredRecords = medicalRecords.filter(
@@ -80,12 +89,24 @@ export default function MedicalHistory() {
       (record?.primarySymptom?.toLowerCase() || "").includes(searchQuery.toLowerCase())
   );
 
+  const filteredConsultations = consultations.filter(
+    (c) =>
+      (c?.diagnosis?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+      (c?.chiefComplaint?.toLowerCase() || "").includes(searchQuery.toLowerCase())
+  );
+
+  const filteredTests = tests.filter(
+    (t) =>
+      (t?.testName?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+      (t?.description?.toLowerCase() || "").includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="p-8 max-w-7xl mx-auto relative">
       <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold mb-2 text-gray-900">Medical History</h1>
-          <p className="text-gray-600">View and manage your complete medical records</p>
+          <p className="text-gray-600">View and manage your complete medical records, consultations, and test recommendations</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <button
@@ -130,30 +151,93 @@ export default function MedicalHistory() {
           <Loader2 className="w-8 h-8 animate-spin text-[#2F80ED]" />
         </div>
       ) : (
-        <div className="space-y-4">
-          {filteredRecords.map((record) => (
-            <MedicalRecordCard
-              key={record.id}
-              date={new Date(record.createdAt).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-              })}
-              diagnosis={record.diagnosis || record.primarySymptom}
-              symptoms={record.primarySymptom}
-              confidence={record.confidenceScore ? `${Math.round(record.confidenceScore * 100)}%` : 'N/A'}
-              urgency={record.urgencyLevel || 'Normal'}
-              recommendations={record.recommendations || record.medicalHistory || 'None'}
-              onViewDetails={() => handleOpenDetails(record)}
-              onDownloadReport={() => console.log(`Download report for record ${record.id}`)}
-            />
-          ))}
+        <div className="space-y-10">
+          {/* Section 1: Disease Records & Intakes */}
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <FileText className="w-5 h-5 text-[#2F80ED]" />
+              Disease Records & Intakes
+            </h2>
+            <div className="space-y-4">
+              {filteredRecords.map((record) => (
+                <MedicalRecordCard
+                  key={record.id}
+                  date={formatDate(record.createdAt)}
+                  diagnosis={record.diagnosis || record.primarySymptom}
+                  symptoms={record.primarySymptom}
+                  urgency={record.urgencyLevel || record.urgency || 'Normal'}
+                  urgencyLabel="Urgency Level"
+                  recommendations={record.recommendations || record.medicalHistory || 'None'}
+                  onViewDetails={() => handleOpenDetails(record, 'record')}
+                  onDownloadReport={() => console.log(`Download report for record ${record.id}`)}
+                />
+              ))}
 
-          {filteredRecords.length === 0 && (
-            <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
-              <p className="text-gray-500 text-sm">No medical records found.</p>
+              {filteredRecords.length === 0 && (
+                <div className="text-center py-8 bg-white rounded-xl border border-gray-100">
+                  <p className="text-gray-500 text-sm">No medical records found.</p>
+                </div>
+              )}
             </div>
-          )}
+          </div>
+
+          {/* Section 2: Doctor Consultations & Notes */}
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <Stethoscope className="w-5 h-5 text-emerald-600" />
+              Doctor Consultations & Notes
+            </h2>
+            <div className="space-y-4">
+              {filteredConsultations.map((consultation) => (
+                <MedicalRecordCard
+                  key={consultation.id}
+                  date={formatDate(consultation.createdAt)}
+                  diagnosis={consultation.diagnosis || consultation.chiefComplaint || "Consultation Visit"}
+                  symptoms={consultation.chiefComplaint || "No chief complaint recorded"}
+                  urgency="Stable"
+                  urgencyLabel="Status"
+                  recommendations={consultation.visitNotes || "No specific notes provided."}
+                  onViewDetails={() => handleOpenDetails(consultation, 'consultation')}
+                  onDownloadReport={() => console.log(`Download report for consultation ${consultation.id}`)}
+                />
+              ))}
+
+              {filteredConsultations.length === 0 && (
+                <div className="text-center py-8 bg-white rounded-xl border border-gray-100">
+                  <p className="text-gray-500 text-sm">No doctor consultations recorded yet.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Section 3: Recommended Diagnostic Tests */}
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <FlaskConical className="w-5 h-5 text-purple-600" />
+              Recommended Diagnostic Tests
+            </h2>
+            <div className="space-y-4">
+              {filteredTests.map((test) => (
+                <MedicalRecordCard
+                  key={test.id}
+                  date={formatDate(test.createdAt)}
+                  diagnosis={test.testName}
+                  symptoms={test.description || "No description provided"}
+                  urgency={test.status || "Pending"}
+                  urgencyLabel="Test Status"
+                  recommendations="Diagnostic Test Recommendation"
+                  onViewDetails={() => handleOpenDetails(test, 'test')}
+                  onDownloadReport={() => console.log(`Download report for test ${test.id}`)}
+                />
+              ))}
+
+              {filteredTests.length === 0 && (
+                <div className="text-center py-8 bg-white rounded-xl border border-gray-100">
+                  <p className="text-gray-500 text-sm">No recommended diagnostic tests found.</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
@@ -168,89 +252,108 @@ export default function MedicalHistory() {
         recordToEdit={recordToEdit}
       />
 
-      {/* View Record Details Modal with Edit & Delete */}
+      {/* View Details Modal */}
       <Modal
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
-        title="Medical Record Details"
+        title={
+          selectedItem?.type === 'consultation'
+            ? "Consultation Details"
+            : selectedItem?.type === 'test'
+            ? "Diagnostic Test Details"
+            : "Disease Record & Intake Details"
+        }
       >
-        {selectedRecord && (
+        {selectedItem && (
           <div className="space-y-6 text-sm">
+            {/* Header timestamp & main title */}
             <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-2">
               <span className="text-[11px] font-bold uppercase tracking-wider text-blue-600">
-                Logged on {new Date(selectedRecord.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                Logged on {formatDate(selectedItem.createdAt)}
               </span>
-              <p className="text-gray-900 font-semibold text-base">{selectedRecord.primarySymptom || "N/A"}</p>
-              {selectedRecord.durationInDays && (
-                <div className="flex items-center gap-1.5 text-xs text-gray-600 pt-1">
-                  <Calendar className="w-4 h-4 text-[#2F80ED]" />
-                  <span>Duration: <strong>{selectedRecord.durationInDays} days</strong></span>
-                </div>
-              )}
+              <p className="text-gray-900 font-semibold text-base">
+                {selectedItem.type === 'consultation'
+                  ? (selectedItem.diagnosis || "Consultation Visit")
+                  : selectedItem.type === 'test'
+                  ? selectedItem.testName
+                  : (selectedItem.diagnosis || selectedItem.primarySymptom)}
+              </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl border border-gray-100 bg-white space-y-1">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Diagnosis Match</span>
-                <p className="font-medium text-gray-800">{selectedRecord.diagnosis || "Pending Evaluation"}</p>
-              </div>
+            {selectedItem.type === 'consultation' ? (
+              /* Consultation Details Layout */
+              <div className="space-y-4">
+                <div className="p-4 rounded-xl border border-gray-100 bg-white space-y-1">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Chief Complaint / Symptoms</span>
+                  <p className="font-medium text-gray-800">{selectedItem.chiefComplaint || "No chief complaint recorded."}</p>
+                </div>
 
-              <div className="p-4 rounded-xl border border-gray-100 bg-white space-y-1">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Urgency Level</span>
-                <div className="flex items-center gap-1.5 pt-1">
-                  <AlertTriangle className="w-4 h-4 text-amber-500" />
-                  <span className="font-semibold text-gray-800">{selectedRecord.urgencyLevel || 'Normal'}</span>
+                <div className="space-y-1">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Visit Notes / Observations</span>
+                  <div className="p-3.5 bg-gray-50 rounded-xl text-gray-700 text-xs leading-relaxed border border-gray-100">
+                    {selectedItem.visitNotes || "No specific notes provided."}
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : selectedItem.type === 'test' ? (
+              /* Diagnostic Test Details Layout */
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-xl border border-gray-100 bg-white space-y-1">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Test Status</span>
+                    <p className="font-medium text-purple-600 pt-1">{selectedItem.status || "Pending"}</p>
+                  </div>
 
-            {selectedRecord.confidenceScore !== null && selectedRecord.confidenceScore !== undefined && (
-              <div className="flex items-center justify-between p-4 bg-blue-50/50 rounded-xl border border-blue-100">
-                <div className="flex items-center gap-2 text-blue-900 font-medium">
-                  <ShieldCheck className="w-5 h-5 text-[#2F80ED]" />
-                  <span>AI Confidence Score</span>
+                  <div className="p-4 rounded-xl border border-gray-100 bg-white space-y-1">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Category</span>
+                    <p className="font-medium text-gray-800 pt-1">Diagnostic Test Recommendation</p>
+                  </div>
                 </div>
-                <span className="font-bold text-[#2F80ED] text-base">
-                  {Math.round(selectedRecord.confidenceScore * (selectedRecord.confidenceScore <= 1 ? 100 : 1))}%
-                </span>
+
+                <div className="space-y-1">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Test Description / Instructions</span>
+                  <div className="p-3.5 bg-gray-50 rounded-xl text-gray-700 text-xs leading-relaxed border border-gray-100">
+                    {selectedItem.description || "No description provided."}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* Disease Record & Note Details Layout (Confidence Score removed, Urgency Level full width) */
+              <div className="space-y-4">
+                <div className="p-4 rounded-xl border border-gray-100 bg-white space-y-1">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Urgency Level</span>
+                  <p className="font-medium text-slate-800 pt-1">{selectedItem.urgencyLevel || selectedItem.urgency || "Normal"}</p>
+                </div>
+
+                <div className="p-4 rounded-xl border border-gray-100 bg-white space-y-1">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Symptoms Discussed</span>
+                  <p className="font-medium text-gray-800">{selectedItem.primarySymptom || "None"}</p>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Medical Notes & Recommendations</span>
+                  <div className="p-3.5 bg-gray-50 rounded-xl text-gray-700 text-xs leading-relaxed border border-gray-100">
+                    {selectedItem.recommendations || selectedItem.medicalHistory || "No recommendations recorded."}
+                  </div>
+                </div>
               </div>
             )}
 
-            <div className="space-y-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Recommendations</span>
-              <div className="p-3.5 bg-gray-50 rounded-xl text-gray-700 text-xs leading-relaxed border border-gray-100">
-                {selectedRecord.recommendations || "No specific recommendations provided yet."}
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Medical History / Notes</span>
-              <div className="p-3.5 bg-gray-50 rounded-xl text-gray-700 text-xs leading-relaxed border border-gray-100">
-                {selectedRecord.medicalHistory || "None provided."}
-              </div>
-            </div>
-
-            {/* Modal Actions: Edit, Delete, Close */}
+            {/* Modal Footer Actions with Delete Button for Medical Intake Section */}
             <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-              <div className="flex items-center gap-2">
+              {selectedItem.type === 'record' ? (
                 <button
                   type="button"
-                  onClick={() => handleOpenEdit(selectedRecord)}
-                  className="px-4 py-2.5 bg-blue-50 hover:bg-blue-100 text-[#2F80ED] text-sm font-medium rounded-xl transition-colors cursor-pointer flex items-center gap-1.5"
-                >
-                  <Edit3 className="w-4 h-4" />
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDeleteRecord(selectedRecord.id)}
+                  onClick={() => handleDeleteRecord(selectedItem.id)}
                   disabled={deleting}
-                  className="px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-sm font-medium rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                  className="flex items-center gap-2 px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-medium rounded-xl transition-colors cursor-pointer"
                 >
-                  {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                  Delete
+                  <Trash2 className="w-4 h-4" />
+                  {deleting ? "Deleting..." : "Delete Record"}
                 </button>
-              </div>
+              ) : (
+                <div />
+              )}
 
               <button
                 type="button"

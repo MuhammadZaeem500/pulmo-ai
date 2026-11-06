@@ -87,7 +87,7 @@ export default function AddConsultationNoteModal({ isOpen, onClose, onSave, note
                 required
                 value={formData.patientId}
                 onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
-                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-700 bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               >
                 <option value="">-- Choose Patient --</option>
                 {patients.map((p) => (
@@ -108,7 +108,7 @@ export default function AddConsultationNoteModal({ isOpen, onClose, onSave, note
                 value={formData.diagnosis}
                 onChange={(e) => setFormData({ ...formData, diagnosis: e.target.value })}
                 placeholder="e.g. COPD Stage II — Stable"
-                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
             <div>
@@ -116,7 +116,7 @@ export default function AddConsultationNoteModal({ isOpen, onClose, onSave, note
               <select
                 value={formData.urgency}
                 onChange={(e) => setFormData({ ...formData, urgency: e.target.value })}
-                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-700 bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               >
                 <option value="Stable">Stable</option>
                 <option value="Active">Active</option>
@@ -134,7 +134,7 @@ export default function AddConsultationNoteModal({ isOpen, onClose, onSave, note
               value={formData.primarySymptom}
               onChange={(e) => setFormData({ ...formData, primarySymptom: e.target.value })}
               placeholder="e.g. Mild dyspnea on exertion"
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
             />
           </div>
 
@@ -145,7 +145,7 @@ export default function AddConsultationNoteModal({ isOpen, onClose, onSave, note
               value={formData.medicalHistory}
               onChange={(e) => setFormData({ ...formData, medicalHistory: e.target.value })}
               placeholder="Enter comprehensive clinical notes..."
-              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 resize-none"
+              className="w-full px-4 py-2.5 border border-slate-200 text-slate-700 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 resize-none"
             />
           </div>
 

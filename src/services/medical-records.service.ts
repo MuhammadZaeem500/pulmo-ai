@@ -9,7 +9,16 @@ const getToken = () => {
 export const medicalRecordsService = {
   async getMyRecords() {
     const token = getToken();
-    const response = await axios.get(`${API_URL}/medical-records/records`, {
+    const response = await axios.get(`${API_URL}/medical-records/my-records`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  },
+
+  // Added method to fetch complete unified history
+  async getCompleteHistory() {
+    const token = getToken();
+    const response = await axios.get(`${API_URL}/medical-records/complete-history`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
