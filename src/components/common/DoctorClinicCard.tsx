@@ -14,15 +14,23 @@ export default function DoctorClinicCard({
   actionText,
   onActionClick,
 }: DoctorClinicCardProps) {
+
+  const renderIcon = () => {
+    if (!icon) return null;
+    if (React.isValidElement(icon)) return icon;
+    if (typeof icon === "function") {
+      return React.createElement(icon as LucideIcon, { className: "w-5 h-5" });
+    }
+    return null;
+  };
+
   return (
     <div className="rounded-2xl bg-white p-6 shadow-xs border border-gray-100 hover:shadow-md transition-all flex flex-col justify-between w-full space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-4">
           {icon && (
             <div className="h-12 w-12 shrink-0 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-              {React.isValidElement(icon)
-                ? icon
-                : React.createElement(icon as LucideIcon, { className: "w-5 h-5" })}
+              {renderIcon()}
             </div>
           )}
           <div>
