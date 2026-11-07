@@ -7,8 +7,19 @@ import Testimonials from "@/components/landing/Testimonials";
 import CtaSection from "@/components/landing/CtaSection";
 import Footer from "@/components/landing/Footer";
 
-
 export default function LandingPage() {
+  // Move console.log here, right before the return statement
+  console.log("COMPONENT CHECK:", {
+    HeroSection: typeof HeroSection,
+    WhyChooseUs: typeof WhyChooseUs,
+    PowerfulFeatures: typeof PowerfulFeatures,
+    HowItWorks: typeof HowItWorks,
+    NearbySpecialists: typeof NearbySpecialists,
+    Testimonials: typeof Testimonials,
+    CtaSection: typeof CtaSection,
+    Footer: typeof Footer,
+  });
+
   return (
     <main className="min-h-screen bg-white">
       <HeroSection />
