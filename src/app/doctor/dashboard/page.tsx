@@ -114,7 +114,7 @@ export default function DoctorDashboardPage() {
               <h2 className="text-2xl font-extrabold text-slate-900 mt-2">
                 {dashboardData.metrics.pendingNotesCount}
               </h2>
-              <p className="text-xs text-slate-500 font-medium">Pending Notes</p>
+              <p className="text-xs text-slate-500 font-medium">Clinical Notes</p>
             </div>
           </DashboardCard>
 
@@ -185,9 +185,9 @@ export default function DoctorDashboardPage() {
 
        
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <DashboardCard title="Pending Notes" icon={<FileText className="w-4 h-4" />} viewAllLink="/doctor/notes">
+          <DashboardCard title="Clinical Notes" icon={<FileText className="w-4 h-4" />} viewAllLink="/doctor/notes">
             {dashboardData.pendingNotes.length === 0 ? (
-              <p className="text-xs text-slate-400 py-4 text-center">No pending notes.</p>
+              <p className="text-xs text-slate-400 py-4 text-center">No Clinical notes.</p>
             ) : (
               dashboardData.pendingNotes.map((item: any, idx: number) => (
                 <div key={idx} className="flex items-center justify-between p-3.5 rounded-xl bg-amber-50/30 border border-amber-100/60">
@@ -201,7 +201,7 @@ export default function DoctorDashboardPage() {
                       <p className="text-[10px] text-slate-400 mt-1">{item.date}</p>
                     </div>
                   </div>
-                  <button className="text-xs font-semibold text-blue-600 hover:underline">Edit</button>
+                  {/* <button className="text-xs font-semibold text-blue-600 hover:underline">Edit</button> */}
                 </div>
               ))
             )}
