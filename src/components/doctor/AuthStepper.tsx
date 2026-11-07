@@ -1,6 +1,6 @@
 import React from "react";
 import { Check } from "lucide-react";
-import AuthStepperProps from "@/types/doctor.types";
+import { AuthStepperProps } from "@/types/doctor.types";
 
 
 export default function AuthStepper({ currentStep }: AuthStepperProps) {

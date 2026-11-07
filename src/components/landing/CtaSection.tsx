@@ -3,7 +3,7 @@ import { Sparkles, CheckCircle2 } from "lucide-react";
 
 export default function CtaSection() {
   return (
-    <section className="relative py-24 lg:py-32 bg-gradient-to-br from-blue-700 via-blue-600 to-teal-500 text-white overflow-hidden text-center">
+    <section className="relative py-24 lg:py-32 bg-linear-to-br from-blue-700 via-blue-600 to-teal-500 text-white overflow-hidden text-center">
       
      
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent pointer-events-none"></div>

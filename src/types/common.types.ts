@@ -2,8 +2,6 @@
 import { ReactNode } from "react";
 import { LucideIcon } from "lucide-react";
 
-
-
 export interface ChatHistoryItemProps {
   title: string;
   date: string;
@@ -33,10 +31,10 @@ export interface DoctorClinicCardProps {
   icon?: LucideIcon | ReactNode;
   title: string;
   subtitle: string;
-  metaText: string;     
-  rating: string;       
+  metaText: string;
+  rating: string;
   availability?: string;
-  actionText?: string;  
+  actionText?: string;
   onActionClick?: () => void;
 }
 
@@ -47,7 +45,7 @@ export interface FeatureCardProps {
   badge?: string;
   isPopular?: boolean;
   linkText?: string;
-  stepNumber?: string; 
+  stepNumber?: string;
 }
 
 export interface MedicalRecordCardProps {
@@ -63,7 +61,8 @@ export interface MedicalRecordCardProps {
 
 export interface MedicineColorCardProps {
   label: string;
-  colorBg: string; 
+  colorBg?: string;
+  icon?: LucideIcon | ReactNode;
   isSelected?: boolean;
   onClick: () => void;
 }
@@ -75,14 +74,14 @@ export interface MedicineShapeCardProps {
   onClick: () => void;
 }
 
-export default interface MetricCardProps {
-  title: string;
-  value: string | number;
-  valueColor?: string;
+export interface MetricCardProps {
+  title?: string;
+  value?: string | number;
   trend?: string;
   trendColor?: string;
-  icon?: LucideIcon | ReactNode;
+  icon?: LucideIcon;
   iconBgColor?: string;
+  valueColor?: string;
   className?: string;
 }
 
@@ -96,7 +95,7 @@ export interface PrescriptionCardProps {
   onViewFull?: () => void;
 }
 
-export default interface PreviousAppointmentCardProps {
+export interface PreviousAppointmentCardProps {
   doctor: string;
   specialty: string;
   date: string;
@@ -113,7 +112,7 @@ export interface ProfileFieldProps {
   value: string;
 }
 
-export default interface ProfilePrescriptionItemProps {
+export interface ProfilePrescriptionItemProps {
   medicine: string;
   prescribedDate: string;
   status: string;
@@ -143,6 +142,6 @@ export interface SymptomCardProps {
 export default interface TestimonialCardProps {
   quote: string;
   name: string;
-  role: string;          
-  avatarInitial: string; 
+  role: string;
+  avatarInitial: string;
 }

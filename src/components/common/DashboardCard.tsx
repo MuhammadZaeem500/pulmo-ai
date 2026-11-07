@@ -18,7 +18,7 @@ export default function DashboardCard({
       <div>
        
         {Icon && iconGradient && (
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#2F80ED] to-[#14B8A6] flex items-center justify-center mb-5 text-white shadow-md shadow-blue-500/20">
+          <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-[#2F80ED] to-[#14B8A6] flex items-center justify-center mb-5 text-white shadow-md shadow-blue-500/20">
             {React.isValidElement(Icon) 
               ? Icon 
               : React.createElement(Icon as LucideIcon, { className: "w-6 h-6" })}

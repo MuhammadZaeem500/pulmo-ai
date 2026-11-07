@@ -1,6 +1,6 @@
 import React from 'react';
 import { Calendar, Clock, MapPin, MessageCircle } from 'lucide-react';
-import PreviousAppointmentCardProps from '@/types/common.types';
+import { PreviousAppointmentCardProps } from '@/types/common.types';
 
 export default function PreviousAppointmentCard({
   doctor,

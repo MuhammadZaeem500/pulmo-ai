@@ -1,5 +1,5 @@
 import { Calendar } from 'lucide-react';
-import AvailableDoctorCardProps from '@/types/common.types';
+import { AvailableDoctorCardProps } from '@/types/common.types';
 
 
 export default function AvailableDoctorCard({

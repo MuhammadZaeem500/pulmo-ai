@@ -1,8 +1,8 @@
-export default interface AuthStepperProps {
+export interface AuthStepperProps {
   currentStep: number;
 }
 
-export default interface DoctorSidebarProps {
+export interface DoctorSidebarProps {
   mobileOpen: boolean;
   setMobileOpen: (val: boolean) => void;
 }

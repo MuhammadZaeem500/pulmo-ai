@@ -2,8 +2,7 @@
 
 import React, { useState } from "react";
 import { X } from "lucide-react";
-import AddClinicModalProps from "@/types/admin.types";
-
+import { AddClinicModalProps } from "@/types/admin.types";
 
 export default function AddClinicModal({ isOpen, onClose, onAddClinic }: AddClinicModalProps) {
   const [newClinic, setNewClinic] = useState({

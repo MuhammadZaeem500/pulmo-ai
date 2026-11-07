@@ -1,6 +1,7 @@
+// src/components/common/MetricCard.tsx
 import React, { ReactNode } from "react";
 import { LucideIcon } from "lucide-react";
-import MetricCardProps from "@/types/common.types";
+import { MetricCardProps } from "@/types/common.types"; // <-- Add curly braces here
 
 export default function MetricCard({
   title,

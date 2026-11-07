@@ -17,7 +17,7 @@ import {
   X
 } from "lucide-react";
 import { doctorPortalService } from "@/services/doctor.service";
-import DoctorSidebarProps from "@/types/doctor.types";
+import { DoctorSidebarProps } from "@/types/doctor.types";
 
 
 export default function DoctorSidebar({ mobileOpen, setMobileOpen }: DoctorSidebarProps) {

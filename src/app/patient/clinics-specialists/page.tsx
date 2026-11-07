@@ -3,7 +3,7 @@
 import { useState } from "react";
 import DoctorClinicCard from "@/components/common/DoctorClinicCard";
 import { Search, Building2, User } from "lucide-react";
-import ItemData from "@/types/patient.types";
+import { ItemData } from "@/types/patient.types";
 
 
 export default function ClinicsSpecialistsPage() {

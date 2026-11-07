@@ -1,6 +1,6 @@
 import React from 'react';
 import { MessageSquare } from 'lucide-react';
-import  ChatHistoryItemProps  from '@/types/common.types';
+import  { ChatHistoryItemProps }  from '@/types/common.types';
 
 export default function ChatHistoryItem({
   title,

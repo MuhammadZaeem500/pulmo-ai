@@ -1,11 +1,20 @@
-import {MedicineColorCardProps} from '@/types/common.types';
+import { MedicineShapeCardProps } from '@/types/common.types';
+import { isValidElement } from 'react';
 
-export default function MedicineColorCard({
+export default function MedicineShapeCard({
   label,
-  colorBg,
+  icon: Icon,
   isSelected = false,
   onClick,
-}: MedicineColorCardProps) {
+}: MedicineShapeCardProps) {
+  const renderIcon = () => {
+    if (!Icon) return null;
+    if (isValidElement(Icon)) return Icon;
+
+    const Component = Icon as React.ElementType;
+    return <Component className="w-6 h-6" />;
+  };
+
   return (
     <button
       onClick={onClick}
@@ -15,7 +24,9 @@ export default function MedicineColorCard({
           : 'border-gray-200 hover:border-gray-300 shadow-xs'
       }`}
     >
-      <div className={`w-8 h-8 rounded-full shadow-xs ${colorBg}`} />
+      <div className="w-8 h-8 rounded-full shadow-xs flex items-center justify-center text-blue-600">
+        {renderIcon()}
+      </div>
       <span className="text-sm font-medium text-gray-900">{label}</span>
     </button>
   );

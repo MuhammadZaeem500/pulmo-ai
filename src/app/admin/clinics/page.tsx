@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import DashboardCard from "@/components/common/DashboardCard";
-import Clinic from "@/types/admin.types";
+import { Clinic } from "@/types/admin.types";
 import AddClinicModal from "@/components/admin/AddClinicModal";
 import { 
   Building2, 

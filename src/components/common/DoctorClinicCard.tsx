@@ -1,6 +1,8 @@
-import { ReactNode } from "react";
-import { Star } from "lucide-react";
-import DoctorClinicCardProps from "@/types/common.types";
+"use client";
+
+import React from "react";
+import { Star, LucideIcon } from "lucide-react";
+import { DoctorClinicCardProps } from "@/types/common.types";
 
 export default function DoctorClinicCard({
   icon,
@@ -14,13 +16,13 @@ export default function DoctorClinicCard({
 }: DoctorClinicCardProps) {
   return (
     <div className="rounded-2xl bg-white p-6 shadow-xs border border-gray-100 hover:shadow-md transition-all flex flex-col justify-between w-full space-y-6">
-      
-     
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-4">
           {icon && (
-            <div className="h-12 w-12 flex-shrink-0 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-              {icon}
+            <div className="h-12 w-12 shrink-0 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+              {React.isValidElement(icon)
+                ? icon
+                : React.createElement(icon as LucideIcon, { className: "w-5 h-5" })}
             </div>
           )}
           <div>
@@ -30,7 +32,6 @@ export default function DoctorClinicCard({
           </div>
         </div>
 
-       
         <div className="text-right shrink-0">
           <div className="flex items-center justify-end gap-1 font-bold text-gray-900 mb-0.5">
             <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
@@ -42,7 +43,6 @@ export default function DoctorClinicCard({
         </div>
       </div>
 
-     
       {actionText && (
         <button
           onClick={onActionClick}
@@ -51,7 +51,6 @@ export default function DoctorClinicCard({
           {actionText}
         </button>
       )}
-
     </div>
   );
 }

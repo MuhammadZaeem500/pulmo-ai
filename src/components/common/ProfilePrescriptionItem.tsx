@@ -1,4 +1,4 @@
-import ProfilePrescriptionItemProps from "@/types/common.types";
+import { ProfilePrescriptionItemProps } from "@/types/common.types";
 
 export default function ProfilePrescriptionItem({
   medicine,

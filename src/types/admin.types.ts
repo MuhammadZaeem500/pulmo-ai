@@ -1,4 +1,4 @@
-export default interface Clinic {
+export interface Clinic {
   id: number;
   name: string;
   phone: string;
@@ -8,6 +8,7 @@ export default interface Clinic {
   type: string;
   since: string;
 }
+
 export default interface DoctorRequest {
   userId: string;
   email: string;
@@ -73,14 +74,14 @@ export interface User {
   initials: string;
 }
 
-export default interface AdminSidebarProps {
+export interface AdminSidebarProps {
   collapsed: boolean;
   setCollapsed: (val: boolean) => void;
   mobileOpen: boolean;
   setMobileOpen: (val: boolean) => void;
 }
 
-export default interface AddClinicModalProps {
+export interface AddClinicModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddClinic: (clinic: {
@@ -102,13 +103,6 @@ export interface SecurityAlert {
   icon: any;
 }
 
-export default interface SecurityAlertModalProps {
-  alert: SecurityAlert | null;
-  isOpen: boolean;
-  onClose: () => void;
-  onResolve: (alertId: number) => void;
-}
-
 export interface User {
   id: number;
   name: string;
@@ -121,9 +115,3 @@ export interface User {
   initials: string;
 }
 
-export default interface UserDetailsModalProps {
-  user: User | null;
-  isOpen: boolean;
-  onClose: () => void;
-  onToggleSuspend: (userId: number) => void;
-}

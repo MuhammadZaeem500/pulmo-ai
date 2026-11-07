@@ -1,6 +1,6 @@
-import {MedicineColorCardProps} from '@/types/common.types';
+import { MedicineColorCardProps } from '@/types/common.types';
 
-export default function MedicineColorCard({
+export default function MedicineColorCard({ 
   label,
   colorBg,
   isSelected = false,

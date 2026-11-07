@@ -448,7 +448,7 @@ export default function DoctorRegisterPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className={`${step > 1 ? "w-2/3" : "w-full"} py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 text-white font-semibold text-sm hover:opacity-95 transition-opacity flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 disabled:opacity-50`}
+                className={`${step > 1 ? "w-2/3" : "w-full"} py-3 px-4 rounded-xl bg-linear-to-r from-blue-600 to-teal-500 text-white font-semibold text-sm hover:opacity-95 transition-opacity flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 disabled:opacity-50`}
               >
                 {loading
                   ? "Processing..."

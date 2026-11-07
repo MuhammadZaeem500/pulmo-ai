@@ -19,7 +19,7 @@ import {
   X,
   Stethoscope
 } from "lucide-react";
-import  AdminSidebarProps  from "@/types/admin.types";
+import  {AdminSidebarProps}  from "@/types/admin.types";
 
 export default function AdminSidebar({
   collapsed,

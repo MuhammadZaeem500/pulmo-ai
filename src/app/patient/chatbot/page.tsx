@@ -29,7 +29,7 @@ export default function ChatbotPage() {
         <div className="p-4 border-b border-gray-100">
           <button
             onClick={() => {}}
-            className="w-full bg-gradient-to-r from-[#2F80ED] to-[#14B8A6] text-white font-medium py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-xs hover:opacity-95 transition-all cursor-pointer"
+            className="w-full bg-linear-to-r from-[#2F80ED] to-[#14B8A6] text-white font-medium py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-xs hover:opacity-95 transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             New Chat
@@ -99,7 +99,7 @@ export default function ChatbotPage() {
 
               <button
                 type="submit"
-                className="mr-2 bg-gradient-to-r from-[#2F80ED] to-[#14B8A6] text-white px-5 py-2.5 rounded-lg font-medium text-sm flex items-center gap-2 hover:opacity-95 transition-all cursor-pointer shadow-xs"
+                className="mr-2 bg-linear-to-r from-[#2F80ED] to-[#14B8A6] text-white px-5 py-2.5 rounded-lg font-medium text-sm flex items-center gap-2 hover:opacity-95 transition-all cursor-pointer shadow-xs"
               >
                 Send <Send className="w-3.5 h-3.5" />
               </button>

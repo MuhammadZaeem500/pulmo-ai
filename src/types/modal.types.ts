@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { LucideIcon } from "lucide-react";
+import { SecurityAlert, User } from "@/types/admin.types";
 
 export interface BaseModalProps {
   isOpen: boolean;
@@ -32,4 +33,18 @@ export interface ConsultationNoteModalProps {
   onClose: () => void;
   onSave: (savedNote: any) => void;
   noteToEdit?: any | null;
+}
+
+export interface SecurityAlertModalProps {
+  alert: SecurityAlert | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onResolve: (alertId: number) => void;
+}
+
+export interface UserDetailsModalProps {
+  user: User | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onToggleSuspend: (userId: number) => void;
 }
