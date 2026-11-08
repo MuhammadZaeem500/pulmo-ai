@@ -1,5 +1,4 @@
 import { ReactNode } from "react";
-import { LucideIcon } from "lucide-react";
 import { SecurityAlert, User } from "@/types/admin.types";
 
 export interface BaseModalProps {

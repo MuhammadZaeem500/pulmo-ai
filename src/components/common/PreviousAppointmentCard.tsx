@@ -38,10 +38,10 @@ export default function PreviousAppointmentCard({
         </span>
       </div>
 
-      <div className="pt-4 border-t border-gray-100">
+      {/* <div className="pt-4 border-t border-gray-100">
         <p className="text-xs font-semibold text-gray-400 tracking-wider uppercase mb-1">Consultation Notes</p>
         <p className="text-sm text-gray-700">{notes}</p>
-      </div>
+      </div> */}
 
       <div className="pt-2">
         <button
