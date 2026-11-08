@@ -3,7 +3,7 @@ import api from './api';
 export const settingsService = {
   async getPreferences() {
     const response = await api.get('/patient/settings/preferences');
-    return response.data.data; // { emailNotifications, appointmentReminders, healthTips, language, timeZone, darkMode }
+    return response.data.data;
   },
 
   async updatePreferences(prefs: {

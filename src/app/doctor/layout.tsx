@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DoctorSidebar from "@/components/doctor/DoctorSidebar";
-import { Menu, Bell } from "lucide-react";
+import { Menu, Bell, Loader2 } from "lucide-react";
+import { doctorPortalService } from "@/services/doctor.service";
 
 export default function DoctorLayout({
   children,
@@ -10,6 +11,35 @@ export default function DoctorLayout({
   children: React.ReactNode;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [doctorInitials, setDoctorInitials] = useState("DR");
+  const [loading, setLoading] = useState(true);
+
+  // Fetch live doctor profile details on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await doctorPortalService.getProfile();
+        // Adjust based on your response structure (e.g., response.data or response directly)
+        const profile = response?.data || response;
+        if (profile?.initials) {
+          setDoctorInitials(profile.initials);
+        } else if (profile?.fullName) {
+          const initials = profile.fullName
+            .replace(/^Dr\.\s*/i, "")
+            .split(" ")
+            .map((n: string) => n[0])
+            .join("")
+            .substring(0, 2)
+            .toUpperCase();
+          setDoctorInitials(initials || "DR");
+        }
+      } catch (err) {
+        console.error("Failed to load doctor profile initials", err);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   return (
     <div className="flex h-screen bg-white font-sans overflow-hidden">
@@ -35,8 +65,14 @@ export default function DoctorLayout({
               <Bell className="w-4 h-4" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500" />
             </button>
+            
+            {/* Live Doctor Initials Avatar */}
             <div className="w-9 h-9 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-sm">
-              SM
+              {loading ? (
+                <Loader2 className="w-4 h-4 animate-spin text-white" />
+              ) : (
+                doctorInitials
+              )}
             </div>
           </div>
         </header>

@@ -11,7 +11,7 @@ export default function Modal({
   children,
   maxWidth = "max-w-md",
 }: ModalProps) {
-  // Close on Escape key
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -33,7 +33,6 @@ export default function Modal({
       <div
         className={`bg-white rounded-2xl shadow-xl w-full ${maxWidth} overflow-hidden transform transition-all scale-100`}
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <h3 className="font-bold text-gray-900 text-lg">{title}</h3>
           <button
@@ -44,7 +43,6 @@ export default function Modal({
           </button>
         </div>
 
-        {/* Content Body */}
         <div className="p-6 max-h-[85vh] overflow-y-auto">{children}</div>
       </div>
     </div>

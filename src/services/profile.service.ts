@@ -1,6 +1,5 @@
 import api from './api';
 
-// ── Doctor profile ────────────────────────────────────────────────────────────
 export const profileService = {
   async getProfile() {
     const response = await api.get('/doctor/profile');
@@ -13,11 +12,9 @@ export const profileService = {
   },
 };
 
-// ── Patient profile ───────────────────────────────────────────────────────────
 export const patientProfileService = {
   async getProfile() {
     const response = await api.get('/patient/profile');
-    // Backend returns { message, data: { ...user, patientProfile, summary, recentPrescriptions } }
     return response.data.data;
   },
 

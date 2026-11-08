@@ -1,6 +1,5 @@
 import api from './api';
 
-// Helper to get token safely
 const getAuthHeader = () => {
   const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
   return token ? { Authorization: `Bearer ${token}` } : {};

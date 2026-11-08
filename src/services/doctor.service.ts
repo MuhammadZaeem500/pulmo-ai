@@ -1,6 +1,5 @@
 import api from './api';
 
-// Helper to get token safely
 const getAuthHeader = () => {
   const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
   return token ? { Authorization: `Bearer ${token}` } : {};
@@ -18,7 +17,7 @@ export const doctorService = {
 export const doctorPortalService = {
   async getProfile() {
     const response = await api.get('/doctor/profile', {
-      headers: getAuthHeader(), // Added auth headers here
+      headers: getAuthHeader(), 
     });
     return response.data;
   },
@@ -27,10 +26,54 @@ export const doctorPortalService = {
 export const doctorDashboardService = {
   async getDashboardData() {
     const response = await api.get("/doctor/dashboard", {
-      headers: getAuthHeader(), // Added auth headers here
+      headers: getAuthHeader(), 
     });
     return response.data;
   },
+};
 
-  
+// ─── Doctor Settings Service ─────────────────────────────────────────────────
+export const doctorSettingsService = {
+  async getProfile() {
+    const response = await api.get('/doctor/settings/profile', {
+      headers: getAuthHeader(),
+    });
+    return response.data.data;
+  },
+
+  async updateProfile(dto: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phoneNumber?: string;
+    specialty?: string;
+  }) {
+    const response = await api.patch('/doctor/settings/profile', dto, {
+      headers: getAuthHeader(),
+    });
+    return response.data.data;
+  },
+
+  async changePassword(currentPassword: string, newPassword: string) {
+    const response = await api.post(
+      '/doctor/settings/change-password',
+      { currentPassword, newPassword },
+      { headers: getAuthHeader() }
+    );
+    return response.data;
+  },
+
+  async getPreferences() {
+    const response = await api.get('/doctor/settings/preferences', {
+      headers: getAuthHeader(),
+    });
+    return response.data.data;
+  },
+
+  async updatePreferences(dto: any) {
+    const response = await api.patch('/doctor/settings/preferences', dto, {
+      headers: getAuthHeader(),
+    });
+    return response.data.data;
+  },
 };

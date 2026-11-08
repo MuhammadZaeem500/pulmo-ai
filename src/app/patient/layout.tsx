@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "@/components/patient/PatientSidebar";
-import { Menu, Bell } from "lucide-react";
+import { Menu, Bell, Loader2 } from "lucide-react";
+import api from "@/services/api";
 
 export default function PatientLayout({
   children,
@@ -10,6 +11,36 @@ export default function PatientLayout({
   children: React.ReactNode;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [patientInitials, setPatientInitials] = useState("PT");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const token = localStorage.getItem("accessToken") || localStorage.getItem("token");
+        const response = await api.get("/patient/profile", {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+
+        const data = response?.data?.data || response?.data;
+        const fullName = data?.patientProfile?.fullName || data?.fullName;
+
+        if (fullName) {
+          const initials = fullName
+            .split(" ")
+            .map((n: string) => n[0])
+            .join("")
+            .substring(0, 2)
+            .toUpperCase();
+          setPatientInitials(initials || "PT");
+        }
+      } catch (err) {
+        console.error("Failed to load patient profile initials", err);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   return (
     <div className="flex h-screen bg-[#F8FAFC] overflow-hidden font-['Ubuntu',sans-serif]">
@@ -35,13 +66,17 @@ export default function PatientLayout({
               <Bell className="w-4 h-4" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500" />
             </button>
+            
             <div className="w-9 h-9 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-sm">
-              PT
+              {loading ? (
+                <Loader2 className="w-4 h-4 animate-spin text-white" />
+              ) : (
+                patientInitials
+              )}
             </div>
           </div>
         </header>
 
-       
         <main className="flex-1 overflow-y-auto p-4 sm:p-8 bg-[#F8FAFC]">
           <div className="mx-auto max-w-7xl space-y-6">
             {children}

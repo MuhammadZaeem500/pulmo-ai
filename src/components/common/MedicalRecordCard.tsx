@@ -16,7 +16,7 @@ export default function MedicalRecordCard({
   recommendations,
   onViewDetails,
   onDownloadReport,
-  urgencyLabel = "Urgency Level", // Default fallback label
+  urgencyLabel = "Urgency Level", 
 }: ExtendedCardProps) {
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">

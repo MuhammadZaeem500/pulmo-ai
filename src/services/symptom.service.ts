@@ -12,7 +12,7 @@ export const symptomService = {
     const response = await axios.get(`${API_URL}/patient/symptoms`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return response.data; // <-- Removed the second .data
+    return response.data; 
   },
 
   async createAssessment(dto: any) {
@@ -20,7 +20,7 @@ export const symptomService = {
     const response = await axios.post(`${API_URL}/patient/symptoms`, dto, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return response.data; // <-- Removed the second .data
+    return response.data;
   },
 
   async deleteAssessment(id: string) {

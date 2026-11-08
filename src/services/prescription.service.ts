@@ -1,6 +1,5 @@
 import api from './api';
 
-// Helper to get token safely (or rely on an axios interceptor in ./api)
 const getAuthHeader = () => {
   const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
   return token ? { Authorization: `Bearer ${token}` } : {};
