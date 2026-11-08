@@ -7,7 +7,6 @@ import MetricCard from "@/components/common/MetricCard";
 import ProfilePrescriptionItem from "@/components/common/ProfilePrescriptionItem";
 import { patientProfileService } from "@/services/profile.service";
 
-// ─── Edit Profile Modal ──────────────────────────────────────────────────────
 function EditProfileModal({
   initial,
   onClose,
@@ -151,7 +150,6 @@ const formatGender = (g: string | null): string => {
   return g.charAt(0).toUpperCase() + g.slice(1).toLowerCase();
 };
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function ProfilePage() {
   const [loading,       setLoading]       = useState(true);
   const [showEdit,      setShowEdit]      = useState(false);

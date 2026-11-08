@@ -154,6 +154,20 @@ export default function SettingsPage() {
     persist({ ...key, ...{ [Object.keys(key)[0]]: next } });
   };
 
+  // ── Handle Account Deletion ────────────────────────────────────────────────
+  const handleDeleteAccount = async () => {
+    if (confirm("Are you sure you want to permanently delete your account and data? This action cannot be undone.")) {
+      try {
+        await settingsService.deleteAccount();
+        localStorage.clear();
+        window.location.href = "/auth/patient/sign-in";
+      } catch (error) {
+        console.error("Failed to delete account", error);
+        alert("Failed to delete account. Please try again.");
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-32">
@@ -202,7 +216,7 @@ export default function SettingsPage() {
                 <p className="text-xs text-gray-500 mt-0.5">Permanently delete your account and data</p>
               </div>
               <button
-                onClick={() => alert("Please contact support to delete your account.")}
+                onClick={handleDeleteAccount}
                 className="px-4 py-2 rounded-xl border border-rose-200 text-rose-600 font-medium text-sm hover:bg-rose-50 transition-all cursor-pointer"
               >
                 Delete

@@ -25,4 +25,9 @@ export const settingsService = {
     });
     return response.data;
   },
+
+  async deleteAccount() {
+    const response = await api.delete('/patient/settings/account');
+    return response.data;
+  },
 };
