@@ -1,54 +1,93 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import api from "@/services/api";
 import DashboardCard from "@/components/common/DashboardCard";
 import MetricCard from "@/components/common/MetricCard";
-import { Activity, Wind, Users, TrendingUp } from "lucide-react";
+import { Activity, Wind, Users, TrendingUp, ShieldCheck, FileText, Image as ImageIcon } from "lucide-react";
 
 export default function AdminAnalyticsPage() {
   const [activeTab, setActiveTab] = useState<"Symptom Trends" | "Conditions" | "Seasonal Trends" | "User Engagement">("Symptom Trends");
+  const [analytics, setAnalytics] = useState({
+    totalScans: 0,
+    activeApprovedDoctors: 0,
+    totalPrescriptionsIssued: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Fetch live healthcare analytics from backend on mount
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get("/admin/analytics/healthcare");
+        // Handle potential nested data wrappers (e.g., response.data.data or response.data)
+        const payload = response.data?.data || response.data || {};
+        setAnalytics({
+          totalScans: payload.totalScans ?? 0,
+          activeApprovedDoctors: payload.activeApprovedDoctors ?? 0,
+          totalPrescriptionsIssued: payload.totalPrescriptionsIssued ?? 0,
+        });
+      } catch (err: any) {
+        setError(err.response?.data?.message || "Failed to load healthcare analytics.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-sm text-slate-500 flex items-center gap-2">
+          <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          Loading analytics metrics...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-
       <div>
         <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Healthcare Analytics</h1>
-        <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">Monitor health trends, disease patterns, and user engagement across the platform.</p>
+        <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">Monitor health trends, disease patterns, and platform activity.</p>
       </div>
 
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl font-medium">
+          {error}
+        </div>
+      )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Live Backend Metrics Cards with Safe Fallbacks */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <MetricCard
-          title="Avg. Daily Queries"
-          value="4,821"
-          trend="+14%"
-          trendColor="text-emerald-600"
-          icon={Activity}
+          title="Total Image Scans"
+          value={(analytics.totalScans ?? 0).toLocaleString()}
+          trend="Platform-wide"
+          trendColor="text-blue-600"
+          icon={ImageIcon}
           iconBgColor="bg-blue-50 text-blue-600"
         />
         <MetricCard
-          title="Conditions Monitored"
-          value="24"
-          trend="+2 new"
+          title="Active Approved Doctors"
+          value={(analytics.activeApprovedDoctors ?? 0).toLocaleString()}
+          trend="Verified & Listed"
           trendColor="text-emerald-600"
-          icon={Wind}
+          icon={ShieldCheck}
           iconBgColor="bg-teal-50 text-teal-600"
         />
         <MetricCard
-          title="Active Users (30d)"
-          value="31,847"
-          trend="+8%"
-          trendColor="text-emerald-600"
-          icon={Users}
+          title="Prescriptions Issued"
+          value={(analytics.totalPrescriptionsIssued ?? 0).toLocaleString()}
+          trend="Total records"
+          trendColor="text-purple-600"
+          icon={FileText}
           iconBgColor="bg-purple-50 text-purple-600"
-        />
-        <MetricCard
-          title="Trend Alerts Triggered"
-          value="18"
-          trend="This month"
-          trendColor="text-amber-600"
-          icon={TrendingUp}
-          iconBgColor="bg-amber-50 text-amber-600"
         />
       </div>
 

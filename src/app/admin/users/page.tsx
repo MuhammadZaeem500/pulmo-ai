@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import api from "@/services/api";
 import DashboardCard from "@/components/common/DashboardCard";
 import UserDetailsModal from "@/components/admin/UserDetailsModal";
 import { 
@@ -14,34 +15,82 @@ import {
 } from "lucide-react";
 import { User } from "@/types/admin.types";
 
-
 export default function AdminUsersPage() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"All" | "Active" | "Suspended" | "Pending">("All");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const [users, setUsers] = useState<User[]>([
-    { id: 1, name: "Dr. Emily Watson", email: "e.watson@metro.com", role: "Physician", registered: "Jan 12, 2024", lastLogin: "Today, 9:41 AM", status: "Active", avatarBg: "bg-blue-600", initials: "EW" },
-    { id: 2, name: "James Okafor", email: "j.okafor@breathe.io", role: "Patient", registered: "Feb 3, 2024", lastLogin: "Yesterday, 3:15 PM", status: "Active", avatarBg: "bg-teal-600", initials: "JO" },
-    { id: 3, name: "Dr. Sarah Lin", email: "s.lin@riverside.com", role: "Specialist", registered: "Nov 28, 2023", lastLogin: "Jun 10, 2026", status: "Active", avatarBg: "bg-purple-600", initials: "SL" },
-    { id: 4, name: "Marcus Reid", email: "m.reid@gmail.com", role: "Patient", registered: "Mar 5, 2024", lastLogin: "May 30, 2026", status: "Suspended", avatarBg: "bg-amber-600", initials: "MR" },
-    { id: 5, name: "Dr. Priya Nair", email: "p.nair@pacific.org", role: "Physician", registered: "Oct 14, 2023", lastLogin: "Today, 11:05 AM", status: "Active", avatarBg: "bg-rose-600", initials: "PN" },
-    { id: 6, name: "Aisha Tremblay", email: "a.tremblay@outlook.com", role: "Patient", registered: "Apr 19, 2024", lastLogin: "Jun 8, 2026", status: "Pending", avatarBg: "bg-teal-500", initials: "AT" },
-    { id: 7, name: "Dr. Carlos Mejia", email: "c.mejia@heartland.med", role: "Specialist", registered: "Dec 1, 2023", lastLogin: "Today, 8:30 AM", status: "Active", avatarBg: "bg-emerald-600", initials: "CM" },
-    { id: 8, name: "Hannah Park", email: "h.park@yahoo.com", role: "Patient", registered: "May 22, 2024", lastLogin: "Jun 11, 2026", status: "Active", avatarBg: "bg-blue-500", initials: "HP" },
-    { id: 9, name: "Robert Tanner", email: "r.tanner@desert.com", role: "Admin", registered: "Jun 5, 2023", lastLogin: "Today, 2:20 PM", status: "Active", avatarBg: "bg-cyan-600", initials: "RT" },
-    { id: 10, name: "Fatima Al-Hassan", email: "f.alhassan@nw.org", role: "Physician", registered: "Sep 10, 2023", lastLogin: "Jun 9, 2026", status: "Suspended", avatarBg: "bg-purple-500", initials: "FA" },
-  ]);
+  // Fetch users from backend on mount
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get("/admin/users");
+        
+        // Map and normalize backend statuses to match frontend User interface types
+        const formattedUsers = response.data.map((u: any) => {
+          let normalizedStatus: "Active" | "Pending" | "Suspended" = "Active";
+          if (u.status === "PENDING") normalizedStatus = "Pending";
+          else if (u.status === "SUSPENDED" || u.status === "REJECTED") normalizedStatus = "Suspended";
+          else if (u.status === "ACTIVE") normalizedStatus = "Active";
 
-  const handleToggleSuspend = (userId: number) => {
-    setUsers(users.map(u => {
-      if (u.id === userId) {
-        const nextStatus = u.status === "Suspended" ? "Active" : "Suspended";
-        return { ...u, status: nextStatus };
+          return {
+            id: u.id,
+            name: u.name || u.email.split("@")[0],
+            email: u.email,
+            role: u.role,
+            registered: new Date(u.createdAt).toLocaleDateString("en-US", { month: 'short', day: 'numeric', year: 'numeric' }),
+            lastLogin: u.lastLogin ? new Date(u.lastLogin).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "N/A",
+            status: normalizedStatus,
+            avatarBg: "bg-blue-600",
+            initials: (u.email.substring(0, 2)).toUpperCase(),
+          };
+        });
+
+        setUsers(formattedUsers);
+      } catch (err: any) {
+        setError(err.response?.data?.message || "Failed to load user list.");
+      } finally {
+        setLoading(false);
       }
-      return u;
-    }));
+    };
+
+    fetchUsers();
+  }, []);
+
+  const handleToggleSuspend = async (userId: number | string) => {
+    const targetUser = users.find(u => u.id === userId);
+    if (!targetUser) return;
+
+    try {
+      setActionLoading(String(userId));
+      const nextStatusUI = targetUser.status === "Suspended" ? "Active" : "Suspended";
+      const nextStatusBackend = nextStatusUI === "Active" ? "ACTIVE" : "SUSPENDED";
+
+      // Call backend API to update user status
+      await api.patch(`/admin/users/${userId}/status`, { status: nextStatusBackend });
+
+      // Update local state instantly
+      setUsers(users.map(u => {
+        if (u.id === userId) {
+          return { ...u, status: nextStatusUI };
+        }
+        return u;
+      }));
+
+      if (selectedUser && selectedUser.id === userId) {
+        setSelectedUser(prev => prev ? { ...prev, status: nextStatusUI } : null);
+      }
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Failed to update user status.");
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const filteredUsers = users.filter((user) => {
@@ -51,15 +100,31 @@ export default function AdminUsersPage() {
     return matchesSearch && matchesStatus;
   });
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-sm text-slate-500 flex items-center gap-2">
+          <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          Loading user records...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-     
       <div>
         <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Users</h1>
         <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">Manage user accounts, profiles, and access controls.</p>
       </div>
 
-     
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl font-medium">
+          {error}
+        </div>
+      )}
+
+      {/* Metrics Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         <DashboardCard>
           <span className="text-[11px] uppercase font-bold tracking-wider text-slate-400 block mb-2">Total Users</span>
@@ -79,7 +144,7 @@ export default function AdminUsersPage() {
         </DashboardCard>
       </div>
 
-     
+      {/* Controls & Search */}
       <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm space-y-4">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="relative w-full sm:w-96">
@@ -111,7 +176,7 @@ export default function AdminUsersPage() {
           </div>
         </div>
 
-       
+        {/* Users Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -193,7 +258,7 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-     
+      {/* User Details & Action Modal */}
       <UserDetailsModal
         user={selectedUser}
         isOpen={isModalOpen}
