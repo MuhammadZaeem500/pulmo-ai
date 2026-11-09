@@ -21,8 +21,8 @@ export default function AdminDashboardPage() {
     <div className="space-y-6">
      
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Dashboard</h1>
-        <p className="text-xs text-slate-400 font-medium mt-0.5">Welcome back. Here&apos;s what&apos;s happening on the platform.</p>
+        <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Dashboard</h1>
+        <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">Welcome back. Here&apos;s what&apos;s happening on the platform.</p>
       </div>
 
      
@@ -93,7 +93,7 @@ export default function AdminDashboardPage() {
               ].map((act, idx) => {
                 const Icon = act.icon;
                 return (
-                  <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-slate-50/60 border border-slate-100">
+                  <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-slate-50/60 border border-slate-100">
                     <div className="flex items-center gap-3">
                       <div className={`p-2 rounded-xl shrink-0 ${act.color}`}>
                         <Icon className="w-4 h-4" />
@@ -103,7 +103,7 @@ export default function AdminDashboardPage() {
                         <p className="text-[11px] text-slate-400 font-medium">{act.desc}</p>
                       </div>
                     </div>
-                    <span className="text-[11px] font-medium text-slate-400">{act.time}</span>
+                    <span className="text-[11px] font-medium text-slate-400 shrink-0 self-end sm:self-center">{act.time}</span>
                   </div>
                 );
               })}

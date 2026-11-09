@@ -58,14 +58,14 @@ export default function ConsultationNotesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-extrabold text-slate-900">Consultation Notes</h1>
-          <p className="text-xs text-slate-400 mt-0.5">{notes.length} total notes</p>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Consultation Notes</h1>
+          <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">{notes.length} total notes</p>
         </div>
         <button
           onClick={handleOpenCreateModal}
-          className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer w-full sm:w-auto"
         >
           <Plus className="w-4 h-4" />
           New Note
@@ -90,13 +90,13 @@ export default function ConsultationNotesPage() {
       ) : (
         <div className="space-y-4">
           {notes.map((note) => (
-            <div key={note.id} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-xs hover:border-blue-200 transition-all flex items-center justify-between">
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-blue-50 text-blue-600 rounded-xl mt-0.5">
+            <div key={note.id} className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-xs hover:border-blue-200 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="p-2.5 sm:p-3 bg-blue-50 text-blue-600 rounded-xl mt-0.5 shrink-0">
                   <FileText className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                     <h3 className="text-sm font-bold text-slate-900">{note.patientName}</h3>
                     <span className="text-xs text-slate-400 font-medium">{note.date}</span>
                   </div>
@@ -104,7 +104,7 @@ export default function ConsultationNotesPage() {
                   <p className="text-xs text-slate-500 mt-1">{note.notes}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 self-end sm:self-center">
                 {/* Edit Button */}
                 <button 
                   onClick={() => handleOpenEditModal(note)}

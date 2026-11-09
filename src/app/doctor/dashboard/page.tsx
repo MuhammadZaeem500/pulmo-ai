@@ -61,18 +61,16 @@ export default function DoctorDashboardPage() {
   });
 
   return (
-    <div className="min-h-screen flex w-full bg-white font-sans">
-      <main className="flex-1 p-8 overflow-y-auto max-h-screen space-y-6 bg-white">
-       
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-6 bg-blue-600 rounded-full" />
-            <h1 className="text-xl font-extrabold text-slate-900">Welcome back, Doctor</h1>
-          </div>
-          <p className="text-xs text-slate-400 font-medium mt-0.5 ml-3.5">
-            {currentDate}
-          </p>
+    <div className="space-y-6 sm:space-y-8">
+      <div>
+        <div className="flex items-center gap-2">
+          <div className="w-1.5 h-6 bg-blue-600 rounded-full" />
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">Welcome back, Doctor</h1>
         </div>
+        <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5 ml-3.5">
+          {currentDate}
+        </p>
+      </div>
 
        
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -228,7 +226,6 @@ export default function DoctorDashboardPage() {
             )}
           </DashboardCard>
         </div>
-      </main>
     </div>
   );
 }

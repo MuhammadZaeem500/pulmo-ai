@@ -43,14 +43,14 @@ export default function DoctorRecommendedTestsPage() {
   return (
     <div className="space-y-6">
      
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-extrabold text-slate-900">Recommended Tests</h1>
-          <p className="text-xs text-slate-400 font-medium mt-0.5">{testRecommendations.length} recommendations issued</p>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Recommended Tests</h1>
+          <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">{testRecommendations.length} recommendations issued</p>
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 text-white font-semibold text-xs hover:opacity-95 transition-opacity shadow-sm cursor-pointer"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 text-white font-semibold text-xs hover:opacity-95 transition-opacity shadow-sm cursor-pointer w-full sm:w-auto"
         >
           <Plus className="w-4 h-4" />
           Add Tests
@@ -78,9 +78,9 @@ export default function DoctorRecommendedTestsPage() {
           {testRecommendations.map((rec) => (
             <DashboardCard key={rec.id} className="hover:border-blue-200 transition-all">
              
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">
+                  <div className="w-10 h-10 rounded-xl bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow-sm shrink-0">
                     {rec.initials}
                   </div>
                   <div>
@@ -88,7 +88,7 @@ export default function DoctorRecommendedTestsPage() {
                     <p className="text-[11px] text-slate-400 font-medium">{rec.date} · {rec.testsCount}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 self-end sm:self-center">
                   <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${rec.statusColor}`}>
                     ● {rec.status}
                   </span>

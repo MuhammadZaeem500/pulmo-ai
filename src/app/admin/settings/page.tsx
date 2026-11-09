@@ -59,15 +59,15 @@ export default function AdminSettingsPage() {
     <div className="space-y-6 max-w-7xl mx-auto">
      
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Settings</h1>
-        <p className="text-xs text-slate-400 font-medium mt-0.5">Manage your account preferences and platform configuration.</p>
+        <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Settings</h1>
+        <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">Manage your account preferences and platform configuration.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
        
         <div className="lg:col-span-1">
           <DashboardCard className="p-2">
-            <nav className="space-y-1">
+            <nav className="flex flex-row overflow-x-auto lg:flex-col gap-1 pb-1 lg:pb-0">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.name;
@@ -75,17 +75,17 @@ export default function AdminSettingsPage() {
                   <button
                     key={item.name}
                     onClick={() => setActiveTab(item.name as any)}
-                    className={`w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`flex items-center justify-between px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 lg:shrink lg:w-full ${
                       isActive
                         ? "bg-blue-50 text-blue-600 shadow-xs"
                         : "text-slate-600 hover:bg-slate-50"
                     }`}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5 sm:gap-3">
                       <Icon className={`w-4 h-4 ${isActive ? "text-blue-600" : "text-slate-400"}`} />
                       <span>{item.name}</span>
                     </div>
-                    {isActive && <ChevronRight className="w-4 h-4 text-blue-600" />}
+                    {isActive && <ChevronRight className="w-4 h-4 text-blue-600 hidden lg:block" />}
                   </button>
                 );
               })}

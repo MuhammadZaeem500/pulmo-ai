@@ -12,8 +12,8 @@ export default function AdminAnalyticsPage() {
     <div className="space-y-6">
 
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Healthcare Analytics</h1>
-        <p className="text-xs text-slate-400 font-medium mt-0.5">Monitor health trends, disease patterns, and user engagement across the platform.</p>
+        <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Healthcare Analytics</h1>
+        <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">Monitor health trends, disease patterns, and user engagement across the platform.</p>
       </div>
 
 

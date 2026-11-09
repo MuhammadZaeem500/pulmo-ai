@@ -54,27 +54,25 @@ export default function DoctorVerificationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 md:p-8 font-sans">
-      <div className="max-w-7xl mx-auto">
-       
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
-          <div>
-            <p className="text-xs font-semibold tracking-wider text-blue-600/80 uppercase mb-1">
-              — Credential Operations
-            </p>
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-950">
-              Doctor Verification Requests
-            </h1>
-            <p className="text-sm text-slate-600 mt-1.5 max-w-2xl">
-              Review professional credentials and approve or reject pending doctor accounts.
-              Doctors will only be able to sign in once their account is verified and activated by an administrator.
-            </p>
-          </div>
-          <div className="flex-shrink-0 self-start md:self-center px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-sm font-medium flex items-center gap-2.5 shadow-sm">
-            <ShieldCheck className="w-5 h-5 text-blue-500" />
-            {pendingDoctors.length} Pending Review
-          </div>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold tracking-wider text-blue-600/80 uppercase mb-1">
+            — Credential Operations
+          </p>
+          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">
+            Doctor Verification Requests
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5 max-w-2xl">
+            Review professional credentials and approve or reject pending doctor accounts.
+            Doctors will only be able to sign in once their account is verified and activated by an administrator.
+          </p>
         </div>
+        <div className="shrink-0 self-start sm:self-center px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs sm:text-sm font-medium flex items-center gap-2 shadow-sm">
+          <ShieldCheck className="w-4 h-4 text-blue-500" />
+          {pendingDoctors.length} Pending Review
+        </div>
+      </div>
 
         {error && (
           <div className="mb-8 p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl font-medium shadow-inner">
@@ -165,7 +163,6 @@ export default function DoctorVerificationPage() {
             </p>
           </div>
         )}
-      </div>
     </div>
   );
 }

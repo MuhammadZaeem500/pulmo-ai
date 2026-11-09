@@ -90,26 +90,26 @@ export default function DoctorProfilePage() {
   return (
     <div className="space-y-6 max-w-5xl">
      
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-extrabold text-slate-900">Profile</h1>
-          <p className="text-xs text-slate-400 font-medium mt-0.5">Manage your professional information</p>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Profile</h1>
+          <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">Manage your professional information</p>
         </div>
 
         {!isEditing ? (
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-colors shadow-sm cursor-pointer"
+            className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-colors shadow-sm cursor-pointer w-full sm:w-auto"
           >
             <Edit3 className="w-3.5 h-3.5 text-blue-600" />
             Edit Profile
           </button>
         ) : (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
             <button
               onClick={() => setIsEditing(false)}
               disabled={saving}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-semibold text-xs transition-colors shadow-sm cursor-pointer"
+              className="flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-semibold text-xs transition-colors shadow-sm cursor-pointer"
             >
               <X className="w-3.5 h-3.5 text-slate-400" />
               Cancel
@@ -117,7 +117,7 @@ export default function DoctorProfilePage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 text-white font-semibold text-xs hover:opacity-95 transition-opacity shadow-sm cursor-pointer disabled:opacity-50"
+              className="flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 text-white font-semibold text-xs hover:opacity-95 transition-opacity shadow-sm cursor-pointer disabled:opacity-50"
             >
               {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
               Save Changes
@@ -130,20 +130,20 @@ export default function DoctorProfilePage() {
       <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
         <div className="h-15 relative" />
 
-        <div className="px-8 pb-8 relative">
+        <div className="px-4 sm:px-8 pb-6 sm:pb-8 relative">
          
-          <div className="flex items-end gap-4 -mt-10 mb-6">
-            <div className="w-20 h-20 rounded-2xl bg-blue-600 text-white font-extrabold text-2xl flex items-center justify-center border-4 border-white shadow-md">
+          <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4 -mt-10 mb-6">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-blue-600 text-white font-extrabold text-xl sm:text-2xl flex items-center justify-center border-4 border-white shadow-md shrink-0">
               {initials || "DR"}
             </div>
             <div className="mb-1">
-              <h2 className="text-lg font-extrabold text-slate-900">{formData.fullName}</h2>
+              <h2 className="text-base sm:text-lg font-extrabold text-slate-900">{formData.fullName}</h2>
               <p className="text-xs text-teal-600 font-semibold">{formData.specialty}</p>
             </div>
           </div>
 
          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 sm:gap-y-6 gap-x-6 sm:gap-x-12">
             <div>
               <label className="text-[10px] uppercase font-extrabold tracking-wider text-slate-400 block mb-1">Full Name</label>
               {isEditing ? (

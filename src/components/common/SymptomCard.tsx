@@ -25,15 +25,15 @@ export default function SymptomCard({
   const severityStyle = severityConfig[severity] || severityConfig.Mild;
 
   return (
-    <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-xs hover:shadow-md transition-all flex items-center justify-between">
-      <div className="flex items-center gap-4">
+    <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-xs hover:shadow-md transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+      <div className="flex items-center gap-3 sm:gap-4">
         <div>
-          <div className="flex items-center gap-3 mb-1.5">
-            <h3 className="text-base font-bold text-gray-900">{symptom}</h3>
+          <div className="flex items-center gap-2 sm:gap-3 mb-1.5 flex-wrap">
+            <h3 className="text-sm sm:text-base font-bold text-gray-900">{symptom}</h3>
             <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${severityStyle.bg} ${severityStyle.text}`}>
               {severity}
             </span>
-            <TrendIcon className="w-4 h-4 text-gray-400" />
+            <TrendIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400" />
           </div>
           <div className="flex items-center gap-1.5 text-gray-400 text-xs">
             <Calendar className="w-3.5 h-3.5" />
@@ -44,7 +44,7 @@ export default function SymptomCard({
 
       <button
         onClick={onViewHistory}
-        className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 font-medium text-sm hover:bg-gray-50 transition-all cursor-pointer"
+        className="w-full sm:w-auto px-4 py-2 rounded-xl border border-gray-200 text-gray-700 font-medium text-xs sm:text-sm hover:bg-gray-50 transition-all cursor-pointer text-center"
       >
         View History
       </button>

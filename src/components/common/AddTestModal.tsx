@@ -42,19 +42,19 @@ export default function AddTestModal({ isOpen, onClose, onSave }: AddMedicalReco
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
-      <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl relative">
-        <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-4 backdrop-blur-xs">
+      <div className="bg-white rounded-2xl max-w-xl w-full p-4 sm:p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-teal-50 text-teal-600 rounded-xl">
-              <FlaskConical className="w-6 h-6" />
+            <div className="p-2 sm:p-2.5 bg-teal-50 text-teal-600 rounded-xl shrink-0">
+              <FlaskConical className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-900">Recommend Diagnostic Test</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900">Recommend Diagnostic Test</h2>
               <p className="text-xs text-slate-500">Order lab tests or clinical scans for patient</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 cursor-pointer">
+          <button onClick={onClose} className="p-1.5 sm:p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 cursor-pointer">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -77,7 +77,7 @@ export default function AddTestModal({ isOpen, onClose, onSave }: AddMedicalReco
             </select>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase mb-1.5">Test Name</label>
               <input
@@ -115,14 +115,14 @@ export default function AddTestModal({ isOpen, onClose, onSave }: AddMedicalReco
             />
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-5 border-t border-slate-100">
-            <button type="button" onClick={onClose} className="px-5 py-2.5 text-sm font-medium text-slate-600 cursor-pointer">
+          <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 pt-4 sm:pt-5 border-t border-slate-100">
+            <button type="button" onClick={onClose} className="px-5 py-2.5 text-xs sm:text-sm font-medium text-slate-600 cursor-pointer text-center">
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="flex items-center gap-2 px-6 py-2.5 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 disabled:opacity-50 cursor-pointer shadow-sm"
+              className="flex items-center justify-center gap-2 px-6 py-2.5 bg-teal-600 text-white text-xs sm:text-sm font-medium rounded-xl hover:bg-teal-700 disabled:opacity-50 cursor-pointer shadow-sm"
             >
               {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
               Save Test Recommendation

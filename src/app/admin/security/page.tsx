@@ -46,8 +46,8 @@ export default function SecurityCenterPage() {
     <div className="space-y-6">
      
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Security Center</h1>
-        <p className="text-xs text-slate-400 font-medium mt-0.5">Monitor platform integrity, suspicious activity, and unauthorized access.</p>
+        <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Security Center</h1>
+        <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">Monitor platform integrity, suspicious activity, and unauthorized access.</p>
       </div>
 
      

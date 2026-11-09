@@ -49,14 +49,14 @@ export default function DoctorPrescriptionsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-extrabold text-slate-900">Prescriptions</h1>
-          <p className="text-xs text-slate-400 font-medium mt-0.5">{prescriptions.length} prescriptions issued</p>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Prescriptions</h1>
+          <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">{prescriptions.length} prescriptions issued</p>
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 text-white font-semibold text-xs hover:opacity-95 transition-opacity shadow-sm cursor-pointer"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 text-white font-semibold text-xs hover:opacity-95 transition-opacity shadow-sm cursor-pointer w-full sm:w-auto"
         >
           <Plus className="w-4 h-4" />
           New Prescription
@@ -82,9 +82,9 @@ export default function DoctorPrescriptionsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {prescriptions.map((rx) => (
             <DashboardCard key={rx.id} className="hover:border-blue-200 transition-all relative group">
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">
+                  <div className="w-10 h-10 rounded-xl bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow-sm shrink-0">
                     {rx.initials}
                   </div>
                   <div>
@@ -92,7 +92,7 @@ export default function DoctorPrescriptionsPage() {
                     <p className="text-[11px] text-slate-400 font-medium">{rx.date} · {rx.medsCount}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 self-end sm:self-center">
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     {rx.status}

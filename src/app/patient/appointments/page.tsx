@@ -115,16 +115,20 @@ export default function AppointmentsPage() {
   };
 
   return (
-    <div className="p-8 lg:p-10 max-w-7xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">Appointments</h1>
-        <p className="text-gray-500 text-sm">Book new appointments or view your appointment history</p>
+    <div className="p-2 sm:p-4 lg:p-8 max-w-7xl mx-auto space-y-6 sm:space-y-8">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight mb-2">
+          Appointments
+        </h1>
+        <p className="text-slate-500 text-xs sm:text-sm font-medium">
+          Book new appointments or view your appointment history
+        </p>
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
         <button
           onClick={() => setActiveTab('book')}
-          className={`px-6 py-2.5 rounded-xl font-medium text-sm transition-all cursor-pointer shadow-xs ${
+          className={`flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl font-medium text-xs sm:text-sm transition-all cursor-pointer shadow-xs text-center ${
             activeTab === 'book'
               ? 'bg-[#2F80ED] text-white'
               : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
@@ -134,7 +138,7 @@ export default function AppointmentsPage() {
         </button>
         <button
           onClick={() => setActiveTab('previous')}
-          className={`px-6 py-2.5 rounded-xl font-medium text-sm transition-all cursor-pointer ${
+          className={`flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl font-medium text-xs sm:text-sm transition-all cursor-pointer text-center ${
             activeTab === 'previous'
               ? 'bg-[#2F80ED] text-white'
               : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
@@ -145,9 +149,9 @@ export default function AppointmentsPage() {
       </div>
 
       {activeTab === 'book' && (
-        <form onSubmit={handleBookAppointment} className="space-y-6">
-          <div className="bg-white rounded-2xl p-6 lg:p-8 border border-gray-100 shadow-xs space-y-4">
-            <h2 className="text-lg font-bold text-gray-900">Select Doctor</h2>
+        <form onSubmit={handleBookAppointment} className="space-y-4 sm:space-y-6">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 lg:p-8 border border-gray-100 shadow-xs space-y-4">
+            <h2 className="text-base sm:text-lg font-bold text-gray-900">Select Doctor</h2>
             
             {loadingDoctors ? (
               <div className="flex items-center justify-center py-8">
@@ -181,8 +185,8 @@ export default function AppointmentsPage() {
             )}
           </div>
 
-          <div className="bg-white rounded-2xl p-6 lg:p-8 border border-gray-100 shadow-xs space-y-4">
-            <h2 className="text-lg font-bold text-gray-900">Booking Details</h2>
+          <div className="bg-white rounded-2xl p-4 sm:p-6 lg:p-8 border border-gray-100 shadow-xs space-y-4">
+            <h2 className="text-base sm:text-lg font-bold text-gray-900">Booking Details</h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-gray-400 tracking-wider uppercase mb-1.5">Select Date</label>
@@ -190,7 +194,7 @@ export default function AppointmentsPage() {
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20 shadow-xs"
+                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl text-xs sm:text-sm bg-white focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20 shadow-xs"
                 />
               </div>
               <div>
@@ -198,7 +202,7 @@ export default function AppointmentsPage() {
                 <select 
                   value={time} 
                   onChange={(e) => setTime(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20 shadow-xs"
+                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl text-xs sm:text-sm bg-white focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20 shadow-xs"
                 >
                   <option value="09:00:00">9:00 AM</option>
                   <option value="10:00:00">10:00 AM</option>
@@ -214,15 +218,15 @@ export default function AppointmentsPage() {
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Describe your symptoms or reason for consultation..."
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20 shadow-xs resize-none"
+                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl text-xs sm:text-sm bg-white focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20 shadow-xs resize-none"
                 />
               </div>
               <button 
                 type="submit" 
                 disabled={submitting}
-                className="w-full py-3.5 bg-[#2F80ED] hover:bg-[#2668c7] text-white font-medium rounded-xl transition-colors cursor-pointer shadow-xs flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full py-3 sm:py-3.5 bg-[#2F80ED] hover:bg-[#2668c7] text-white font-medium text-xs sm:text-sm rounded-xl transition-colors cursor-pointer shadow-xs flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                {submitting && <Loader2 className="w-5 h-5 animate-spin" />}
+                {submitting && <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />}
                 <span>Confirm Booking</span>
               </button>
             </div>

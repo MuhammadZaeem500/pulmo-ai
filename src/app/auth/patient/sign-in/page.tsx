@@ -30,34 +30,39 @@ export default function Login() {
   };
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
-      <div className="hidden lg:flex bg-linear-to-br from-[#2F80ED] to-[#14B8A6] items-center justify-center p-12 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRo dD0iQzM2IDE4YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02em0wIDE4YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02eiIgZmlsbD0iI2ZmZiIgZmlsbC1vcGFjaXR5PSIuMDUiLz48L2c+PC9zdmc+')] opacity-20"></div>
-        <div className="text-white text-center relative z-10">
-          <div className="w-32 h-32 mx-auto mb-8 bg-white/10 backdrop-blur-sm rounded-3xl flex items-center justify-center">
-            <Activity className="w-20 h-20" />
+      <div className="hidden lg:flex bg-linear-to-br from-[#2F80ED] to-[#14B8A6] items-center justify-center p-8 xl:p-12 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRo dD0iQzM2IDE4YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02em0wIDE4YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02eiIgZmlsbD5pPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjIuMDUiLz48L2c+PC9zdmc+')] opacity-20"></div>
+        <div className="text-white text-center relative z-10 max-w-lg">
+          <div className="w-24 h-24 xl:w-32 xl:h-32 mx-auto mb-6 xl:mb-8 bg-white/15 backdrop-blur-sm rounded-3xl flex items-center justify-center shadow-inner">
+            <Activity className="w-12 h-12 xl:w-20 xl:h-20" />
           </div>
-          <h2 className="text-4xl mb-4">Welcome Back to PulmoAI</h2>
-          <p className="text-xl opacity-90">
+          <h2 className="text-2xl xl:text-4xl font-bold mb-3 xl:mb-4">
+            Welcome Back to PulmoAI
+          </h2>
+          <p className="text-base xl:text-xl opacity-90 leading-relaxed">
             Access your AI-powered health dashboard and continue your wellness
             journey
           </p>
         </div>
       </div>
 
-     
-      <div className="flex items-center justify-center p-8 bg-[#F8FAFC]">
-        <div className="w-full max-w-md">
-          <div className="mb-8">
-            <div className="flex items-center gap-2 mb-6">
+      <div className="flex items-center justify-center p-4 sm:p-8 bg-[#F8FAFC]">
+        <div className="w-full max-w-md mx-auto">
+          <div className="mb-6 sm:mb-8">
+            <div className="flex items-center gap-2 mb-4 sm:mb-6">
               <div className="p-2 bg-linear-to-br from-[#2F80ED] to-[#14B8A6] rounded-lg">
-                <Activity className="w-6 h-6 text-white" />
+                <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <span className="font-semibold text-xl bg-linear-to-r from-[#2F80ED] to-[#14B8A6] bg-clip-text text-transparent">
+              <span className="font-semibold text-lg sm:text-xl bg-linear-to-r from-[#2F80ED] to-[#14B8A6] bg-clip-text text-transparent">
                 PulmoAI
               </span>
             </div>
-            <h1 className="text-3xl mb-2">Login to your account</h1>
-            <p className="text-gray-600">Enter your credentials to continue</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-2">
+              Login to your account
+            </h1>
+            <p className="text-sm sm:text-base text-gray-500">
+              Enter your credentials to continue
+            </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
@@ -137,8 +142,7 @@ export default function Login() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mt-6">
-             
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-6">
               <button
                 type="button"
                 className="flex items-center justify-center gap-2 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors bg-white cursor-pointer"
@@ -166,7 +170,6 @@ export default function Login() {
                 </span>
               </button>
 
-             
               <button
                 type="button"
                 className="flex items-center justify-center gap-2 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors bg-white cursor-pointer"

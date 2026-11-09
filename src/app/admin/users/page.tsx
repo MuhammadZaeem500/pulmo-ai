@@ -55,12 +55,12 @@ export default function AdminUsersPage() {
     <div className="space-y-6">
      
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Users</h1>
-        <p className="text-xs text-slate-400 font-medium mt-0.5">Manage user accounts, profiles, and access controls.</p>
+        <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Users</h1>
+        <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">Manage user accounts, profiles, and access controls.</p>
       </div>
 
      
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         <DashboardCard>
           <span className="text-[11px] uppercase font-bold tracking-wider text-slate-400 block mb-2">Total Users</span>
           <span className="text-3xl font-extrabold text-blue-600">{users.length}</span>

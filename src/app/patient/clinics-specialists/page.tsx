@@ -65,34 +65,34 @@ export default function ClinicsSpecialistsPage() {
   });
 
   return (
-    <div className="p-8 lg:p-10 max-w-7xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">
+    <div className="p-2 sm:p-4 lg:p-8 max-w-7xl mx-auto space-y-6 sm:space-y-8">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight mb-2">
           Clinics & Specialists
         </h1>
-        <p className="text-gray-500 text-sm">
+        <p className="text-slate-500 text-xs sm:text-sm font-medium">
           Find nearby clinics and pulmonary specialists
         </p>
       </div>
 
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search by name, location, or specialty..."
-          className="w-full bg-white pl-12 pr-4 py-3.5 rounded-2xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 outline-hidden focus:border-blue-500 transition-all shadow-xs"
+          className="w-full bg-white pl-11 sm:pl-12 pr-4 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl border border-gray-200 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 outline-hidden focus:border-blue-500 transition-all shadow-xs"
         />
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
         <button
           onClick={() => {
             setActiveTab("clinics");
             setSearchQuery("");
           }}
-          className={`px-6 py-2.5 rounded-xl font-medium text-sm transition-all cursor-pointer shadow-xs ${
+          className={`flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl font-medium text-xs sm:text-sm transition-all cursor-pointer shadow-xs text-center ${
             activeTab === "clinics"
               ? "bg-[#2F80ED] text-white"
               : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
@@ -105,7 +105,7 @@ export default function ClinicsSpecialistsPage() {
             setActiveTab("specialists");
             setSearchQuery("");
           }}
-          className={`px-6 py-2.5 rounded-xl font-medium text-sm transition-all cursor-pointer ${
+          className={`flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl font-medium text-xs sm:text-sm transition-all cursor-pointer text-center ${
             activeTab === "specialists"
               ? "bg-[#2F80ED] text-white"
               : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"

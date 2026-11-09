@@ -8,16 +8,23 @@ export default function PatientDashboard() {
   const router = useRouter();
   
   return (
-    <div className="p-8 lg:p-10 max-w-7xl mx-auto">
+    <div className="p-2 sm:p-4 lg:p-8 max-w-7xl mx-auto space-y-6 sm:space-y-8">
      
-      <div className="mb-8">
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">Dashboard</h1>
-        <p className="text-gray-500 text-sm">Welcome back! Here&apos;s your health overview</p>
+      {/* Header Section */}
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight mb-3">
+          Dashboard
+        </h1>
+        <p className="text-slate-500 text-xs sm:text-sm font-medium">
+          Welcome back! Here&apos;s your health overview
+        </p>
       </div>
 
      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Responsive Grid Section */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
        
+        {/* Continue Conversation Card */}
         <DashboardCard
           title="Continue Last Conversation"
           icon={MessageCircle}
@@ -29,6 +36,7 @@ export default function PatientDashboard() {
         </DashboardCard>
 
        
+        {/* Recent Medical History Card */}
         <DashboardCard
           title="Recent Medical History"
           icon={FileText}
@@ -41,6 +49,7 @@ export default function PatientDashboard() {
         </DashboardCard>
 
        
+        {/* Upcoming Appointment Card */}
         <DashboardCard
           title="Upcoming Appointment"
           icon={Calendar}
@@ -53,6 +62,7 @@ export default function PatientDashboard() {
         </DashboardCard>
 
        
+        {/* Recent Prescription Card */}
         <DashboardCard
           title="Recent Prescription"
           icon={Pill}
@@ -65,13 +75,14 @@ export default function PatientDashboard() {
         </DashboardCard>
 
        
+        {/* Symptom Tracker Summary Card (Spans full width on medium/large screens) */}
         <DashboardCard
           title="Symptom Tracker Summary"
           icon={Activity}
           iconGradient={true}
           actionText="Track Symptoms →"
           onAction={() => router.push('/patient/symptom-tracker')}
-          className="md:col-span-2"
+          className="sm:col-span-2 lg:col-span-2"
         >
           <p>Last logged: Shortness of breath (Moderate) - May 28, 2026</p>
         </DashboardCard>

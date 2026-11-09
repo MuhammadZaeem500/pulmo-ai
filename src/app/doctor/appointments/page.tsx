@@ -75,24 +75,24 @@ export default function DoctorAppointmentsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-extrabold text-slate-900">Appointments</h1>
-          <p className="text-xs text-slate-400 font-medium mt-0.5">Live Schedule Overview</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">Appointments</h1>
+          <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">Live Schedule Overview</p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="bg-white rounded-xl border border-slate-200/80 px-4 py-2 text-center shadow-sm">
-            <span className="text-sm font-extrabold text-blue-600 block">{totalCount}</span>
-            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Total</span>
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full sm:w-auto">
+          <div className="bg-white rounded-xl border border-slate-200/80 px-3 sm:px-4 py-2 text-center shadow-sm">
+            <span className="text-xs sm:text-sm font-extrabold text-blue-600 block">{totalCount}</span>
+            <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider text-slate-400">Total</span>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200/80 px-4 py-2 text-center shadow-sm">
-            <span className="text-sm font-extrabold text-emerald-600 block">{completedCount}</span>
-            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Completed</span>
+          <div className="bg-white rounded-xl border border-slate-200/80 px-3 sm:px-4 py-2 text-center shadow-sm">
+            <span className="text-xs sm:text-sm font-extrabold text-emerald-600 block">{completedCount}</span>
+            <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider text-slate-400">Completed</span>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200/80 px-4 py-2 text-center shadow-sm">
-            <span className="text-sm font-extrabold text-amber-600 block">{remainingCount}</span>
-            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Remaining</span>
+          <div className="bg-white rounded-xl border border-slate-200/80 px-3 sm:px-4 py-2 text-center shadow-sm">
+            <span className="text-xs sm:text-sm font-extrabold text-amber-600 block">{remainingCount}</span>
+            <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider text-slate-400">Remaining</span>
           </div>
         </div>
       </div>
@@ -137,12 +137,12 @@ export default function DoctorAppointmentsPage() {
             {appointments.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50/60 border border-slate-100"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-50/60 border border-slate-100"
               >
                 {/* Left: time + avatar + name */}
-                <div className="flex items-center gap-4">
-                  <span className="text-xs font-bold text-slate-500 w-24">{item.time}</span>
-                  <div className="w-9 h-9 rounded-xl bg-blue-600 text-white font-bold flex items-center justify-center text-xs shadow-sm">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <span className="text-xs font-bold text-slate-500 w-16 sm:w-24 shrink-0">{item.time}</span>
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-blue-600 text-white font-bold flex items-center justify-center text-xs shadow-sm shrink-0">
                     {item.patientInitials || "PT"}
                   </div>
                   <div>
@@ -154,7 +154,7 @@ export default function DoctorAppointmentsPage() {
                 </div>
 
                 {/* Right: status badge + actions */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap justify-end sm:justify-start">
                   {item.status === "Completed" ? (
                     <span className="text-xs font-semibold px-3 py-1.5 rounded-lg text-emerald-600 bg-emerald-50 flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5" /> Completed

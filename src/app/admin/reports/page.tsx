@@ -82,8 +82,8 @@ export default function AdminReportsPage() {
     <div className="space-y-6">
      
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Reports</h1>
-        <p className="text-xs text-slate-400 font-medium mt-0.5">Generate, download, and export administrative reports.</p>
+        <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Reports</h1>
+        <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">Generate, download, and export administrative reports.</p>
       </div>
 
      

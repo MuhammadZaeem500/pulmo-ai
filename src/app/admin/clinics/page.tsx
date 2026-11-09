@@ -63,14 +63,14 @@ export default function AdminClinicsPage() {
   return (
     <div className="space-y-6 relative">
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Clinics & Hospitals</h1>
-          <p className="text-xs text-slate-400 font-medium mt-0.5">Manage and verify healthcare facilities on the platform.</p>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Clinics & Hospitals</h1>
+          <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">Manage and verify healthcare facilities on the platform.</p>
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition-all cursor-pointer"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition-all cursor-pointer w-full sm:w-auto"
         >
           <Plus className="w-4 h-4" />
           Add Clinic

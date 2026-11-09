@@ -32,17 +32,17 @@ export default function MedicalRecordDetailsModal({ isOpen, onClose, record, onE
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
-      <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200 space-y-6 text-left">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-4 backdrop-blur-xs">
+      <div className="bg-white rounded-2xl max-w-xl w-full p-4 sm:p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200 space-y-4 sm:space-y-6 text-left max-h-[90vh] overflow-y-auto">
         
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+        <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-blue-50 text-[#2F80ED] rounded-xl">
-              <FileText className="w-6 h-6" />
+            <div className="p-2 sm:p-2.5 bg-blue-50 text-[#2F80ED] rounded-xl shrink-0">
+              <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-950">Medical Record Details</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-gray-950">Medical Record Details</h2>
               <p className="text-xs text-gray-500">
                 Logged on {new Date(record.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
               </p>
@@ -50,7 +50,7 @@ export default function MedicalRecordDetailsModal({ isOpen, onClose, record, onE
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+            className="p-1.5 sm:p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -123,7 +123,7 @@ export default function MedicalRecordDetailsModal({ isOpen, onClose, record, onE
         </div>
 
         {/* Footer Actions (Edit & Delete) */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 sm:pt-4 border-t border-gray-100">
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -131,7 +131,7 @@ export default function MedicalRecordDetailsModal({ isOpen, onClose, record, onE
                 onClose();
                 onEdit(record);
               }}
-              className="px-4 py-2.5 bg-blue-50 hover:bg-blue-100 text-[#2F80ED] text-sm font-medium rounded-xl transition-colors cursor-pointer flex items-center gap-2"
+              className="flex-1 sm:flex-none justify-center px-4 py-2.5 bg-blue-50 hover:bg-blue-100 text-[#2F80ED] text-xs sm:text-sm font-medium rounded-xl transition-colors cursor-pointer flex items-center gap-2"
             >
               <Edit3 className="w-4 h-4" />
               Edit
@@ -140,7 +140,7 @@ export default function MedicalRecordDetailsModal({ isOpen, onClose, record, onE
               type="button"
               onClick={handleDelete}
               disabled={deleting}
-              className="px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-sm font-medium rounded-xl transition-colors cursor-pointer flex items-center gap-2 disabled:opacity-50"
+              className="flex-1 sm:flex-none justify-center px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs sm:text-sm font-medium rounded-xl transition-colors cursor-pointer flex items-center gap-2 disabled:opacity-50"
             >
               {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
               Delete
@@ -150,7 +150,7 @@ export default function MedicalRecordDetailsModal({ isOpen, onClose, record, onE
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-xl transition-colors cursor-pointer"
+            className="w-full sm:w-auto px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-medium rounded-xl transition-colors cursor-pointer text-center"
           >
             Close
           </button>

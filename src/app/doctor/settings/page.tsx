@@ -169,15 +169,15 @@ export default function DoctorSettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-extrabold text-slate-900">Settings</h1>
-        <p className="text-xs text-slate-400 font-medium mt-0.5">Manage your account preferences</p>
+        <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Settings</h1>
+        <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">Manage your account preferences</p>
       </div>
 
       {error && <div className="p-3 bg-rose-50 border border-rose-200 text-rose-600 text-xs rounded-xl font-medium">{error}</div>}
       {successMsg && <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-600 text-xs rounded-xl font-medium">{successMsg}</div>}
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-2 shadow-sm space-y-1">
+        <div className="flex flex-row overflow-x-auto lg:flex-col bg-white rounded-2xl border border-slate-200/80 p-2 shadow-sm gap-1 pb-2 sm:pb-2 lg:pb-2">
           {navTabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -185,7 +185,7 @@ export default function DoctorSettingsPage() {
               <button
                 key={tab.id}
                 onClick={() => { setActiveTab(tab.id); setError(""); setSuccessMsg(""); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold transition-all ${
+                className={`flex items-center gap-2.5 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs font-semibold transition-all whitespace-nowrap shrink-0 lg:shrink lg:w-full ${
                   isActive
                     ? "bg-blue-50 text-blue-600 shadow-sm"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"

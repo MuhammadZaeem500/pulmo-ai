@@ -131,8 +131,8 @@ export default function AdminNotificationsPage() {
      
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Notifications</h1>
-          <p className="text-xs text-slate-400 font-medium mt-0.5">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Notifications</h1>
+          <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">
             You have {unreadCount} unread notification{unreadCount === 1 ? "" : "s"}.
           </p>
         </div>
