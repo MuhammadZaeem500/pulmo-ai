@@ -3,12 +3,15 @@
 import { useState, useEffect } from "react";
 import DoctorClinicCard from "@/components/common/DoctorClinicCard";
 import { Search, Building2, User, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function ClinicsSpecialistsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"clinics" | "specialists">(
     "clinics",
   );
+
+  const router = useRouter();
 
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -153,11 +156,9 @@ export default function ClinicsSpecialistsPage() {
                   ? "View Details & Book"
                   : "Book Appointment"
               }
-              onActionClick={() =>
-                console.log(
-                  `Action clicked for ${activeTab === "clinics" ? item.name : item.fullName}`,
-                )
-              }
+              onActionClick={() => {
+                router.push(`/patient/appointments`);
+              }}
             />
           ))
         ) : (

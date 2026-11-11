@@ -14,8 +14,8 @@ export default function AvailableDoctorCard({
         <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-0.5">{name}</h3>
         <p className="text-xs text-gray-500 mb-1.5 sm:mb-2">{specialty}</p>
         <div className="flex items-center gap-1.5 text-xs text-gray-500">
-          <Calendar className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-          <span>Next available: {nextAvailable}</span>
+          {/* <Calendar className="w-3.5 h-3.5 text-gray-400 shrink-0" /> */}
+          {/* <span>Next available: {nextAvailable}</span> */}
         </div>
       </div>
       <button

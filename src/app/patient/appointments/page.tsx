@@ -18,9 +18,17 @@ export default function AppointmentsPage() {
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
   const [selectedClinicId, setSelectedClinicId] = useState('');
   const [date, setDate] = useState('');
-  const [time, setTime] = useState('09:00:00');
+  const [time, setTime] = useState('09:00');
   const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  // Minimum date for date picker (today)
+  const todayString = new Date().toISOString().split('T')[0];
+
+  // Computed selected day of the week safely parsed
+  const selectedDayOfWeek = date && !isNaN(new Date(date + 'T00:00:00').getTime())
+    ? new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long' }) 
+    : '';
 
   // Fetch registered doctors from the backend directory API
   const fetchDoctors = async () => {
@@ -35,6 +43,10 @@ export default function AppointmentsPage() {
 
       if (!response.ok) throw new Error('Failed to fetch doctors');
       const result = await response.json();
+      
+      console.log('🩺 Fetched Doctors Directory Response:', result);
+      console.log('🩺 Doctor Profiles Array:', result.data);
+
       setAvailableDoctors(result.data || []);
     } catch (error) {
       console.error('Error fetching doctors:', error);
@@ -69,11 +81,73 @@ export default function AppointmentsPage() {
     fetchAppointments();
   }, []);
 
-  // Handle booking submission
+  // Robust lookup supporting id, userId, or nested user records
+  const selectedDoctor = availableDoctors.find(d => 
+    d.id === selectedDoctorId || 
+    d.userId === selectedDoctorId || 
+    d.user?.id === selectedDoctorId
+  );
+
+  useEffect(() => {
+    if (selectedDoctorId) {
+      console.log('🎯 Currently Selected Doctor ID:', selectedDoctorId);
+      console.log('🎯 Resolved Selected Doctor Object:', selectedDoctor);
+      console.log('⏰ Doctor Consultation Hours:', selectedDoctor?.consultationHours);
+    }
+  }, [selectedDoctorId, selectedDoctor]);
+
+  // Validate if selected time falls within doctor's consultation hours
+  const validateConsultationHours = () => {
+    if (!selectedDoctor?.consultationHours || !date || !time) return true;
+
+    const dayOfWeek = new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long' });
+    const entries = selectedDoctor.consultationHours.split(';');
+    const dayEntry = entries.find((e: string) => e.trim().startsWith(dayOfWeek));
+
+    if (!dayEntry) return true;
+
+    if (dayEntry.toLowerCase().includes('closed')) {
+      alert(`The doctor is closed on ${dayOfWeek}. Please choose another date.`);
+      return false;
+    }
+
+    const colonIndex = dayEntry.indexOf(':');
+    const timeRange = dayEntry.substring(colonIndex + 1).trim();
+    const [openTime, closeTime] = timeRange.split('-').map((t: string) => t?.trim());
+
+    if (openTime && closeTime) {
+      if (time < openTime || time > closeTime) {
+        alert(`Selected time (${time}) is outside the doctor's working hours for ${dayOfWeek} (${openTime} - ${closeTime}).`);
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  // Handle booking submission with strict validation
   const handleBookAppointment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedDoctorId || !date) {
-      alert('Please select a doctor and a date.');
+    
+    if (!selectedDoctorId) {
+      alert('Please select a doctor from the list.');
+      return;
+    }
+    if (!date) {
+      alert('Please select an appointment date.');
+      return;
+    }
+    if (!time) {
+      alert('Please select an appointment time.');
+      return;
+    }
+    if (!reason.trim()) {
+      alert('Please provide a reason or symptoms for your visit.');
+      return;
+    }
+
+    // Validate consultation hours before making API request
+    if (!validateConsultationHours()) {
       return;
     }
 
@@ -81,8 +155,8 @@ export default function AppointmentsPage() {
     try {
       const token = localStorage.getItem('token');
       
-      // Combine date and time into a proper ISO string
-      const scheduledAt = new Date(`${date}T${time}`).toISOString();
+      const formattedTime = time.length === 5 ? `${time}:00` : time;
+      const scheduledAt = new Date(`${date}T${formattedTime}`).toISOString();
 
       const response = await fetch('http://localhost:3000/patient/appointments', {
         method: 'POST',
@@ -108,7 +182,7 @@ export default function AppointmentsPage() {
       setActiveTab('previous');
     } catch (error) {
       console.error('Error booking appointment:', error);
-      alert('Failed to book appointment.');
+      alert('Failed to book appointment. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -159,26 +233,30 @@ export default function AppointmentsPage() {
               </div>
             ) : availableDoctors.length > 0 ? (
               <div className="space-y-3">
-                {availableDoctors.map((doc) => (
-                  <div
-                    key={doc.id}
-                    onClick={() => {
-                      setSelectedDoctorId(doc.id);
-                      if (doc.facilityId) setSelectedClinicId(doc.facilityId);
-                    }}
-                    className={`cursor-pointer transition-all rounded-xl ${selectedDoctorId === doc.id ? 'ring-2 ring-blue-500' : ''}`}
-                  >
-                    <AvailableDoctorCard
-                      name={doc.fullName}
-                      specialty={doc.specialization}
-                      nextAvailable="Available Soon"
-                      onBook={() => {
-                        setSelectedDoctorId(doc.id);
+                {availableDoctors.map((doc) => {
+                  const docId = doc.id || doc.userId || doc.user?.id;
+                  const isSelected = selectedDoctorId === docId;
+                  return (
+                    <div
+                      key={docId}
+                      onClick={() => {
+                        setSelectedDoctorId(docId);
                         if (doc.facilityId) setSelectedClinicId(doc.facilityId);
                       }}
-                    />
-                  </div>
-                ))}
+                      className={`cursor-pointer transition-all rounded-xl ${isSelected ? 'ring-2 ring-blue-500 shadow-md bg-blue-50/20' : ''}`}
+                    >
+                      <AvailableDoctorCard
+                        name={doc.fullName}
+                        specialty={doc.specialization}
+                        nextAvailable={doc.consultationHours || "Consultation hours not specified"}
+                        onBook={() => {
+                          setSelectedDoctorId(docId);
+                          if (doc.facilityId) setSelectedClinicId(doc.facilityId);
+                        }}
+                      />
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <p className="text-sm text-gray-500">No registered doctors available right now.</p>
@@ -188,29 +266,80 @@ export default function AppointmentsPage() {
           <div className="bg-white rounded-2xl p-4 sm:p-6 lg:p-8 border border-gray-100 shadow-xs space-y-4">
             <h2 className="text-base sm:text-lg font-bold text-gray-900">Booking Details</h2>
             <div className="space-y-4">
+              
+              {/* Date Selection with Sanity Check & Automatic Day Display */}
               <div>
-                <label className="block text-xs font-semibold text-gray-400 tracking-wider uppercase mb-1.5">Select Date</label>
+                <div className="flex justify-between items-center mb-1.5 flex-wrap gap-2">
+                  <label className="block text-xs font-semibold text-gray-400 tracking-wider uppercase">Select Date</label>
+                  {selectedDayOfWeek && (
+                    <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-100">
+                      📅 Selected Day: {selectedDayOfWeek}
+                    </span>
+                  )}
+                </div>
                 <input
                   type="date"
+                  min={todayString}
+                  max="2100-12-31"
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl text-xs sm:text-sm bg-white focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20 shadow-xs"
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val) {
+                      const yearPart = val.split('-')[0];
+                      if (yearPart && yearPart.length > 4) return;
+                    }
+                    setDate(val);
+                  }}
+                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl text-xs sm:text-sm bg-white focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20 shadow-xs text-slate-700"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 tracking-wider uppercase mb-1.5">Select Time</label>
-                <select 
-                  value={time} 
+              
+              {/* Time Selection with Structured Doctor Availability List */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-center flex-wrap gap-2">
+                  <label className="block text-xs font-semibold text-gray-400 tracking-wider uppercase">Select Time</label>
+                  <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100 flex items-center gap-1.5">
+                    🕒 Doctor Schedule Overview
+                  </span>
+                </div>
+
+                {/* Structured List of Weekly Availability */}
+                {selectedDoctor?.consultationHours ? (
+                  <div className="bg-slate-50/70 p-3.5 rounded-2xl border border-slate-200/80">
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Weekly Consultation Hours</p>
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {selectedDoctor.consultationHours.split(";").map((item: string, idx: number) => {
+                        const colonIndex = item.indexOf(":");
+                        if (colonIndex === -1) return null;
+                        const day = item.substring(0, colonIndex).trim();
+                        const timeSlot = item.substring(colonIndex + 1).trim();
+                        const isClosed = timeSlot.toLowerCase().includes("closed");
+                        
+                        return (
+                          <li key={idx} className="flex items-center justify-between text-xs font-semibold text-slate-700 bg-white px-3 py-2 rounded-xl border border-slate-200/60 shadow-2xs">
+                            <span className="text-slate-900 font-bold">{day}</span>
+                            <span className={isClosed ? "text-rose-500 font-medium italic" : "text-emerald-600 font-medium"}>
+                              {timeSlot}
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                ) : (
+                  <div className="bg-amber-50/50 border border-amber-100 p-3 rounded-xl text-xs font-medium text-amber-600">
+                    {selectedDoctorId ? '⚠️ Consultation hours not specified by this doctor yet.' : '👆 Please select a doctor above to view their consultation schedule.'}
+                  </div>
+                )}
+
+                <input
+                  type="time"
+                  value={time}
                   onChange={(e) => setTime(e.target.value)}
-                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl text-xs sm:text-sm bg-white focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20 shadow-xs"
-                >
-                  <option value="09:00:00">9:00 AM</option>
-                  <option value="10:00:00">10:00 AM</option>
-                  <option value="14:00:00">2:00 PM</option>
-                  <option value="15:00:00">3:00 PM</option>
-                  <option value="16:00:00">4:00 PM</option>
-                </select>
+                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl text-xs sm:text-sm bg-white focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20 shadow-xs text-slate-700 mt-2"
+                />
               </div>
+
               <div>
                 <label className="block text-xs font-semibold text-gray-400 tracking-wider uppercase mb-1.5">Reason for Visit</label>
                 <textarea
@@ -218,9 +347,10 @@ export default function AppointmentsPage() {
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Describe your symptoms or reason for consultation..."
-                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl text-xs sm:text-sm bg-white focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20 shadow-xs resize-none"
+                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl text-xs sm:text-sm bg-white focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20 shadow-xs resize-none text-slate-700"
                 />
               </div>
+
               <button 
                 type="submit" 
                 disabled={submitting}
