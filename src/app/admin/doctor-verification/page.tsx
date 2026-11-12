@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import api from "@/services/api";
-import { ShieldCheck, UserCheck, XCircle, Stethoscope, Mail } from "lucide-react";
-import DoctorRequest from "@/types/admin.types";
+import { ShieldCheck, UserCheck, XCircle, Stethoscope, Mail, Eye, X } from "lucide-react";
 
 export default function DoctorVerificationPage() {
   const [pendingDoctors, setPendingDoctors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [selectedDoctor, setSelectedDoctor] = useState<any | null>(null);
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -17,8 +17,9 @@ export default function DoctorVerificationPage() {
         setLoading(true);
         const response = await api.get("/admin/doctors");
         
-        // Filter pending doctor requests
-        const pending = response.data.filter(
+        const data = response.data || response;
+
+        const pending = data.filter(
           (doc: any) => doc.verificationStatus === "PENDING"
         );
         setPendingDoctors(pending);
@@ -38,8 +39,8 @@ export default function DoctorVerificationPage() {
 
       await api.patch(`/admin/doctors/${doctorId}/verify`, { status });
       
-      // Remove processed doctor from the list
       setPendingDoctors((prev) => prev.filter((doc) => doc.id !== doctorId));
+      setSelectedDoctor(null);
       
     } catch (err: any) {
       alert(err.response?.data?.message || "Failed to update doctor status. Please try again.");
@@ -137,11 +138,17 @@ export default function DoctorVerificationPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 pt-3 sm:pt-0 w-full sm:w-auto justify-end border-t border-slate-100 sm:border-none">
+                <div className="flex items-center gap-2 pt-3 sm:pt-0 w-full sm:w-auto justify-end border-t border-slate-100 sm:border-none">
+                  <button
+                    onClick={() => setSelectedDoctor(doc)}
+                    className="py-2 px-3 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 font-bold text-xs flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Eye className="w-4 h-4 text-blue-600" /> Details
+                  </button>
                   <button
                     onClick={() => handleStatusUpdate(doc.id, "REJECTED")}
                     disabled={actionLoading === doc.id}
-                    className="grow sm:grow-0 text-center py-2.5 px-5 rounded-xl border border-red-200 text-red-700 font-semibold text-sm hover:bg-red-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
+                    className="py-2.5 px-4 rounded-xl border border-red-200 text-red-700 font-semibold text-sm hover:bg-red-50 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:pointer-events-none"
                   >
                     <XCircle className="w-4 h-4" />
                     {actionLoading === doc.id ? "..." : "Reject"}
@@ -149,10 +156,10 @@ export default function DoctorVerificationPage() {
                   <button
                     onClick={() => handleStatusUpdate(doc.id, "APPROVED")}
                     disabled={actionLoading === doc.id}
-                    className="grow sm:grow-0 text-center py-2.5 px-5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold text-sm hover:from-blue-700 hover:to-blue-800 transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 disabled:pointer-events-none"
+                    className="py-2.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold text-sm hover:from-blue-700 hover:to-blue-800 transition-all flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50 disabled:pointer-events-none"
                   >
                     <UserCheck className="w-4 h-4" />
-                    {actionLoading === doc.id ? "Updating..." : "Verify & Approve"}
+                    {actionLoading === doc.id ? "Updating..." : "Verify"}
                   </button>
                 </div>
               </div>
@@ -161,6 +168,120 @@ export default function DoctorVerificationPage() {
           <p className="text-xs text-slate-400 text-right pt-4">
             Requests are ordered by submission date, newest first.
           </p>
+        </div>
+      )}
+
+      {/* DETAIL MODAL FOR SUBMITTED RECORDS */}
+      {selectedDoctor && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <h2 className="text-lg font-extrabold text-slate-900">Doctor Credentials Review</h2>
+                <p className="text-xs text-slate-400">Complete record of submitted registration data</p>
+              </div>
+              <button 
+                onClick={() => setSelectedDoctor(null)}
+                className="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs max-h-[60vh] overflow-y-auto pr-1">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-50 p-3 rounded-2xl space-y-1">
+                  <span className="text-slate-400 font-semibold block">Full Name</span>
+                  <span className="font-bold text-slate-800 text-sm">{selectedDoctor.fullName}</span>
+                </div>
+                <div className="bg-slate-50 p-3 rounded-2xl space-y-1">
+                  <span className="text-slate-400 font-semibold block">Email Address</span>
+                  <span className="font-bold text-slate-800">{selectedDoctor.user?.email || 'N/A'}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-50 p-3 rounded-2xl space-y-1">
+                  <span className="text-slate-400 font-semibold block">Specialization</span>
+                  <span className="font-bold text-slate-800">{selectedDoctor.specialization}</span>
+                </div>
+                <div className="bg-slate-50 p-3 rounded-2xl space-y-1">
+                  <span className="text-slate-400 font-semibold block">License Number</span>
+                  <span className="font-bold text-slate-800">{selectedDoctor.licenseNumber}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-50 p-3 rounded-2xl space-y-1">
+                  <span className="text-slate-400 font-semibold block">Phone Number</span>
+                  <span className="font-bold text-slate-800">{selectedDoctor.phone || 'Not provided'}</span>
+                </div>
+                <div className="bg-slate-50 p-3 rounded-2xl space-y-1">
+                  <span className="text-slate-400 font-semibold block">Experience</span>
+                  <span className="font-bold text-slate-800">{selectedDoctor.yearsOfExperience ? `${selectedDoctor.yearsOfExperience} Years` : 'Not specified'}</span>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 p-3 rounded-2xl space-y-1">
+                <span className="text-slate-400 font-semibold block">Hospital / Clinic Affiliation</span>
+                <span className="font-bold text-slate-800">{selectedDoctor.hospitalAffiliation || 'Independent Practice'}</span>
+              </div>
+
+              <div className="bg-slate-50 p-3 rounded-2xl space-y-1">
+                <span className="text-slate-400 font-semibold block">Qualifications</span>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {selectedDoctor.qualifications && selectedDoctor.qualifications.length > 0 ? (
+                    selectedDoctor.qualifications.map((q: string, i: number) => (
+                      <span key={i} className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-md font-bold text-[10px]">
+                        {q}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-slate-500">None listed</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-slate-50 p-3 rounded-2xl space-y-2">
+                <span className="text-slate-400 font-semibold block">Consultation Hours</span>
+                <div className="space-y-1">
+                  {selectedDoctor.consultationHours ? (
+                    selectedDoctor.consultationHours.split(';').map((slot: string, i: number) => {
+                      const trimmed = slot.trim();
+                      if (!trimmed) return null;
+                      const [day, time] = trimmed.split(': ');
+                      const isClosed = time?.toLowerCase() === 'closed';
+                      return (
+                        <div key={i} className="flex items-center justify-between text-xs py-1 border-b border-slate-200/50 last:border-none">
+                          <span className="font-bold text-slate-700">{day}</span>
+                          <span className={`font-medium ${isClosed ? 'text-rose-500' : 'text-slate-600'}`}>
+                            {time || 'Closed'}
+                          </span>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <span className="text-slate-500">Standard hours</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+              <button
+                onClick={() => handleStatusUpdate(selectedDoctor.id, "REJECTED")}
+                className="px-4 py-2.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold text-xs cursor-pointer"
+              >
+                Reject Account
+              </button>
+              <button
+                onClick={() => handleStatusUpdate(selectedDoctor.id, "APPROVED")}
+                className="px-5 py-2.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 font-bold text-xs shadow-md cursor-pointer"
+              >
+                Verify & Approve Account
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
