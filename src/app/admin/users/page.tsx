@@ -177,8 +177,8 @@ export default function AdminUsersPage() {
         </div>
 
         {/* Users Table */}
-        <div className="overflow-x-auto rounded-lg border border-slate-100">
-          <table className="w-full text-left border-collapse min-w-max sm:min-w-0">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-100 text-[11px] uppercase font-bold text-slate-400 tracking-wider">
                 <th className="py-3 px-4">User</th>
