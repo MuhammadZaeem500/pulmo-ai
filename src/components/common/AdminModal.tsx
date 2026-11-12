@@ -14,8 +14,8 @@ export default function AdminModal({ isOpen, onClose, title, children }: AdminMo
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-      <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 overflow-y-auto">
+      <div className="bg-white rounded-3xl max-w-md sm:max-w-lg w-full p-4 sm:p-6 space-y-5 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 my-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <h3 className="text-sm font-extrabold text-slate-900">{title}</h3>
           <button onClick={onClose} className="p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer">

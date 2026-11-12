@@ -234,8 +234,8 @@ export default function AdminClinicsPage() {
         </div>
 
         {/* RESPONSIVE TABLE CONTAINER */}
-        <div className="overflow-x-auto min-h-[300px]">
-          <table className="w-full text-left border-collapse min-w-[750px]">
+        <div className="overflow-x-auto min-h-[300px] rounded-xl border border-slate-100">
+          <table className="w-full text-left border-collapse min-w-max sm:min-w-0">
             <thead>
               <tr className="border-b border-slate-100 text-[11px] uppercase font-bold text-slate-400 tracking-wider">
                 <th className="py-3 px-4">Facility</th>
@@ -307,7 +307,7 @@ export default function AdminClinicsPage() {
                         </button>
 
                         {activeDropdownId === clinic.id && (
-                          <div className="absolute right-0 bottom-full mb-2 sm:bottom-auto sm:top-full sm:mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2 z-50 text-left">
+                          <div className="absolute -right-4 sm:right-0 bottom-full mb-2 sm:bottom-auto sm:top-full sm:mt-2 w-56 sm:w-48 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2 z-50 text-left">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();

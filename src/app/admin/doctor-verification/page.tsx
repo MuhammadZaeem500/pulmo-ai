@@ -173,8 +173,8 @@ export default function DoctorVerificationPage() {
 
       {/* DETAIL MODAL FOR SUBMITTED RECORDS */}
       {selectedDoctor && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-4 sm:p-6 space-y-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 my-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div>
                 <h2 className="text-lg font-extrabold text-slate-900">Doctor Credentials Review</h2>
@@ -189,29 +189,29 @@ export default function DoctorVerificationPage() {
             </div>
 
             <div className="space-y-4 text-xs max-h-[60vh] overflow-y-auto pr-1">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-slate-50 p-3 rounded-2xl space-y-1">
                   <span className="text-slate-400 font-semibold block">Full Name</span>
                   <span className="font-bold text-slate-800 text-sm">{selectedDoctor.fullName}</span>
                 </div>
                 <div className="bg-slate-50 p-3 rounded-2xl space-y-1">
                   <span className="text-slate-400 font-semibold block">Email Address</span>
-                  <span className="font-bold text-slate-800">{selectedDoctor.user?.email || 'N/A'}</span>
+                  <span className="font-bold text-slate-800 break-all">{selectedDoctor.user?.email || 'N/A'}</span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-slate-50 p-3 rounded-2xl space-y-1">
                   <span className="text-slate-400 font-semibold block">Specialization</span>
                   <span className="font-bold text-slate-800">{selectedDoctor.specialization}</span>
                 </div>
                 <div className="bg-slate-50 p-3 rounded-2xl space-y-1">
                   <span className="text-slate-400 font-semibold block">License Number</span>
-                  <span className="font-bold text-slate-800">{selectedDoctor.licenseNumber}</span>
+                  <span className="font-bold text-slate-800 break-all">{selectedDoctor.licenseNumber}</span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-slate-50 p-3 rounded-2xl space-y-1">
                   <span className="text-slate-400 font-semibold block">Phone Number</span>
                   <span className="font-bold text-slate-800">{selectedDoctor.phone || 'Not provided'}</span>
