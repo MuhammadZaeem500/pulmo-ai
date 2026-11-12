@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DashboardCard from "@/components/common/DashboardCard";
 import { 
   Building2, 
@@ -9,126 +9,120 @@ import {
   Info, 
   Check, 
   X, 
-  CheckCheck 
+  CheckCheck,
+  Loader2,
+  MailOpen
 } from "lucide-react";
-import {Notification} from "@/types/admin.types";
+import { Notification } from "@/types/admin.types";
+import api from "@/services/api";
 
 export default function AdminNotificationsPage() {
-  const [activeTab, setActiveTab] = useState<"All" | "Verification" | "Security" | "System" | "Update">("All");
+  const [activeTab, setActiveTab] = useState<"All" | "Unread" | "Read" | "Verification" | "Security" | "System" | "Update">("All");
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: "1",
-      title: "Clinic verification request",
-      description: "Breathe Well Clinic (Austin, TX) submitted a verification request. Review the application to approve or reject.",
-      time: "10 min ago",
-      type: "Verification",
-      isRead: false,
-      isUrgent: true,
-      icon: Building2,
-      badgeBg: "bg-blue-50 text-blue-600",
-      borderColor: "border-l-4 border-l-blue-500"
-    },
-    {
-      id: "2",
-      title: "Critical security alert",
-      description: "Multiple failed login attempts from IP 192.168.1.47. The account has been automatically locked.",
-      time: "34 min ago",
-      type: "Security",
-      isRead: false,
-      isUrgent: true,
-      icon: ShieldAlert,
-      badgeBg: "bg-rose-50 text-rose-600",
-      borderColor: "border-l-4 border-l-rose-500"
-    },
-    {
-      id: "3",
-      title: "Sunrise Medical Center pending",
-      description: "Sunrise Medical Center (Miami, FL) has been awaiting verification for 3 days. Action required.",
-      time: "1 hr ago",
-      type: "Verification",
-      isRead: false,
-      isUrgent: true,
-      icon: Building2,
-      badgeBg: "bg-blue-50 text-blue-600",
-      borderColor: "border-l-4 border-l-blue-500"
-    },
-    {
-      id: "4",
-      title: "System maintenance scheduled",
-      description: "PulmoAI platform will undergo scheduled maintenance on June 15, 2026 from 2:00–4:00 AM UTC.",
-      time: "5 hr ago",
-      type: "System",
-      isRead: true,
-      icon: Settings,
-      badgeBg: "bg-purple-50 text-purple-600"
-    },
-    {
-      id: "5",
-      title: "Admin role updated",
-      description: "User Dr. Emily Watson has been granted Clinic Manager privileges by Super Admin.",
-      time: "Yesterday",
-      type: "Update",
-      isRead: true,
-      icon: Info,
-      badgeBg: "bg-teal-50 text-teal-600"
-    },
-    {
-      id: "6",
-      title: "Fake review cluster removed",
-      description: "14 suspicious reviews for Metro Clinic have been removed following automated detection.",
-      time: "Yesterday",
-      type: "Security",
-      isRead: true,
-      icon: ShieldAlert,
-      badgeBg: "bg-rose-50 text-rose-600"
-    },
-    {
-      id: "7",
-      title: "Monthly analytics report ready",
-      description: "The May 2026 healthcare analytics report has been generated and is ready for download.",
-      time: "Jun 10, 2026",
-      type: "System",
-      isRead: true,
-      icon: Settings,
-      badgeBg: "bg-purple-50 text-purple-600"
-    },
-    {
-      id: "8",
-      title: "New admin registered",
-      description: "Dr. Robert Tanner has completed registration as a Support Admin. Account is pending super admin approval.",
-      time: "Jun 9, 2026",
-      type: "Update",
-      isRead: true,
-      icon: Info,
-      badgeBg: "bg-teal-50 text-teal-600"
-    },
-  ]);
+  useEffect(() => {
+    async function loadNotifications() {
+      try {
+        setLoading(true);
+        const res = await api.get('/admin/notifications');
+        const data = res.data.notifications || res.data;
+
+        const mapped = data.map((item: any) => {
+          let icon = Info;
+          let badgeBg = "bg-teal-50 text-teal-600";
+          let borderColor = "";
+
+          if (item.type === "Verification") {
+            icon = Building2;
+            badgeBg = "bg-blue-50 text-blue-600";
+            borderColor = "border-l-4 border-l-blue-500";
+          } else if (item.type === "Security") {
+            icon = ShieldAlert;
+            badgeBg = "bg-rose-50 text-rose-600";
+            borderColor = "border-l-4 border-l-rose-500";
+          } else if (item.type === "System") {
+            icon = Settings;
+            badgeBg = "bg-purple-50 text-purple-600";
+          }
+
+          return {
+            ...item,
+            icon,
+            badgeBg,
+            borderColor: item.isRead ? "" : borderColor,
+          };
+        });
+
+        setNotifications(mapped);
+      } catch (err: any) {
+        setError(err.message || "Failed to load notifications.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadNotifications();
+  }, []);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
+  const readCount = notifications.filter(n => n.isRead).length;
 
-  const handleMarkAllRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, isRead: true, isUrgent: false, borderColor: undefined })));
+const handleMarkAllRead = async () => {
+    try {
+      await api.patch('/admin/notifications/read-all');
+      setNotifications(notifications.map(n => ({ ...n, isRead: true, isUrgent: false, borderColor: undefined })));
+    } catch (err) {
+      console.error("Failed to mark all read", err);
+    }
   };
 
-  const handleMarkAsRead = (id: string, e: React.MouseEvent) => {
+  const handleMarkAsRead = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setNotifications(notifications.map(n => n.id === id ? { ...n, isRead: true, isUrgent: false, borderColor: undefined } : n));
+    try {
+      await api.patch(`/admin/notifications/${id}/read`);
+      setNotifications(notifications.map(n => n.id === id ? { ...n, isRead: true, isUrgent: false, borderColor: undefined } : n));
+    } catch (err) {
+      console.error("Failed to mark notification read", err);
+    }
   };
 
-  const handleDismiss = (id: string, e: React.MouseEvent) => {
+const handleDismiss = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setNotifications(notifications.filter(n => n.id !== id));
+    try {
+      await api.delete(`/admin/notifications/${id}`);
+      setNotifications(notifications.filter(n => n.id !== id)); // Changed .map to .filter
+    } catch (err) {
+      console.error("Failed to delete notification", err);
+    }
   };
 
   const filteredNotifications = notifications.filter(n => {
     if (activeTab === "All") return true;
+    if (activeTab === "Unread") return !n.isRead;
+    if (activeTab === "Read") return n.isRead;
     return n.type === activeTab;
   });
 
+  if (loading) {
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-rose-50 border border-rose-200 text-rose-600 p-4 rounded-xl text-sm font-medium">
+        Error loading notifications: {error}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-     
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Notifications</h1>
@@ -144,10 +138,14 @@ export default function AdminNotificationsPage() {
         </button>
       </div>
 
-     
+      {/* Navigation Tabs including All and Unread */}
       <div className="flex items-center gap-2 bg-white p-1.5 rounded-2xl border border-slate-200/80 w-fit shadow-xs overflow-x-auto">
-        {(["All", "Verification", "Security", "System", "Update"] as const).map((tab) => {
-          const count = tab === "All" ? notifications.length : notifications.filter(n => n.type === tab).length;
+        {(["All", "Unread", "Read", "Verification", "Security", "System", "Update"] as const).map((tab) => {
+          let count = notifications.length;
+          if (tab === "Unread") count = unreadCount;
+          else if (tab === "Read") count = readCount;
+          else if (tab !== "All") count = notifications.filter(n => n.type === tab).length;
+
           return (
             <button
               key={tab}
@@ -159,23 +157,21 @@ export default function AdminNotificationsPage() {
               }`}
             >
               <span>{tab}</span>
-              {tab !== "All" && (
-                <span className={`px-1.5 py-0.2 rounded-md text-[10px] ${
-                  activeTab === tab ? "bg-blue-700 text-white" : "bg-slate-100 text-slate-600"
-                }`}>
-                  {count}
-                </span>
-              )}
+              <span className={`px-1.5 py-0.2 rounded-md text-[10px] ${
+                activeTab === tab ? "bg-blue-700 text-white" : "bg-slate-100 text-slate-600"
+              }`}>
+                {count}
+              </span>
             </button>
           );
         })}
       </div>
 
-     
+      {/* Notifications Feed */}
       <div className="space-y-3">
         {filteredNotifications.length > 0 ? (
           filteredNotifications.map((notif) => {
-            const NotifIcon = notif.icon;
+            const NotifIcon = notif.icon || Info;
             return (
               <DashboardCard 
                 key={notif.id}
@@ -183,25 +179,27 @@ export default function AdminNotificationsPage() {
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4">
-                   
-                    <div className={`w-10 h-10 rounded-xl ${notif.badgeBg} flex items-center justify-center shrink-0 mt-0.5 shadow-xs`}>
+                    <div className={`w-10 h-10 rounded-xl ${notif.badgeBg || "bg-slate-100 text-slate-600"} flex items-center justify-center shrink-0 mt-0.5 shadow-xs`}>
                       <NotifIcon className="w-5 h-5" />
                     </div>
 
-                   
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="text-sm font-bold text-slate-900">{notif.title}</h3>
                         
-                       
                         {notif.isUrgent && (
                           <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
                         )}
 
-                       
-                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${notif.badgeBg}`}>
+                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${notif.badgeBg || "bg-slate-100 text-slate-600"}`}>
                           {notif.type}
                         </span>
+
+                        {notif.isRead && (
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-500 flex items-center gap-1">
+                            <MailOpen className="w-3 h-3" /> Read
+                          </span>
+                        )}
                       </div>
 
                       <p className="text-xs text-slate-600 leading-relaxed">{notif.description}</p>
@@ -209,7 +207,6 @@ export default function AdminNotificationsPage() {
                     </div>
                   </div>
 
-                 
                   <div className="flex items-center gap-1 shrink-0">
                     {!notif.isRead && (
                       <button

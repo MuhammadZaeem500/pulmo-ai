@@ -106,7 +106,7 @@ export default function AdminSidebar({
        
         <div className="p-3 border-t border-slate-100 space-y-1">
           <Link
-            href="/admin/signin"
+            href="/auth/admin/sign-in"
             onClick={() => setMobileOpen(false)}
             className="flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors"
           >

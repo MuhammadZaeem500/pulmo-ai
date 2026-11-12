@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import DashboardCard from "@/components/common/DashboardCard";
-import { Clinic } from "@/types/admin.types";
 import AddClinicModal from "@/components/admin/AddClinicModal";
+import AdminModal from "@/components/common/AdminModal";
 import { 
   Building2, 
   Plus, 
@@ -14,43 +14,137 @@ import {
   CheckCircle2, 
   Clock, 
   XCircle, 
-  MoreVertical 
+  MoreVertical,
+  Loader2,
+  Trash2,
+  Edit3
 } from "lucide-react";
-
-
+import api from "@/services/api";
 
 export default function AdminClinicsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"All" | "Verified" | "Pending" | "Suspended">("All");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [clinics, setClinics] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
 
-  const [clinics, setClinics] = useState<Clinic[]>([
-    { id: 1, name: "Riverside Pulmonary Center", phone: "+1 (916) 555-0142", location: "Sacramento, CA", status: "Verified", specialists: 8, type: "Pulmonary", since: "Mar 2023" },
-    { id: 2, name: "Metro General Hospital", phone: "+1 (212) 555-0198", location: "New York, NY", status: "Verified", specialists: 24, type: "General + Pulmonary", since: "Jan 2022" },
-    { id: 3, name: "Breathe Well Clinic", phone: "+1 (512) 555-0167", location: "Austin, TX", status: "Pending", specialists: 4, type: "Pulmonary", since: "May 2024" },
-    { id: 4, name: "Pacific Lung Associates", phone: "+1 (206) 555-0123", location: "Seattle, WA", status: "Verified", specialists: 12, type: "Pulmonary", since: "Nov 2022" },
-    { id: 5, name: "Sunrise Medical Center", phone: "+1 (305) 555-0189", location: "Miami, FL", status: "Pending", specialists: 6, type: "Respiratory", since: "Jun 2024" },
-    { id: 6, name: "NorthWest Health Hub", phone: "+1 (503) 555-0145", location: "Portland, OR", status: "Suspended", specialists: 3, type: "Pulmonary", since: "Aug 2023" },
-    { id: 7, name: "Heartland Respiratory Institute", phone: "+1 (312) 555-0177", location: "Chicago, IL", status: "Verified", specialists: 18, type: "Pulmonary + Cardio", since: "Feb 2023" },
-    { id: 8, name: "Desert Lung Specialists", phone: "+1 (602) 555-0134", location: "Phoenix, AZ", status: "Verified", specialists: 9, type: "Pulmonary", since: "Sep 2022" },
-  ]);
+  // Edit Facility Modal State
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedClinic, setSelectedClinic] = useState<any>(null);
+  const [editName, setEditName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editAddress, setEditAddress] = useState("");
+  const [editCity, setEditCity] = useState("");
+  const [editType, setEditType] = useState("");
 
-  const handleAddNewClinic = (clinicData: {
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setActiveDropdownId(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    fetchClinics();
+  }, []);
+
+  async function fetchClinics() {
+    try {
+      setLoading(true);
+      const res = await api.get('/admin/clinics');
+      const data = res.data?.data || res.data || res;
+      if (Array.isArray(data)) {
+        setClinics(data.map((c: any) => ({
+          id: c.id,
+          name: c.name,
+          phone: c.phone || 'Not provided',
+          address: c.address,
+          city: c.city,
+          location: `${c.address}, ${c.city}`,
+          status: c.isActive ? "Verified" : "Suspended",
+          specialists: c._count?.doctors || c.specialists || 0,
+          type: c.type || "General Healthcare",
+          since: new Date(c.createdAt || Date.now()).toLocaleDateString("en-US", { month: 'short', year: 'numeric' })
+        })));
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to load clinics.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleAddNewClinic = async (clinicData: {
     name: string;
     location: string;
     phone: string;
     specialists: number;
     type: string;
   }) => {
-    const clinicEntry: Clinic = {
-      id: clinics.length + 1,
-      ...clinicData,
-      status: "Pending",
-      since: "Just now",
-    };
-    setClinics([clinicEntry, ...clinics]);
-    setIsModalOpen(false);
-    alert("New clinic submitted for review!");
+    try {
+      const [address, city = 'Unknown'] = clinicData.location.split(',').map(s => s.trim());
+
+      await api.post('/admin/clinics', {
+        name: clinicData.name,
+        address,
+        city,
+        phone: clinicData.phone,
+        type: clinicData.type,
+      });
+
+      setIsModalOpen(false);
+      fetchClinics();
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Failed to create clinic.");
+    }
+  };
+
+  const handleToggleStatus = async (clinicId: string, currentStatus: string) => {
+    try {
+      const newActiveState = currentStatus !== "Verified";
+      await api.patch(`/admin/clinics/${clinicId}/status`, { isActive: newActiveState });
+      setActiveDropdownId(null);
+      fetchClinics();
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Failed to update clinic status.");
+    }
+  };
+
+  const handleDeleteClinic = async (clinicId: string) => {
+    if (!confirm("Are you sure you want to delete this clinic facility?")) return;
+    try {
+      await api.delete(`/admin/clinics/${clinicId}`);
+      setActiveDropdownId(null);
+      fetchClinics();
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Failed to delete clinic.");
+    }
+  };
+
+  const handleUpdateClinicDetails = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedClinic) return;
+    try {
+      await api.patch(`/admin/clinics/${selectedClinic.id}`, {
+        name: editName,
+        phone: editPhone,
+        address: editAddress,
+        city: editCity,
+        type: editType,
+      });
+      setIsEditModalOpen(false);
+      setSelectedClinic(null);
+      fetchClinics();
+    } catch (err: any) {
+      alert("Failed to update facility details.");
+    }
   };
 
   const filteredClinics = clinics.filter((clinic) => {
@@ -60,9 +154,17 @@ export default function AdminClinicsPage() {
     return matchesSearch && matchesStatus;
   });
 
-  return (
-    <div className="space-y-6 relative">
+  if (loading) {
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
 
+  return (
+    <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* HEADER SECTION */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Clinics & Hospitals</h1>
@@ -77,21 +179,29 @@ export default function AdminClinicsPage() {
         </button>
       </div>
 
+      {error && (
+        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl font-bold">
+          {error}
+        </div>
+      )}
+
+      {/* METRICS CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <DashboardCard>
           <span className="text-[11px] uppercase font-bold tracking-wider text-slate-400 block mb-2">Total Facilities</span>
           <span className="text-3xl font-extrabold text-slate-900">{clinics.length}</span>
         </DashboardCard>
         <DashboardCard>
-          <span className="text-[11px] uppercase font-bold tracking-wider text-slate-400 block mb-2">Verified</span>
+          <span className="text-[11px] uppercase font-bold tracking-wider text-slate-400 block mb-2">Verified / Active</span>
           <span className="text-3xl font-extrabold text-emerald-600">{clinics.filter(c => c.status === "Verified").length}</span>
         </DashboardCard>
         <DashboardCard>
-          <span className="text-[11px] uppercase font-bold tracking-wider text-slate-400 block mb-2">Pending Review</span>
-          <span className="text-3xl font-extrabold text-amber-500">{clinics.filter(c => c.status === "Pending").length}</span>
+          <span className="text-[11px] uppercase font-bold tracking-wider text-slate-400 block mb-2">Suspended / Inactive</span>
+          <span className="text-3xl font-extrabold text-rose-500">{clinics.filter(c => c.status === "Suspended").length}</span>
         </DashboardCard>
       </div>
 
+      {/* SEARCH AND FILTERS */}
       <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm space-y-4">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="relative w-full sm:w-96">
@@ -111,7 +221,7 @@ export default function AdminClinicsPage() {
               <button
                 key={status}
                 onClick={() => setStatusFilter(status)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                   statusFilter === status
                     ? "bg-blue-600 text-white shadow-sm shadow-blue-500/20"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -123,8 +233,9 @@ export default function AdminClinicsPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        {/* RESPONSIVE TABLE CONTAINER */}
+        <div className="overflow-x-auto min-h-[300px]">
+          <table className="w-full text-left border-collapse min-w-[750px]">
             <thead>
               <tr className="border-b border-slate-100 text-[11px] uppercase font-bold text-slate-400 tracking-wider">
                 <th className="py-3 px-4">Facility</th>
@@ -181,10 +292,64 @@ export default function AdminClinicsPage() {
                     </td>
                     <td className="py-3.5 px-4 text-slate-600 font-semibold">{clinic.type}</td>
                     <td className="py-3.5 px-4 text-slate-500">{clinic.since}</td>
-                    <td className="py-3.5 px-4 text-right">
-                      <button className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
-                        <MoreVertical className="w-4 h-4" />
-                      </button>
+                    
+                    {/* RESPONSIVE DROPDOWN FIX */}
+                    <td className="py-3.5 px-4 text-right relative">
+                      <div className="inline-block relative" ref={activeDropdownId === clinic.id ? dropdownRef : null}>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveDropdownId(activeDropdownId === clinic.id ? null : clinic.id);
+                          }}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                        >
+                          <MoreVertical className="w-4 h-4" />
+                        </button>
+
+                        {activeDropdownId === clinic.id && (
+                          <div className="absolute right-0 bottom-full mb-2 sm:bottom-auto sm:top-full sm:mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2 z-50 text-left">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggleStatus(clinic.id, clinic.status);
+                              }}
+                              className="w-full px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 cursor-pointer"
+                            >
+                              {clinic.status === "Verified" ? <XCircle className="w-4 h-4 text-rose-500" /> : <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+                              {clinic.status === "Verified" ? "Suspend Facility" : "Verify Facility"}
+                            </button>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveDropdownId(null);
+                                setSelectedClinic(clinic);
+                                setEditName(clinic.name || "");
+                                setEditPhone(clinic.phone || "");
+                                setEditAddress(clinic.address || "");
+                                setEditCity(clinic.city || "");
+                                setEditType(clinic.type || "General Healthcare");
+                                setIsEditModalOpen(true);
+                              }}
+                              className="w-full px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 cursor-pointer"
+                            >
+                              <Edit3 className="w-4 h-4 text-blue-500" />
+                              Edit Facility Details
+                            </button>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteClinic(clinic.id);
+                              }}
+                              className="w-full px-4 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-2.5 cursor-pointer border-t border-slate-100 mt-1 pt-2.5"
+                            >
+                              <Trash2 className="w-4 h-4 text-rose-500" />
+                              Delete Facility
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -205,6 +370,89 @@ export default function AdminClinicsPage() {
         onClose={() => setIsModalOpen(false)}
         onAddClinic={handleAddNewClinic}
       />
+
+      {/* REUSABLE ADMIN MODAL FOR EDITING */}
+      <AdminModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        title="Edit Facility Details"
+      >
+        <form onSubmit={handleUpdateClinicDetails} className="space-y-4 text-xs">
+          <div className="space-y-1">
+            <label className="font-bold text-slate-700">Facility / Clinic Name</label>
+            <input
+              type="text"
+              required
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-semibold text-slate-800 bg-slate-50/50"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="font-bold text-slate-700">Phone Number</label>
+            <input
+              type="text"
+              value={editPhone}
+              onChange={(e) => setEditPhone(e.target.value)}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-semibold text-slate-800 bg-slate-50/50"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="font-bold text-slate-700">Street Address</label>
+              <input
+                type="text"
+                required
+                value={editAddress}
+                onChange={(e) => setEditAddress(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-semibold text-slate-800 bg-slate-50/50"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="font-bold text-slate-700">City / State</label>
+              <input
+                type="text"
+                required
+                value={editCity}
+                onChange={(e) => setEditCity(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-semibold text-slate-800 bg-slate-50/50"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="font-bold text-slate-700">Facility Type</label>
+            <select
+              value={editType}
+              onChange={(e) => setEditType(e.target.value)}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-semibold text-slate-800 bg-slate-50/50"
+            >
+              <option value="Pulmonary">Pulmonary</option>
+              <option value="General Healthcare">General Healthcare</option>
+              <option value="Respiratory">Respiratory</option>
+              <option value="Specialized Care">Specialized Care</option>
+            </select>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={() => setIsEditModalOpen(false)}
+              className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold cursor-pointer shadow-md"
+            >
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </AdminModal>
     </div>
   );
 }
