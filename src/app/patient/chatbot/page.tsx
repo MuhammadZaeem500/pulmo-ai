@@ -5,7 +5,7 @@ import {
   Plus,
   Paperclip,
   Send,
-  History,
+  PanelLeftOpen,
   X,
   Calendar,
   CheckCircle2,
@@ -14,6 +14,7 @@ import {
   Check,
   MoreVertical,
   Sparkles,
+  Bookmark,
 } from "lucide-react";
 
 type Slot = {
@@ -309,9 +310,9 @@ export default function ChatbotPage() {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-1">
-          <p className="text-[10px] sm:text-xs font-semibold text-gray-400 tracking-wider uppercase mb-2 px-1">
-            Chat History
+        <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-1.5">
+          <p className="text-[10px] sm:text-xs font-semibold text-gray-400 tracking-wider uppercase mb-2 px-1 flex items-center gap-1.5">
+            <Bookmark className="w-3.5 h-3.5 text-blue-500" /> Tracked Chats
           </p>
           {chatHistory.length === 0 ? (
             <p className="text-xs text-gray-400 px-1">No previous chats found.</p>
@@ -319,9 +320,9 @@ export default function ChatbotPage() {
             chatHistory.map((chat) => (
               <div
                 key={chat.id}
-                className={`group relative flex items-center justify-between w-full px-3 py-2 rounded-xl text-xs sm:text-sm transition-colors ${
+                className={`group relative flex items-center justify-between w-full px-3 py-2.5 rounded-xl text-xs sm:text-sm transition-colors ${
                   activeSessionId === chat.id
-                    ? "bg-blue-50 text-blue-600 font-medium"
+                    ? "bg-blue-50/80 text-blue-600 font-semibold border-l-4 border-blue-600"
                     : "text-gray-700 hover:bg-gray-50"
                 }`}
               >
@@ -355,9 +356,10 @@ export default function ChatbotPage() {
                   <>
                     <button
                       onClick={() => handleSelectSession(chat.id)}
-                      className="text-left truncate flex-1 cursor-pointer pr-6"
+                      className="text-left truncate flex-1 cursor-pointer pr-6 flex items-center gap-2"
                     >
-                      {chat.title || "Respiratory Consultation"}
+                      <Bookmark className={`w-3.5 h-3.5 shrink-0 ${activeSessionId === chat.id ? "text-blue-600" : "text-gray-300"}`} />
+                      <span className="truncate">{chat.title || "Respiratory Consultation"}</span>
                     </button>
 
                     <div className="absolute right-2 flex items-center">
@@ -413,21 +415,23 @@ export default function ChatbotPage() {
       {/* Main Chat Interface */}
       <div className="flex-1 flex flex-col bg-white min-w-0">
         <div className="px-3 sm:px-6 py-3 border-b border-gray-100 flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="text-sm sm:text-base font-bold text-gray-900 truncate">
-              AI Healthcare Chatbot
-            </h1>
-            <p className="text-gray-500 text-[11px] sm:text-xs truncate">
-              Ask questions & discuss symptoms
-            </p>
+          <div className="min-w-0 flex items-center gap-2.5">
+            <button
+              onClick={() => setShowHistory(true)}
+              className="lg:hidden p-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer shrink-0 flex items-center justify-center shadow-2xs"
+              title="Toggle Sidebar"
+            >
+              <PanelLeftOpen className="w-4 h-4 text-slate-700" />
+            </button>
+            <div className="min-w-0">
+              <h1 className="text-sm sm:text-base font-bold text-gray-900 truncate">
+                AI Healthcare Chatbot
+              </h1>
+              <p className="text-gray-500 text-[11px] sm:text-xs truncate">
+                Ask questions & discuss symptoms
+              </p>
+            </div>
           </div>
-          <button
-            onClick={() => setShowHistory(true)}
-            className="lg:hidden p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer shrink-0"
-            title="Chat History"
-          >
-            <History className="w-4 h-4" />
-          </button>
         </div>
 
         {/* Messages Body */}
