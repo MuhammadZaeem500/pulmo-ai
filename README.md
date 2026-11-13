@@ -1,178 +1,155 @@
-<!-- # 🫁 PulmoAI — Intelligent Healthcare & Pulmonary Management Platform
+# PulmoAI 
 
-PulmoAI is a modern healthcare platform designed to improve pulmonary care and simplify clinic management. It provides dedicated portals for administrators, doctors, and patients, with features for healthcare analytics, appointment management, medical records, AI-assisted symptom tracking, and medicine identification.
+Web client for **PulmoAI**, an AI-assisted pulmonary health advisory and records platform built as a final-year project at the University of Management and Technology (UMT), Lahore. It provides separate Patient, Doctor and Admin portals for respiratory care, focused on asthma, COPD, pneumonia, tuberculosis and bronchitis.
 
-## 🚀 Key Features
+> **Medical disclaimer:** PulmoAI is an educational project. It does not provide medical advice, diagnosis or treatment, and AI-generated output is preliminary and advisory only. Always consult a qualified healthcare professional.
 
-### 🛠️ Admin Portal
-- **Dashboard & Analytics:** View platform activity, daily queries, and health trends.
-- **Healthcare Analytics:** Track symptom patterns, pulmonary conditions such as COPD, asthma, and pneumonia, seasonal health metrics, and user engagement.
-- **Clinic & Hospital Management:** Review, verify, approve, or suspend healthcare facilities.
-- **User & Role Management:** Manage patient, doctor, and administrator accounts and permissions.
-- **Security Center:** Monitor threats, review vulnerabilities, track severity levels, and manage security alerts.
-- **Reports & Notifications:** Export administrative reports in PDF, CSV, XLSX, and JSON formats and manage system notifications.
-- **Account Settings:** Configure account preferences, security options, two-factor authentication, session timeout, notifications, language, and theme.
+**Backend repository:** [PulmoAI Backend](<https://github.com/MuhammadZaeem500/pulmo-ai-backend>)
 
-### 🩺 Doctor Portal
-- **Doctor Dashboard:** View important information and manage daily clinical activities.
-- **Patient Records:** Review patient details, medical histories, and consultation notes.
-- **Prescriptions & Diagnostic Tests:** Create digital prescriptions and recommend pulmonary diagnostic tests.
-- **Appointment Management:** View and manage upcoming patient consultations.
-- **Profile & Settings:** Manage professional information and account preferences.
+## Status
 
-### 👤 Patient Portal
-- **AI Symptom Tracker:** Record symptoms and receive AI-assisted guidance.
-- **AI Chatbot:** Interact with a chatbot for preliminary health information and symptom guidance.
-- **Know Your Medicine:** Identify medicines using pill-related information and access medicine safety details.
-- **Clinic & Specialist Finder:** Discover pulmonary specialists and find clinics.
-- **Appointment Management:** Manage medical appointments.
-- **Medical History:** Access available medical records, prescriptions, and previous visit summaries.
-- **Personal Dashboard:** View relevant health information and patient activities.
+Early development. The three portals, role-based sign-in and sign-up flows, and most screens are built. Some screens still use placeholder data, and the AI features (symptom analysis, chatbot) are not yet connected to a model. See the [Roadmap](#roadmap).
 
-> **Medical Disclaimer:** PulmoAI is intended to support healthcare management and provide health information. AI-generated guidance is not a substitute for professional medical advice, diagnosis, or treatment. Medicine identification results should be verified by a qualified healthcare professional.
+## Features
 
-## 🛠️ Tech Stack
+### Patient portal
+- Dashboard, profile and settings
+- Symptom tracker
+- Appointments and clinic/specialist finder
+- Medical history and prescriptions
+- Know Your Medicine: identify a medicine by colour and shape
+- Chatbot interface (UI only for now)
+
+### Doctor portal
+- Dashboard, patient list and appointments
+- Consultation notes
+- Prescriptions and recommended diagnostic tests
+- Profile, consultation hours and settings
+
+### Admin portal
+- Dashboard, analytics and reports
+- User management and doctor verification
+- Clinic management
+- Security alerts and notifications
+- Settings
+
+## Tech stack
 
 | Technology | Purpose |
 |---|---|
-| [Next.js](https://nextjs.org/) | React framework and application routing |
-| [React](https://react.dev/) | User interface development |
-| [TypeScript](https://www.typescriptlang.org/) | Type-safe application development |
-| [Tailwind CSS](https://tailwindcss.com/) | Responsive styling |
-| [Lucide React](https://lucide.dev/) | Icons |
-| [Turbopack](https://turbo.build/pack) | Development build tooling through Next.js |
+| [Next.js](https://nextjs.org/) 16 (App Router) | Framework and routing |
+| [React](https://react.dev/) 19 | UI |
+| [TypeScript](https://www.typescriptlang.org/) | Type safety |
+| [Tailwind CSS](https://tailwindcss.com/) 4 | Styling |
+| [MUI](https://mui.com/) | UI components and icons |
+| [Lucide](https://lucide.dev/) | Icons |
+| [Axios](https://axios-http.com/) | API requests |
 
-## 📂 Project Structure
+## Project structure
 
 ```text
-pulmo-ai/
-├── public/                     # Static assets and icons
+.
+├── public/                 # Static assets
 ├── src/
-│   ├── app/
-│   │   ├── admin/              # Admin portal pages
-│   │   │   ├── analytics/
-│   │   │   ├── clinics/
-│   │   │   ├── dashboard/
-│   │   │   ├── notifications/
-│   │   │   ├── reports/
-│   │   │   ├── security/
-│   │   │   ├── settings/
-│   │   │   └── users/
-│   │   ├── auth/               # Role-based authentication pages
-│   │   │   ├── admin/
-│   │   │   ├── doctor/
-│   │   │   └── patient/
-│   │   ├── doctor/             # Doctor portal pages
-│   │   ├── patient/            # Patient portal pages
-│   │   ├── globals.css         # Global styles
-│   │   ├── layout.tsx          # Root layout
-│   │   └── page.tsx            # Landing page
+│   ├── app/                # Next.js App Router
+│   │   ├── admin/          # analytics, clinics, dashboard, doctor-verification,
+│   │   │                   # notifications, reports, security, settings, users
+│   │   ├── auth/           # admin/, doctor/, patient/ (sign-in and sign-up each)
+│   │   ├── doctor/         # appointments, dashboard, notes, patients,
+│   │   │                   # prescriptions, profile, settings, tests
+│   │   ├── patient/        # appointments, chatbot, clinics-specialists, dashboard,
+│   │   │                   # know-your-medicine, medical-history, prescriptions,
+│   │   │                   # profile, settings, symptom-tracker
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx        # Landing page
 │   ├── components/
-│   │   ├── admin/              # Admin-specific components
-│   │   ├── common/             # Shared UI components
-│   │   ├── doctor/             # Doctor-specific components
-│   │   ├── landing/            # Landing page components
-│   │   └── paitient/           # Patient-specific components
-│   └── store/                  # Application state management
-├── .gitignore
-├── AGENTS.md
-├── ARCHITECTURE.md
-├── CLAUDE.md
+│   │   ├── admin/          # Sidebar, modals, auth banner
+│   │   ├── common/         # Shared cards, modals and form pieces
+│   │   ├── doctor/         # Sidebar, auth stepper, auth banner
+│   │   ├── landing/        # Landing page sections
+│   │   └── patient/        # Sidebar, auth banner
+│   ├── services/           # Axios client (api.ts) and one service per feature
+│   └── types/              # Shared TypeScript types
+├── AGENTS.md               # Guidelines for AI coding assistants
+├── ARCHITECTURE.md         # Architecture notes
+├── CLAUDE.md               # Guidelines for AI coding assistants
 ├── eslint.config.mjs
 ├── next.config.ts
-├── package.json
-├── package-lock.json
 ├── postcss.config.mjs
 ├── tsconfig.json
-└── README.md
+└── package.json
 ```
 
-*Note: This structure summarizes the main folders. Some files may be omitted for readability. The `paitient` folder name matches the structure provided and can be renamed to `patient` if desired.*
-
-## 🏁 Getting Started
-
-Follow these steps to run PulmoAI locally.
+## Getting started
 
 ### Prerequisites
 
-Make sure you have the following installed:
+- Node.js 20 or later
+- npm
+- The [PulmoAI backend](<https://github.com/MuhammadZaeem500/pulmo-ai-backend>) running locally
 
-- **Node.js:** Version 18 or later
-- **npm:** Installed with Node.js
-- **Git:** Required to clone the repository
-
-### 1. Clone the Repository
+### Installation
 
 ```bash
-git clone https://github.com/muhammad-zaeem-sheikh/PulmoAI.git
-```
-
-### 2. Navigate to the Project Directory
-
-```bash
-cd PulmoAI/pulmo-ai
-```
-
-If the repository already opens directly into the `pulmo-ai` directory, navigate to that directory instead.
-
-### 3. Install Dependencies
-
-```bash
+git clone <this-repo-url>
+cd <repo-folder>
 npm install
 ```
 
-### 4. Start the Development Server
+### Configuration
+
+The frontend and backend both default to port 3000, so run the backend on a different port (for example `PORT=4000`) and point the frontend at it. Create a `.env.local` file in the project root:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:4000
+```
+
+### Run the app
 
 ```bash
 npm run dev
 ```
 
-### 5. Open the Application
+Open [http://localhost:3000](http://localhost:3000).
 
-Visit the following URL in your browser:
-
-[http://localhost:3000](http://localhost:3000)
-
-## 📜 Available Scripts
-
-The following are common Next.js scripts. Confirm their exact names in `package.json`.
+## Scripts
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Starts the development server |
-| `npm run build` | Creates a production build |
-| `npm run start` | Starts the production server |
-| `npm run lint` | Runs linting, if configured |
+| `npm run dev` | Start the development server |
+| `npm run build` | Create a production build |
+| `npm run start` | Run the production build |
+| `npm run lint` | Run ESLint |
 
-## 🔐 Environment Variables
+## Authentication
 
-If the project uses external APIs, a backend service, or other environment-based configuration, create a `.env.local` file in the application root.
+Signing in returns a JWT from the backend. The Axios client in `src/services/api.ts` attaches it as a `Bearer` token on every request. Pages are separated by role: `patient`, `doctor` and `admin`.
 
-For example:
+## Roadmap
 
-```env
-# Add the environment variables required by your project
-# NEXT_PUBLIC_API_URL=http://localhost:3001/api
-```
+- [ ] Connect the chatbot to the backend
+- [ ] Connect symptom analysis to the NLP/ML service
+- [ ] Replace remaining placeholder data with API calls
+- [ ] Chest X-ray upload and analysis screen
+- [ ] Improve responsiveness and accessibility across all portals
+- [ ] Add tests
 
-Use the actual values required by your application. Never commit API keys, passwords, tokens, or other secrets to Git.
+## Contributing
 
-## 🤝 Contributing
+Issues and pull requests are welcome.
 
-Contributions, bug reports, and feature requests are welcome.
+1. Fork the repository
+2. Create a branch for your change
+3. Run `npm run lint` and make sure the app builds
+4. Open a pull request describing what you changed and why
 
-1. Fork the repository.
-2. Create a new branch for your changes.
-3. Make and test your changes.
-4. Commit your work with a clear commit message.
-5. Open a pull request describing your updates.
+## License
 
-For bugs or feature requests, visit the [PulmoAI GitHub repository](https://github.com/muhammad-zaeem-sheikh/PulmoAI).
+Copyright (c) 2026 PulmoAI contributors. All rights reserved.
 
-## 📄 License
+This code is shared for viewing only. See [LICENSE](LICENSE) for details.
 
-This project is intended to be available under the MIT License. Make sure a `LICENSE` file containing the MIT License is included in the repository before describing the project as officially licensed under it.
+## Acknowledgements
 
----
-
-**PulmoAI** — Supporting better pulmonary care through technology. -->
+Built by <UMTians> as a final-year project at the University of Management and Technology, Lahore.
