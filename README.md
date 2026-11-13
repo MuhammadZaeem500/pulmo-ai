@@ -92,7 +92,7 @@ Early development. The three portals, role-based sign-in and sign-up flows, and 
 ### Installation
 
 ```bash
-git clone <this-repo-url>
+git clone <https://github.com/MuhammadZaeem500/pulmo-ai>
 cd <repo-folder>
 npm install
 ```
