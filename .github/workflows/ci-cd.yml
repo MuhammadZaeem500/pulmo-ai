@@ -18,13 +18,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm install
 
       - name: Run Type Checking
         run: npx tsc --noEmit
 
-      - name: Run Next.js Build Check
+      - name: Run Build Check
         run: npm run build
