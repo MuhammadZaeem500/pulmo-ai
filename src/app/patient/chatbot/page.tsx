@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import type { FormEvent, MouseEvent } from "react";
 import {
   Plus,
   Paperclip,
@@ -18,6 +19,7 @@ import {
   FileText,
   Download,
   Eye,
+  RefreshCw,
 } from "lucide-react";
 
 type Slot = {
@@ -28,12 +30,14 @@ type Slot = {
 
 type Doctor = {
   id: string;
+  doctorId?: string;
   fullName: string;
   specialization: string;
-  hospitalAffiliation?: string;
+  hospitalAffiliation?: string | null;
+  consultationHours?: string | null;
+  bookedSlots?: string[];
   availableSlots?: Slot[];
 };
-
 
 type Attachment = {
   id: string;
@@ -43,17 +47,12 @@ type Attachment = {
   url?: string;
 };
 
-
 type Message = {
   role: "user" | "assistant";
   content: string;
   specialization?: string;
   doctors?: Doctor[];
-
-  // Saved attachment returned by the backend
   attachment?: Attachment | null;
-
-  // Temporary file used before uploading
   localFile?: File;
 };
 
@@ -63,6 +62,13 @@ type ChatSessionItem = {
   updatedAt: string;
 };
 
+const API_BASE_URL = "http://localhost:3000";
+
+const AVAILABILITY_URL = (doctorId: string) =>
+  `${API_BASE_URL}/patient/appointments/doctors/${doctorId}/available-slots`;
+
+const APPOINTMENT_URL = `${API_BASE_URL}/patient/appointments`;
+
 export default function ChatbotPage() {
   const [message, setMessage] = useState("");
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
@@ -71,45 +77,57 @@ export default function ChatbotPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const API_BASE_URL = "http://localhost:3000";
 
-
-  // Attachment state
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // File preview state
   const [previewFile, setPreviewFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
   const [previewText, setPreviewText] = useState("");
   const [previewLoading, setPreviewLoading] = useState(false);
 
-  // Rename & Delete state management
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [newTitle, setNewTitle] = useState("");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
-  const [selectedSlots, setSelectedSlots] = useState<{
-    [doctorId: string]: string;
-  }>({});
-
-  const [bookingStatus, setBookingStatus] = useState<{
-    [doctorId: string]: string;
-  }>({});
+  // Selected date per doctor: Record<doctorId, "YYYY-MM-DD">
+  const [selectedDates, setSelectedDates] = useState<Record<string, string>>(
+    {},
+  );
+  // Selected slot ISO per doctor
+  const [selectedSlots, setSelectedSlots] = useState<Record<string, string>>(
+    {},
+  );
+  const [bookingStatus, setBookingStatus] = useState<Record<string, string>>(
+    {},
+  );
+  const [slotLoading, setSlotLoading] = useState<Record<string, boolean>>({});
+  const [slotErrors, setSlotErrors] = useState<Record<string, string>>({});
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const requestedDoctorsRef = useRef<Set<string>>(new Set());
 
-  // Load chat history
+  const getToken = () => localStorage.getItem("token") || "";
+
   useEffect(() => {
     fetchChatSessions();
   }, []);
 
-  // Auto-scroll messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
-  // Clean up preview URLs when they change or component unmounts
+  useEffect(() => {
+    const doctors = messages.flatMap((msg) => msg.doctors || []);
+
+    doctors.forEach((doctor) => {
+      const docId = doctor.id || doctor.doctorId;
+      if (docId && !requestedDoctorsRef.current.has(docId)) {
+        fetchDoctorSlots(docId);
+      }
+    });
+  }, [messages]);
+
   useEffect(() => {
     return () => {
       if (previewUrl) {
@@ -118,80 +136,130 @@ export default function ChatbotPage() {
     };
   }, [previewUrl]);
 
-
-
-const handleOpenSavedAttachment = async (
-  attachment: Attachment,
-) => {
-  try {
-    setError("");
-
-    if (!attachment.url) {
-      throw new Error("Attachment URL is missing.");
-    }
-
-    const token = localStorage.getItem("token") || "";
-
-    const response = await fetch(
-      `${API_BASE_URL}${attachment.url}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        `Unable to load attachment. Status: ${response.status}`,
-      );
-    }
-
-    const blob = await response.blob();
-
-    const file = new File(
-      [blob],
-      attachment.fileName,
-      {
-        type:
-          attachment.mimeType ||
-          blob.type ||
-          "application/octet-stream",
-      },
-    );
-
-    await openFilePreview(file);
-  } catch (error) {
-    console.error("Attachment preview error:", error);
-
-    setError(
-      error instanceof Error
-        ? error.message
-        : "Unable to open this attachment.",
-    );
-  }
-};
-
-
-
   const fetchChatSessions = async () => {
     try {
-      const token = localStorage.getItem("token") || "";
-
-      const res = await fetch(
-        "http://localhost:3000/patient/chatbot/sessions",
-        {
-          headers: { Authorization: `Bearer ${token}` },
+      const response = await fetch(`${API_BASE_URL}/patient/chatbot/sessions`, {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
         },
-      );
+      });
 
-      if (res.ok) {
-        const data = await res.json();
-        setChatHistory(data);
+      if (!response.ok) {
+        throw new Error("Unable to load chat history.");
       }
+
+      const data = await response.json();
+      setChatHistory(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("Failed to fetch chat history", err);
+      console.error("Failed to fetch chat history:", err);
     }
+  };
+
+  const fetchDoctorSlots = async (doctorId: string) => {
+    requestedDoctorsRef.current.add(doctorId);
+
+    setSlotLoading((prev) => ({ ...prev, [doctorId]: true }));
+    setSlotErrors((prev) => ({ ...prev, [doctorId]: "" }));
+
+    try {
+      const response = await fetch(AVAILABILITY_URL(doctorId), {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      });
+
+      const responseText = await response.text();
+      let data: any = {};
+
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        throw new Error("Invalid availability response from server.");
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to fetch consultation times.");
+      }
+
+      const result = data.data || data;
+      const consultationHours = result.consultationHours || "";
+      const bookedSlots = Array.isArray(result.bookedSlots)
+        ? result.bookedSlots
+        : [];
+
+      setMessages((prev) =>
+        prev.map((msg) => {
+          if (!msg.doctors) return msg;
+
+          return {
+            ...msg,
+            doctors: msg.doctors.map((doctor) =>
+              (doctor.id || doctor.doctorId) === doctorId
+                ? {
+                    ...doctor,
+                    consultationHours,
+                    bookedSlots,
+                  }
+                : doctor,
+            ),
+          };
+        }),
+      );
+    } catch (err) {
+      console.error("Availability fetch failed:", err);
+      setSlotErrors((prev) => ({
+        ...prev,
+        [doctorId]:
+          err instanceof Error
+            ? err.message
+            : "Unable to load consultation hours.",
+      }));
+    } finally {
+      setSlotLoading((prev) => ({ ...prev, [doctorId]: false }));
+    }
+  };
+
+  const handleRefreshSlots = async (doctorId: string) => {
+    requestedDoctorsRef.current.delete(doctorId);
+    await fetchDoctorSlots(doctorId);
+  };
+
+  // Helper to generate time slots for a given date and doctor
+  const generateSlotsForDate = (
+    dateStr: string,
+    bookedSlots: string[] = [],
+  ): Slot[] => {
+    if (!dateStr) return [];
+    const slots: Slot[] = [];
+    const bookedSet = new Set(bookedSlots);
+
+    // Standard hourly blocks between 09:00 and 17:00
+    const hours = [9, 10, 11, 12, 13, 14, 15, 16];
+
+    for (const hour of hours) {
+      const slotDate = new Date(
+        `${dateStr}T${hour.toString().padStart(2, "0")}:00:00`,
+      );
+      const isoString = slotDate.toISOString();
+
+      if (!bookedSet.has(isoString)) {
+        slots.push({
+          date: slotDate.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          }),
+          time: slotDate.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          iso: isoString,
+        });
+      }
+    }
+
+    return slots;
   };
 
   const handleSelectSession = async (sessionId: string) => {
@@ -199,23 +267,35 @@ const handleOpenSavedAttachment = async (
     setShowHistory(false);
     setIsLoading(true);
     setOpenMenuId(null);
+    setError("");
+
+    setSelectedSlots({});
+    setSelectedDates({});
+    setBookingStatus({});
+    setSlotErrors({});
+    requestedDoctorsRef.current.clear();
 
     try {
-      const token = localStorage.getItem("token") || "";
-
-      const res = await fetch(
-        `http://localhost:3000/patient/chatbot/sessions/${sessionId}/messages`,
+      const response = await fetch(
+        `${API_BASE_URL}/patient/chatbot/sessions/${sessionId}/messages`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
         },
       );
 
-      if (res.ok) {
-        const data = await res.json();
-        setMessages(data);
+      if (!response.ok) {
+        throw new Error("Unable to load this conversation.");
       }
+
+      const data = await response.json();
+      setMessages(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("Failed to load session messages", err);
+      console.error("Failed to load session messages:", err);
+      setError(
+        err instanceof Error ? err.message : "Unable to load conversation.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -227,13 +307,17 @@ const handleOpenSavedAttachment = async (
     setShowHistory(false);
     setAttachedFile(null);
     setError("");
+    setSelectedSlots({});
+    setSelectedDates({});
+    setBookingStatus({});
+    setSlotErrors({});
+    requestedDoctorsRef.current.clear();
 
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
-  // Open file preview
   const openFilePreview = async (file: File) => {
     setPreviewFile(file);
     setPreviewUrl(URL.createObjectURL(file));
@@ -241,7 +325,6 @@ const handleOpenSavedAttachment = async (
     setPreviewLoading(false);
 
     const fileName = file.name.toLowerCase();
-
     const isText =
       file.type.startsWith("text/") ||
       fileName.endsWith(".txt") ||
@@ -249,12 +332,10 @@ const handleOpenSavedAttachment = async (
 
     if (isText) {
       setPreviewLoading(true);
-
       try {
-        const content = await file.text();
-        setPreviewText(content);
+        setPreviewText(await file.text());
       } catch (err) {
-        console.error("Failed to read file", err);
+        console.error("Failed to read file:", err);
         setPreviewText("Unable to read this file.");
       } finally {
         setPreviewLoading(false);
@@ -262,7 +343,6 @@ const handleOpenSavedAttachment = async (
     }
   };
 
-  // Close file preview
   const closeFilePreview = () => {
     setPreviewFile(null);
     setPreviewUrl("");
@@ -270,353 +350,340 @@ const handleOpenSavedAttachment = async (
     setPreviewLoading(false);
   };
 
-  // Check file format
-  const isPdfFile = (file: File) => {
-    return (
-      file.type === "application/pdf" ||
-      file.name.toLowerCase().endsWith(".pdf")
-    );
+  const handleOpenSavedAttachment = async (attachment: Attachment) => {
+    try {
+      setError("");
+      if (!attachment.url) throw new Error("Attachment URL is missing.");
+
+      const response = await fetch(`${API_BASE_URL}${attachment.url}`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+
+      if (!response.ok) throw new Error(`Unable to load attachment.`);
+
+      const blob = await response.blob();
+      const file = new File([blob], attachment.fileName, {
+        type: attachment.mimeType || blob.type || "application/octet-stream",
+      });
+
+      await openFilePreview(file);
+    } catch (err) {
+      console.error("Attachment preview error:", err);
+      setError(
+        err instanceof Error ? err.message : "Unable to open this attachment.",
+      );
+    }
   };
 
-  const isImageFile = (file: File) => {
-    return (
-      file.type.startsWith("image/") ||
-      /\.(jpg|jpeg|png|webp)$/i.test(file.name)
-    );
-  };
+  const isPdfFile = (file: File) =>
+    file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+  const isImageFile = (file: File) =>
+    file.type.startsWith("image/") || /\.(jpg|jpeg|png|webp)$/i.test(file.name);
+  const isTextFile = (file: File) =>
+    file.type.startsWith("text/") || /\.(txt|csv)$/i.test(file.name);
 
-  const isTextFile = (file: File) => {
-    return file.type.startsWith("text/") || /\.(txt|csv)$/i.test(file.name);
-  };
-
-  // Rename chat API handler
-  const handleRenameChat = async (sessionId: string, e?: React.FormEvent) => {
-    if (e) e.preventDefault();
+  const handleRenameChat = async (sessionId: string, e?: FormEvent) => {
+    e?.preventDefault();
     if (!newTitle.trim()) return;
 
     try {
-      const token = localStorage.getItem("token") || "";
-
-      const res = await fetch(
-        `http://localhost:3000/patient/chatbot/sessions/${sessionId}`,
+      const response = await fetch(
+        `${API_BASE_URL}/patient/chatbot/sessions/${sessionId}`,
         {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${getToken()}`,
           },
           body: JSON.stringify({ title: newTitle.trim() }),
         },
       );
 
-      if (res.ok) {
-        setChatHistory((prev) =>
-          prev.map((chat) =>
-            chat.id === sessionId ? { ...chat, title: newTitle.trim() } : chat,
-          ),
-        );
+      if (!response.ok) throw new Error("Unable to rename conversation.");
 
-        setEditingSessionId(null);
-        setNewTitle("");
-        setOpenMenuId(null);
-      }
+      setChatHistory((prev) =>
+        prev.map((chat) =>
+          chat.id === sessionId ? { ...chat, title: newTitle.trim() } : chat,
+        ),
+      );
+
+      setEditingSessionId(null);
+      setNewTitle("");
+      setOpenMenuId(null);
     } catch (err) {
-      console.error("Failed to rename chat session", err);
+      console.error("Rename failed:", err);
+      setError(err instanceof Error ? err.message : "Unable to rename chat.");
     }
   };
 
-  // Delete chat API handler
-  const handleDeleteChat = async (sessionId: string, e: React.MouseEvent) => {
+  const handleDeleteChat = async (
+    sessionId: string,
+    e: MouseEvent<HTMLButtonElement>,
+  ) => {
     e.stopPropagation();
-
-    if (!confirm("Are you sure you want to delete this conversation?")) {
-      return;
-    }
+    if (!confirm("Are you sure you want to delete this conversation?")) return;
 
     try {
-      const token = localStorage.getItem("token") || "";
-
-      const res = await fetch(
-        `http://localhost:3000/patient/chatbot/sessions/${sessionId}`,
+      const response = await fetch(
+        `${API_BASE_URL}/patient/chatbot/sessions/${sessionId}`,
         {
           method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${getToken()}` },
         },
       );
 
-      if (res.ok) {
-        setChatHistory((prev) => prev.filter((chat) => chat.id !== sessionId));
+      if (!response.ok) throw new Error("Unable to delete conversation.");
 
-        if (activeSessionId === sessionId) {
-          handleNewChat();
-        }
-
-        setOpenMenuId(null);
-      }
+      setChatHistory((prev) => prev.filter((chat) => chat.id !== sessionId));
+      if (activeSessionId === sessionId) handleNewChat();
+      setOpenMenuId(null);
     } catch (err) {
-      console.error("Failed to delete chat session", err);
+      console.error("Delete failed:", err);
+      setError(err instanceof Error ? err.message : "Unable to delete chat.");
     }
   };
 
-  // Send message and attachment
- 
-const handleSend = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSend = async (e: FormEvent) => {
+    e.preventDefault();
+    if ((!message.trim() && !attachedFile) || isLoading) return;
 
-  if ((!message.trim() && !attachedFile) || isLoading) return;
-
-  const userMessage = message.trim();
-  const fileToSend = attachedFile;
-
-  // Add the user's message immediately
-  setMessages((prev) => [
-    ...prev,
-    {
-      role: "user",
-      content: userMessage || "Uploaded medical report",
-      localFile: fileToSend || undefined,
-    },
-  ]);
-
-  setMessage("");
-  setAttachedFile(null);
-  setIsLoading(true);
-  setError("");
-
-  if (fileInputRef.current) {
-    fileInputRef.current.value = "";
-  }
-
-  try {
-    const token = localStorage.getItem("token") || "";
-
-    const formData = new FormData();
-    formData.append("symptomText", userMessage);
-
-    if (activeSessionId) {
-      formData.append("sessionId", activeSessionId);
-    }
-
-    if (fileToSend) {
-      formData.append("file", fileToSend);
-    }
-
-    const response = await fetch(
-      `${API_BASE_URL}/patient/chatbot/analyze-and-recommend`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      },
-    );
-
-    const textResponse = await response.text();
-    const data = textResponse ? JSON.parse(textResponse) : {};
-
-    if (!response.ok) {
-      throw new Error(data.message || "AI request failed");
-    }
-
-    if (data.sessionId && activeSessionId !== data.sessionId) {
-      setActiveSessionId(data.sessionId);
-      fetchChatSessions();
-    }
-
-    // Update the user's message with the saved attachment information.
-    // Then add the assistant's response.
-    setMessages((prev) => {
-      const updatedMessages = [...prev];
-
-      if (data.attachment) {
-        const userMessageIndex = updatedMessages.findLastIndex(
-          (msg) => msg.role === "user" && msg.localFile,
-        );
-
-        if (userMessageIndex !== -1) {
-          updatedMessages[userMessageIndex] = {
-            ...updatedMessages[userMessageIndex],
-            attachment: data.attachment,
-            localFile: undefined,
-          };
-        }
-      }
-
-      return [
-        ...updatedMessages,
-        {
-          role: "assistant",
-          content: data.content,
-          specialization: data.specialization,
-          doctors: data.doctors,
-        },
-      ];
-    });
-  } catch (err) {
-    console.error("Chatbot request failed:", err);
-
-    setError(
-      err instanceof Error ? err.message : "Something went wrong.",
-    );
+    const userMessage = message.trim();
+    const fileToSend = attachedFile;
 
     setMessages((prev) => [
       ...prev,
       {
-        role: "assistant",
-        content:
-          "Unable to process your request. Please check your connection and try again.",
+        role: "user",
+        content: userMessage || "Uploaded medical report",
+        localFile: fileToSend || undefined,
       },
     ]);
-  } finally {
-    setIsLoading(false);
-  }
-};
 
+    setMessage("");
+    setAttachedFile(null);
+    setIsLoading(true);
+    setError("");
 
-  // Book appointment
+    if (fileInputRef.current) fileInputRef.current.value = "";
+
+    try {
+      const formData = new FormData();
+      formData.append("symptomText", userMessage);
+      if (activeSessionId) formData.append("sessionId", activeSessionId);
+      if (fileToSend) formData.append("file", fileToSend);
+
+      const response = await fetch(
+        `${API_BASE_URL}/patient/chatbot/analyze-and-recommend`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${getToken()}` },
+          body: formData,
+        },
+      );
+
+      const responseText = await response.text();
+      let data: any = {};
+
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        throw new Error("The server returned an invalid response.");
+      }
+
+      if (!response.ok) throw new Error(data.message || "AI request failed.");
+
+      if (data.sessionId && activeSessionId !== data.sessionId) {
+        setActiveSessionId(data.sessionId);
+        fetchChatSessions();
+      }
+
+      setMessages((prev) => {
+        const updated = [...prev];
+        let userMessageIndex = -1;
+
+        for (let i = updated.length - 1; i >= 0; i--) {
+          if (updated[i].role === "user" && updated[i].localFile) {
+            userMessageIndex = i;
+            break;
+          }
+        }
+
+        if (userMessageIndex !== -1) {
+          updated[userMessageIndex] = {
+            ...updated[userMessageIndex],
+            attachment: data.attachment || null,
+            localFile: undefined,
+          };
+        }
+
+        return [
+          ...updated,
+          {
+            role: "assistant",
+            content: data.content || "I could not generate a response.",
+            specialization: data.specialization,
+            doctors: Array.isArray(data.doctors)
+              ? data.doctors.map((doctor: any) => ({
+                  ...doctor,
+                  id: doctor.id || doctor.doctorId,
+                }))
+              : [],
+          },
+        ];
+      });
+    } catch (err) {
+      console.error("Chatbot request failed:", err);
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            "Unable to process your request. Please check your connection and try again.",
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleBookAppointment = async (doctorId: string) => {
     const chosenSlotIso = selectedSlots[doctorId];
 
     if (!chosenSlotIso) {
-      alert("Please select an available time slot first!");
+      setBookingStatus((prev) => ({
+        ...prev,
+        [doctorId]: "Please select a consultation time first.",
+      }));
       return;
     }
 
     try {
-      setBookingStatus((prev) => ({
-        ...prev,
-        [doctorId]: "booking",
-      }));
+      setBookingStatus((prev) => ({ ...prev, [doctorId]: "booking" }));
 
-      const token = localStorage.getItem("token") || "";
-
-      const response = await fetch(
-        "http://localhost:3000/patient/appointments",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            doctorId,
-            scheduledAt: chosenSlotIso,
-            reason: "Referred via PulmoAI Symptom Chatbot",
-          }),
+      const response = await fetch(APPOINTMENT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
         },
-      );
+        body: JSON.stringify({
+          doctorId,
+          scheduledAt: chosenSlotIso,
+          reason: "Referred via PulmoAI Symptom Chatbot",
+        }),
+      });
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data: any = {};
 
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to book appointment");
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        throw new Error("The server returned an invalid response.");
       }
 
-      setBookingStatus((prev) => ({
-        ...prev,
-        [doctorId]: "success",
-      }));
-    } catch (err) {
-      setBookingStatus((prev) => ({
-        ...prev,
-        [doctorId]: "error",
-      }));
+      if (!response.ok)
+        throw new Error(data.message || "Failed to book appointment.");
 
-      alert(err instanceof Error ? err.message : "Booking failed");
+      setBookingStatus((prev) => ({ ...prev, [doctorId]: "success" }));
+      setSelectedSlots((prev) => ({ ...prev, [doctorId]: "" }));
+
+      requestedDoctorsRef.current.delete(doctorId);
+      await fetchDoctorSlots(doctorId);
+    } catch (err) {
+      setBookingStatus((prev) => ({ ...prev, [doctorId]: "error" }));
+      alert(err instanceof Error ? err.message : "Unable to book appointment.");
     }
   };
 
   return (
     <>
-      <div className="flex h-[calc(100vh-7rem)] sm:h-[calc(100vh-8rem)] bg-white rounded-xl sm:rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden relative">
+      <div className="relative flex h-[calc(100vh-7rem)] overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-xs sm:h-[calc(100vh-8rem)] sm:rounded-2xl">
         {/* Chat History Sidebar */}
         <div
-          className={`fixed inset-y-0 left-0 z-30 w-72 sm:w-80 bg-white border-r border-gray-100 flex flex-col transition-transform duration-200 lg:static lg:translate-x-0 ${
+          className={`fixed inset-y-0 left-0 z-30 flex w-72 flex-col border-r border-gray-100 bg-white transition-transform duration-200 sm:w-80 lg:static lg:translate-x-0 ${
             showHistory
               ? "translate-x-0 shadow-2xl"
               : "-translate-x-full lg:translate-x-0"
           }`}
         >
-          <div className="p-3 sm:p-4 border-b border-gray-100 flex items-center justify-between gap-2">
+          <div className="flex items-center justify-between gap-2 border-b border-gray-100 p-3 sm:p-4">
             <button
               onClick={handleNewChat}
-              className="flex-1 bg-linear-to-r from-[#2F80ED] to-[#14B8A6] text-white font-medium py-2 px-3 sm:py-2.5 sm:px-4 rounded-xl flex items-center justify-center gap-2 shadow-xs hover:opacity-95 transition-all cursor-pointer text-xs sm:text-sm"
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-linear-to-r from-[#2F80ED] to-[#14B8A6] px-3 py-2.5 text-xs font-medium text-white shadow-xs transition-all hover:opacity-95 sm:text-sm"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="h-4 w-4" />
               New Chat
             </button>
 
             <button
               onClick={() => setShowHistory(false)}
-              className="lg:hidden p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 cursor-pointer"
+              className="rounded-lg p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-600 lg:hidden"
             >
-              <X className="w-5 h-5" />
+              <X className="h-5 w-5" />
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-1.5">
-            <p className="text-[10px] sm:text-xs font-semibold text-gray-400 tracking-wider uppercase mb-2 px-1 flex items-center gap-1.5">
-              <Bookmark className="w-3.5 h-3.5 text-blue-500" />
+          <div className="flex-1 space-y-1.5 overflow-y-auto p-2 sm:p-4">
+            <p className="mb-2 flex items-center gap-1.5 px-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400 sm:text-xs">
+              <Bookmark className="h-3.5 w-3.5 text-blue-500" />
               Tracked Chats
             </p>
 
             {chatHistory.length === 0 ? (
-              <p className="text-xs text-gray-400 px-1">
+              <p className="px-1 text-xs text-gray-400">
                 No previous chats found.
               </p>
             ) : (
               chatHistory.map((chat) => (
                 <div
                   key={chat.id}
-                  className={`group relative flex items-center justify-between w-full px-3 py-2.5 rounded-xl text-xs sm:text-sm transition-colors ${
+                  className={`group relative flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-xs transition-colors sm:text-sm ${
                     activeSessionId === chat.id
-                      ? "bg-blue-50/80 text-blue-600 font-semibold border-l-4 border-blue-600"
+                      ? "border-l-4 border-blue-600 bg-blue-50/80 font-semibold text-blue-600"
                       : "text-gray-700 hover:bg-gray-50"
                   }`}
                 >
                   {editingSessionId === chat.id ? (
                     <form
                       onSubmit={(e) => handleRenameChat(chat.id, e)}
-                      className="flex items-center gap-1 w-full"
+                      className="flex w-full items-center gap-1"
                     >
                       <input
                         type="text"
                         value={newTitle}
                         autoFocus
                         onChange={(e) => setNewTitle(e.target.value)}
-                        className="w-full bg-white border border-blue-300 rounded px-2 py-1 text-xs outline-none text-gray-900"
+                        className="w-full rounded border border-blue-300 bg-white px-2 py-1 text-xs text-gray-900 outline-none"
                       />
-
                       <button
                         type="submit"
-                        className="p-1 text-emerald-600 hover:bg-emerald-50 rounded"
+                        className="rounded p-1 text-emerald-600 hover:bg-emerald-50"
                       >
-                        <Check className="w-3.5 h-3.5" />
+                        <Check className="h-3.5 w-3.5" />
                       </button>
-
                       <button
                         type="button"
                         onClick={() => setEditingSessionId(null)}
-                        className="p-1 text-gray-400 hover:bg-gray-100 rounded"
+                        className="rounded p-1 text-gray-400 hover:bg-gray-100"
                       >
-                        <X className="w-3.5 h-3.5" />
+                        <X className="h-3.5 w-3.5" />
                       </button>
                     </form>
                   ) : (
                     <>
                       <button
                         onClick={() => handleSelectSession(chat.id)}
-                        className="text-left truncate flex-1 cursor-pointer pr-6 flex items-center gap-2"
+                        className="flex flex-1 cursor-pointer items-center gap-2 truncate pr-6 text-left"
                       >
                         <Bookmark
-                          className={`w-3.5 h-3.5 shrink-0 ${
+                          className={`h-3.5 w-3.5 shrink-0 ${
                             activeSessionId === chat.id
                               ? "text-blue-600"
                               : "text-gray-300"
                           }`}
                         />
-
                         <span className="truncate">
                           {chat.title || "Respiratory Consultation"}
                         </span>
@@ -626,18 +693,17 @@ const handleSend = async (e: React.FormEvent) => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-
                             setOpenMenuId(
                               openMenuId === chat.id ? null : chat.id,
                             );
                           }}
-                          className="p-1 text-gray-400 hover:text-gray-600 rounded cursor-pointer"
+                          className="cursor-pointer rounded p-1 text-gray-400 hover:text-gray-600"
                         >
-                          <MoreVertical className="w-3.5 h-3.5" />
+                          <MoreVertical className="h-3.5 w-3.5" />
                         </button>
 
                         {openMenuId === chat.id && (
-                          <div className="absolute right-0 top-6 w-28 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-10 text-xs">
+                          <div className="absolute right-0 top-6 z-10 w-28 rounded-lg border border-gray-200 bg-white py-1 text-xs shadow-lg">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -645,17 +711,17 @@ const handleSend = async (e: React.FormEvent) => {
                                 setNewTitle(chat.title);
                                 setOpenMenuId(null);
                               }}
-                              className="w-full text-left px-3 py-1.5 hover:bg-gray-50 flex items-center gap-1.5 text-gray-700 cursor-pointer"
+                              className="flex w-full cursor-pointer items-center gap-1.5 px-3 py-1.5 text-left text-gray-700 hover:bg-gray-50"
                             >
-                              <Edit2 className="w-3 h-3" />
+                              <Edit2 className="h-3 w-3" />
                               Rename
                             </button>
 
                             <button
                               onClick={(e) => handleDeleteChat(chat.id, e)}
-                              className="w-full text-left px-3 py-1.5 hover:bg-rose-50 flex items-center gap-1.5 text-rose-600 cursor-pointer"
+                              className="flex w-full cursor-pointer items-center gap-1.5 px-3 py-1.5 text-left text-rose-600 hover:bg-rose-50"
                             >
-                              <Trash2 className="w-3 h-3" />
+                              <Trash2 className="h-3 w-3" />
                               Delete
                             </button>
                           </div>
@@ -672,28 +738,27 @@ const handleSend = async (e: React.FormEvent) => {
         {showHistory && (
           <div
             onClick={() => setShowHistory(false)}
-            className="fixed inset-0 bg-slate-900/30 backdrop-blur-xs z-20 lg:hidden"
+            className="fixed inset-0 z-20 bg-slate-900/30 backdrop-blur-xs lg:hidden"
           />
         )}
 
         {/* Main Chat Interface */}
-        <div className="flex-1 flex flex-col bg-white min-w-0">
-          <div className="px-3 sm:px-6 py-3 border-b border-gray-100 flex items-center justify-between gap-3">
-            <div className="min-w-0 flex items-center gap-2.5">
+        <div className="flex min-w-0 flex-1 flex-col bg-white">
+          <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-3 py-3 sm:px-6">
+            <div className="flex min-w-0 items-center gap-2.5">
               <button
                 onClick={() => setShowHistory(true)}
-                className="lg:hidden p-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer shrink-0 flex items-center justify-center shadow-2xs"
+                className="flex shrink-0 items-center justify-center rounded-xl border border-slate-200 p-2 text-slate-700 shadow-2xs transition-colors hover:bg-slate-50 lg:hidden"
                 title="Toggle Sidebar"
               >
-                <PanelLeftOpen className="w-4 h-4 text-slate-700" />
+                <PanelLeftOpen className="h-4 w-4" />
               </button>
 
               <div className="min-w-0">
-                <h1 className="text-sm sm:text-base font-bold text-gray-900 truncate">
+                <h1 className="truncate text-sm font-bold text-gray-900 sm:text-base">
                   AI Healthcare Chatbot
                 </h1>
-
-                <p className="text-gray-500 text-[11px] sm:text-xs truncate">
+                <p className="truncate text-[11px] text-gray-500 sm:text-xs">
                   Ask questions & discuss symptoms
                 </p>
               </div>
@@ -701,10 +766,10 @@ const handleSend = async (e: React.FormEvent) => {
           </div>
 
           {/* Messages Body */}
-          <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4 bg-gray-50/50">
+          <div className="flex-1 space-y-4 overflow-y-auto bg-gray-50/50 p-3 sm:p-6">
             {messages.length === 0 && (
-              <div className="flex items-start gap-3 max-w-2xl">
-                <div className="bg-white rounded-2xl rounded-tl-sm p-3.5 sm:p-4 shadow-xs border border-gray-100 text-gray-800 text-xs sm:text-sm leading-relaxed space-y-2">
+              <div className="flex max-w-2xl items-start gap-3">
+                <div className="space-y-2 rounded-2xl rounded-tl-sm border border-gray-100 bg-white p-3.5 text-xs leading-relaxed text-gray-800 shadow-xs sm:p-4 sm:text-sm">
                   <p>
                     Hello! I&apos;m your healthcare assistant. How can I help
                     you today? You can describe your symptoms or ask
@@ -718,154 +783,255 @@ const handleSend = async (e: React.FormEvent) => {
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`flex flex-col gap-2 max-w-2xl ${
-                  msg.role === "user" ? "ml-auto items-end" : "items-start"
-                }`}
+                className={`flex max-w-2xl flex-col gap-2 ${msg.role === "user" ? "ml-auto items-end" : "items-start"}`}
               >
                 <div
-                  className={`rounded-2xl p-3.5 sm:p-4 shadow-xs border text-xs sm:text-sm leading-relaxed whitespace-pre-wrap ${
+                  className={`w-full rounded-2xl border p-3.5 text-xs leading-relaxed shadow-xs sm:p-4 sm:text-sm ${
                     msg.role === "user"
-                      ? "bg-blue-500 text-white border-blue-500 rounded-tr-sm"
-                      : "bg-white text-gray-800 border-gray-100 rounded-tl-sm w-full"
+                      ? "rounded-tr-sm border-blue-500 bg-blue-500 text-white"
+                      : "rounded-tl-sm border-gray-100 bg-white text-gray-800"
                   }`}
                 >
-                  {msg.content && <p>{msg.content}</p>}
+                  {msg.content && (
+                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                  )}
 
                   {msg.localFile && (
                     <button
                       type="button"
                       onClick={() => openFilePreview(msg.localFile!)}
-                      className="mt-3 flex items-center gap-3 p-3 rounded-xl border border-white/30 bg-white/10 text-left w-full"
+                      className="mt-3 flex w-full items-center gap-3 rounded-xl border border-white/30 bg-white/10 p-3 text-left"
                     >
-                      <FileText className="w-5 h-5 shrink-0" />
-
+                      <FileText className="h-5 w-5 shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium truncate">
+                        <p className="truncate font-medium">
                           {msg.localFile.name}
                         </p>
                         <p className="text-[10px] opacity-75">
                           Preview attachment
                         </p>
                       </div>
-
-                      <Eye className="w-4 h-4 shrink-0" />
+                      <Eye className="h-4 w-4 shrink-0" />
                     </button>
                   )}
 
-                 
-{msg.attachment && (
-  <button
-    type="button"
-    onClick={() =>
-      handleOpenSavedAttachment(msg.attachment!)
-    }
-    className="mt-3 flex items-center gap-3 p-3 rounded-xl border border-gray-200 bg-gray-50 text-left w-full hover:bg-gray-100 transition-colors"
-  >
-    <FileText className="w-5 h-5 shrink-0 text-blue-600" />
-
-    <div className="min-w-0 flex-1">
-      <p className="font-medium truncate text-gray-800">
-        {msg.attachment.fileName}
-      </p>
-
-      <p className="text-[10px] text-gray-500">
-        View attachment
-      </p>
-    </div>
-
-    <Eye className="w-4 h-4 shrink-0 text-gray-500" />
-  </button>
-)}
-
+                  {msg.attachment && (
+                    <button
+                      type="button"
+                      onClick={() => handleOpenSavedAttachment(msg.attachment!)}
+                      className="mt-3 flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-3 text-left transition-colors hover:bg-gray-100"
+                    >
+                      <FileText className="h-5 w-5 shrink-0 text-blue-600" />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium text-gray-800">
+                          {msg.attachment.fileName}
+                        </p>
+                        <p className="text-[10px] text-gray-500">
+                          View attachment
+                        </p>
+                      </div>
+                      <Eye className="h-4 w-4 shrink-0 text-gray-500" />
+                    </button>
+                  )}
 
                   {/* Doctor Cards */}
                   {msg.doctors && msg.doctors.length > 0 && (
                     <div className="mt-4 space-y-3">
                       {msg.doctors.map((doc) => {
-                        const status = bookingStatus[doc.id];
+                        const docId = doc.id || doc.doctorId;
+                        if (!docId) return null;
+
+                        const status = bookingStatus[docId];
+                        const selectedDate = selectedDates[docId] || "";
+                        const slots = generateSlotsForDate(
+                          selectedDate,
+                          doc.bookedSlots,
+                        );
 
                         return (
                           <div
-                            key={doc.id}
-                            className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex flex-col gap-3"
+                            key={docId}
+                            className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3"
                           >
                             <div>
-                              <p className="font-semibold text-gray-950 text-xs sm:text-sm">
+                              <p className="text-xs font-semibold text-gray-950 sm:text-sm">
                                 {doc.fullName}
                               </p>
-
                               <p className="text-[11px] text-slate-500">
-                                {doc.specialization}{" "}
+                                {doc.specialization}
                                 {doc.hospitalAffiliation
-                                  ? `• ${doc.hospitalAffiliation}`
+                                  ? ` • ${doc.hospitalAffiliation}`
                                   : ""}
                               </p>
+                              {doc.consultationHours && (
+                                <div className="mt-2 space-y-1">
+                                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-600">
+                                    Consultation Hours:
+                                  </p>
+                                  <ul className="grid grid-cols-1 gap-1 text-[11px] text-slate-700 sm:grid-cols-2">
+                                    {doc.consultationHours
+                                      .split(";")
+                                      .map((daySchedule, idx) => {
+                                        const [day, time] =
+                                          daySchedule.split(":");
+                                        if (!day || !time) return null;
+                                        const isClosed = time
+                                          .trim()
+                                          .toLowerCase()
+                                          .includes("closed");
+
+                                        return (
+                                          <li
+                                            key={idx}
+                                            className="flex items-center justify-between rounded-md bg-white px-2.5 py-1 border border-slate-200/60 shadow-2xs"
+                                          >
+                                            <span className="font-medium text-slate-900">
+                                              {day.trim()}
+                                            </span>
+                                            <span
+                                              className={
+                                                isClosed
+                                                  ? "text-rose-500 font-medium"
+                                                  : "text-slate-600"
+                                              }
+                                            >
+                                              {time.trim()}
+                                            </span>
+                                          </li>
+                                        );
+                                      })}
+                                  </ul>
+                                </div>
+                              )}
                             </div>
 
-                            {status !== "success" &&
-                              doc.availableSlots &&
-                              doc.availableSlots.length > 0 && (
-                                <div className="space-y-1.5">
-                                  <p className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider">
-                                    Select Preferred Time Slot:
-                                  </p>
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-600">
+                                  Step 1: Select Consultation Date
+                                </p>
 
+                                <button
+                                  type="button"
+                                  onClick={() => handleRefreshSlots(docId)}
+                                  disabled={slotLoading[docId]}
+                                  className="flex items-center gap-1 text-[10px] text-blue-600 hover:text-blue-800 disabled:opacity-50"
+                                >
+                                  <RefreshCw
+                                    className={`h-3 w-3 ${slotLoading[docId] ? "animate-spin" : ""}`}
+                                  />
+                                  Refresh
+                                </button>
+                              </div>
+
+                              <input
+                                type="date"
+                                value={selectedDate}
+                                onChange={(e) => {
+                                  setSelectedDates((prev) => ({
+                                    ...prev,
+                                    [docId]: e.target.value,
+                                  }));
+                                  setSelectedSlots((prev) => ({
+                                    ...prev,
+                                    [docId]: "",
+                                  }));
+                                }}
+                                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-blue-500"
+                              />
+                            </div>
+
+                            {selectedDate && (
+                              <div className="space-y-2">
+                                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-600">
+                                  Step 2: Select Available Time
+                                </p>
+
+                                {slotLoading[docId] ? (
+                                  <p className="flex items-center gap-2 text-xs text-slate-500">
+                                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                                    Checking consultation slots...
+                                  </p>
+                                ) : slots.length > 0 ? (
                                   <div className="flex flex-wrap gap-1.5">
-                                    {doc.availableSlots.map((slot, idx) => {
+                                    {slots.map((slot) => {
                                       const isSelected =
-                                        selectedSlots[doc.id] === slot.iso;
+                                        selectedSlots[docId] === slot.iso;
 
                                       return (
                                         <button
-                                          key={idx}
-                                          onClick={() =>
+                                          key={slot.iso}
+                                          type="button"
+                                          onClick={() => {
                                             setSelectedSlots((prev) => ({
                                               ...prev,
-                                              [doc.id]: slot.iso,
-                                            }))
-                                          }
-                                          className={`text-[11px] px-2 py-1 rounded-lg border transition-all cursor-pointer ${
+                                              [docId]: slot.iso,
+                                            }));
+                                            setBookingStatus((prev) => ({
+                                              ...prev,
+                                              [docId]: "",
+                                            }));
+                                          }}
+                                          className={`cursor-pointer rounded-lg border px-2.5 py-1.5 text-[11px] transition-all ${
                                             isSelected
-                                              ? "bg-blue-600 text-white border-blue-600 shadow-xs"
-                                              : "bg-white text-slate-700 border-slate-200 hover:border-blue-300"
+                                              ? "border-blue-600 bg-blue-600 text-white shadow-xs"
+                                              : "border-slate-200 bg-white text-slate-700 hover:border-blue-300"
                                           }`}
                                         >
-                                          {slot.date} @ {slot.time}
+                                          {slot.time}
                                         </button>
                                       );
                                     })}
                                   </div>
-                                </div>
+                                ) : (
+                                  <p className="text-[11px] text-slate-500">
+                                    No available slots found for this date. All
+                                    hours may be booked.
+                                  </p>
+                                )}
+                              </div>
+                            )}
+
+                            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-2">
+                              {status === "success" ? (
+                                <span className="inline-flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-600">
+                                  <CheckCircle2 className="h-3.5 w-3.5" />
+                                  Appointment booked successfully
+                                </span>
+                              ) : status === "booking" ? (
+                                <span className="text-[11px] text-blue-600">
+                                  Booking your appointment...
+                                </span>
+                              ) : (
+                                <span className="text-[10px] text-slate-500">
+                                  Select a date and time slot to book.
+                                </span>
                               )}
 
-                            <div className="flex justify-end pt-1">
-                              {status === "success" ? (
-                                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
-                                  <CheckCircle2 className="w-3.5 h-3.5" />
-                                  Booked
-                                </span>
-                              ) : doc.availableSlots &&
-                                doc.availableSlots.length > 0 ? (
+                              {status !== "success" && (
                                 <button
-                                  onClick={() => handleBookAppointment(doc.id)}
+                                  type="button"
+                                  onClick={() => handleBookAppointment(docId)}
                                   disabled={
-                                    status === "booking" ||
-                                    !selectedSlots[doc.id]
+                                    !selectedSlots[docId] ||
+                                    slotLoading[docId] ||
+                                    status === "booking"
                                   }
-                                  className="bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-medium px-3.5 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  className="flex cursor-pointer items-center gap-1 rounded-lg bg-blue-600 px-3.5 py-1.5 text-[11px] font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
-                                  <Calendar className="w-3 h-3" />
-
+                                  <Calendar className="h-3 w-3" />
                                   {status === "booking"
                                     ? "Confirming..."
-                                    : "Confirm & Book Slot"}
+                                    : "Confirm & Book"}
                                 </button>
-                              ) : (
-                                <span className="text-[11px] text-slate-500">
-                                  Appointment times are not available here yet.
-                                </span>
                               )}
                             </div>
+
+                            {status === "error" && (
+                              <p className="text-[11px] text-red-600">
+                                Booking failed. Please select another time.
+                              </p>
+                            )}
                           </div>
                         );
                       })}
@@ -877,34 +1043,32 @@ const handleSend = async (e: React.FormEvent) => {
 
             {isLoading && (
               <div className="flex items-start gap-3">
-                <div className="bg-white rounded-2xl rounded-tl-sm p-3 border border-gray-100 text-gray-500 text-xs shadow-xs flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-blue-500 animate-spin" />
+                <div className="flex items-center gap-2 rounded-2xl rounded-tl-sm border border-gray-100 bg-white p-3 text-xs text-gray-500 shadow-xs">
+                  <Sparkles className="h-4 w-4 animate-spin text-blue-500" />
                   <span>Analyzing your symptoms and attachment...</span>
                 </div>
               </div>
             )}
 
             {error && (
-              <div className="text-red-500 text-xs text-center">{error}</div>
+              <div className="text-center text-xs text-red-500">{error}</div>
             )}
 
             <div ref={messagesEndRef} />
           </div>
 
           {/* Input Bar & Attachment Preview */}
-          <div className="p-2.5 sm:p-4 bg-white border-t border-gray-100">
+          <div className="border-t border-gray-100 bg-white p-2.5 sm:p-4">
             {attachedFile && (
-              <div className="max-w-4xl mx-auto mb-2 flex items-center gap-2 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg text-xs text-blue-700 w-fit">
+              <div className="mx-auto mb-2 flex w-fit max-w-full items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs text-blue-700">
                 <button
                   type="button"
                   onClick={() => openFilePreview(attachedFile)}
-                  className="flex items-center gap-2 cursor-pointer min-w-0"
+                  className="flex min-w-0 cursor-pointer items-center gap-2"
                 >
-                  <Paperclip className="w-3.5 h-3.5 shrink-0" />
-
-                  <span className="truncate max-w-xs">{attachedFile.name}</span>
-
-                  <span className="text-blue-500 underline shrink-0">
+                  <Paperclip className="h-3.5 w-3.5 shrink-0" />
+                  <span className="max-w-xs truncate">{attachedFile.name}</span>
+                  <span className="shrink-0 text-blue-500 underline">
                     Preview
                   </span>
                 </button>
@@ -913,26 +1077,22 @@ const handleSend = async (e: React.FormEvent) => {
                   type="button"
                   onClick={() => {
                     setAttachedFile(null);
-
-                    if (fileInputRef.current) {
-                      fileInputRef.current.value = "";
-                    }
+                    if (fileInputRef.current) fileInputRef.current.value = "";
                   }}
-                  className="ml-1 text-slate-400 hover:text-rose-600 font-bold cursor-pointer"
+                  className="ml-1 cursor-pointer font-bold text-slate-400 hover:text-rose-600"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="h-3.5 w-3.5" />
                 </button>
               </div>
             )}
 
-            <form onSubmit={handleSend} className="max-w-4xl mx-auto">
-              <div className="relative flex items-center bg-white rounded-xl border border-gray-200 shadow-xs focus-within:border-blue-500 transition-all">
+            <form onSubmit={handleSend} className="mx-auto max-w-4xl">
+              <div className="relative flex items-center rounded-xl border border-gray-200 bg-white shadow-xs transition-all focus-within:border-blue-500">
                 <input
                   type="file"
                   ref={fileInputRef}
                   onChange={(e) => {
                     const selectedFile = e.target.files?.[0];
-
                     if (!selectedFile) return;
 
                     const allowedExtensions = [
@@ -945,16 +1105,14 @@ const handleSend = async (e: React.FormEvent) => {
                       ".txt",
                       ".csv",
                     ];
-
                     const extension = selectedFile.name
                       .slice(selectedFile.name.lastIndexOf("."))
                       .toLowerCase();
 
                     if (!allowedExtensions.includes(extension)) {
                       setError(
-                        "Supported files: PDF, JPG, PNG, WEBP, DOCX, TXT and CSV. Export DICOM scans as JPG or PNG first.",
+                        "Supported files: PDF, JPG, PNG, WEBP, DOCX, TXT and CSV.",
                       );
-
                       e.target.value = "";
                       return;
                     }
@@ -975,10 +1133,10 @@ const handleSend = async (e: React.FormEvent) => {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="pl-3 pr-1 text-gray-400 hover:text-blue-600 transition-colors cursor-pointer shrink-0"
-                  title="Attach a medical image, X-ray, scan, PDF or report"
+                  className="shrink-0 cursor-pointer pl-3 pr-1 text-gray-400 transition-colors hover:text-blue-600"
+                  title="Attach a medical report"
                 >
-                  <Paperclip className="w-4 h-4" />
+                  <Paperclip className="h-4 w-4" />
                 </button>
 
                 <input
@@ -986,16 +1144,16 @@ const handleSend = async (e: React.FormEvent) => {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Describe your symptoms or attach a medical file..."
-                  className="flex-1 py-2 sm:py-3 px-2 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 bg-transparent outline-hidden"
+                  className="flex-1 bg-transparent px-2 py-2 text-xs text-gray-900 outline-hidden placeholder:text-gray-400 sm:py-3 sm:text-sm"
                 />
 
                 <button
                   type="submit"
                   disabled={isLoading || (!message.trim() && !attachedFile)}
-                  className="mr-1.5 bg-linear-to-r from-[#2F80ED] to-[#14B8A6] text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-xs flex items-center gap-1 hover:opacity-95 transition-all cursor-pointer shadow-xs shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="mr-1.5 flex shrink-0 cursor-pointer items-center gap-1 rounded-lg bg-linear-to-r from-[#2F80ED] to-[#14B8A6] px-3 py-2 text-xs font-medium text-white shadow-xs transition-all hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50 sm:px-4"
                 >
                   <span>Send</span>
-                  <Send className="w-3 h-3" />
+                  <Send className="h-3 w-3" />
                 </button>
               </div>
             </form>
@@ -1006,99 +1164,89 @@ const handleSend = async (e: React.FormEvent) => {
       {/* File Preview Modal */}
       {previewFile && (
         <div
-          className="fixed inset-0 z-100 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-6"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-2 backdrop-blur-sm sm:p-6"
           onClick={closeFilePreview}
         >
           <div
-            className="bg-white w-full max-w-5xl h-[92vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            className="flex h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Preview Header */}
-            <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-4 border-b border-gray-200 shrink-0">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="p-2 bg-blue-50 rounded-lg">
-                  <FileText className="w-5 h-5 text-blue-600" />
+            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-gray-200 px-4 py-4 sm:px-6">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="rounded-lg bg-blue-50 p-2">
+                  <FileText className="h-5 w-5 text-blue-600" />
                 </div>
-
                 <div className="min-w-0">
-                  <h2 className="font-semibold text-gray-900 text-sm truncate">
+                  <h2 className="truncate text-sm font-semibold text-gray-900">
                     {previewFile.name}
                   </h2>
-
                   <p className="text-xs text-gray-400">File Preview</p>
                 </div>
               </div>
-
               <button
                 type="button"
                 onClick={closeFilePreview}
-                className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-red-500 transition-colors shrink-0"
+                className="shrink-0 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-red-500"
                 title="Close preview"
               >
-                <X className="w-5 h-5" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            {/* Preview Content */}
-            <div className="flex-1 min-h-0 bg-gray-100 overflow-auto flex items-center justify-center p-2 sm:p-4">
+            <div className="flex flex-1 min-h-0 items-center justify-center overflow-auto bg-gray-100 p-2 sm:p-4">
               {isPdfFile(previewFile) ? (
                 <iframe
                   src={previewUrl}
                   title={`Preview of ${previewFile.name}`}
-                  className="w-full h-full rounded-lg bg-white"
+                  className="h-full w-full rounded-lg bg-white"
                 />
               ) : isImageFile(previewFile) ? (
                 <img
                   src={previewUrl}
                   alt={previewFile.name}
-                  className="max-w-full max-h-full object-contain rounded-lg"
+                  className="max-h-full max-w-full rounded-lg object-contain"
                 />
               ) : isTextFile(previewFile) ? (
-                <div className="w-full h-full bg-white rounded-lg overflow-auto">
+                <div className="h-full w-full overflow-auto rounded-lg bg-white">
                   {previewLoading ? (
-                    <div className="h-full flex items-center justify-center text-gray-500 text-sm">
+                    <div className="flex h-full items-center justify-center text-sm text-gray-500">
                       Loading file content...
                     </div>
                   ) : (
-                    <pre className="p-4 sm:p-6 text-xs sm:text-sm text-gray-800 whitespace-pre-wrap wrap-break-word font-mono">
+                    <pre className="whitespace-pre-wrap break-words p-4 font-mono text-xs text-gray-800 sm:p-6 sm:text-sm">
                       {previewText || "This file is empty."}
                     </pre>
                   )}
                 </div>
               ) : (
-                <div className="text-center p-8">
-                  <FileText className="w-14 h-14 text-gray-400 mx-auto mb-4" />
-
+                <div className="p-8 text-center">
+                  <FileText className="mx-auto mb-4 h-14 w-14 text-gray-400" />
                   <h3 className="font-semibold text-gray-800">
                     Preview is not available for this format yet.
                   </h3>
-
-                  <p className="text-sm text-gray-500 mt-2">
+                  <p className="mt-2 text-sm text-gray-500">
                     You can download this file to view it.
                   </p>
-
                   <a
                     href={previewUrl}
                     download={previewFile.name}
-                    className="inline-flex items-center gap-2 mt-5 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                    className="mt-5 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-700"
                   >
-                    <Download className="w-4 h-4" />
+                    <Download className="h-4 w-4" />
                     Download File
                   </a>
                 </div>
               )}
             </div>
 
-            {/* Preview Footer */}
-            <div className="px-4 py-3 border-t border-gray-200 flex justify-between items-center shrink-0">
-              <p className="text-xs text-gray-400 hidden sm:block">
+            <div className="flex shrink-0 items-center justify-between border-t border-gray-200 px-4 py-3">
+              <p className="hidden text-xs text-gray-400 sm:block">
                 {previewFile.name}
               </p>
-
               <button
                 type="button"
                 onClick={closeFilePreview}
-                className="ml-auto px-5 py-2 bg-gray-900 text-white rounded-lg text-sm hover:bg-gray-700 transition-colors"
+                className="ml-auto rounded-lg bg-gray-900 px-5 py-2 text-sm text-white transition-colors hover:bg-gray-700"
               >
                 Close Preview
               </button>
