@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { Bell, Menu } from "lucide-react";
 
@@ -9,8 +10,32 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
+  useEffect(() => {
+    // Check for token existence in localStorage (or cookies if syncing)
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.replace("/auth/admin/sign-in");
+    } else {
+      setIsAuthorized(true);
+    }
+  }, [router]);
+
+  // Prevent flashing protected content before redirect completes
+  if (!isAuthorized) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-[#F8FAFC]">
+        <div className="flex flex-col items-center gap-2">
+          <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs font-semibold text-slate-500">Verifying session...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-[#F8FAFC] font-sans overflow-hidden">

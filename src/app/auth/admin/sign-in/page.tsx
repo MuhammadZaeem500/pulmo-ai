@@ -124,12 +124,12 @@ export default function AdminSignInPage() {
               {loading ? "Signing In..." : "Sign In"}
             </button>
             <p className="text-center text-xs text-slate-500">
-              Don&apos;t have an account?{" "}
+              {/* Don&apos;t have an account?{" "} */}
               <Link
                 href="/auth/admin/sign-up"
                 className="font-bold text-blue-600 hover:underline"
               >
-                Create account
+                {/* Create account */}
               </Link>
             </p>
           </form>

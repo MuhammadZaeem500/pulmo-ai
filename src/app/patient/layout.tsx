@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Sidebar from "@/components/patient/PatientSidebar";
 import { Menu, Bell, Loader2 } from "lucide-react";
 import api from "@/services/api";
@@ -10,16 +11,24 @@ export default function PatientLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [patientInitials, setPatientInitials] = useState("PT");
   const [loading, setLoading] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
     (async () => {
+      const token = localStorage.getItem("accessToken") || localStorage.getItem("token");
+      if (!token) {
+        router.replace("/auth/patient/sign-in");
+        return;
+      }
+      setIsAuthorized(true);
+
       try {
-        const token = localStorage.getItem("accessToken") || localStorage.getItem("token");
         const response = await api.get("/patient/profile", {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         const data = response?.data?.data || response?.data;
@@ -40,7 +49,18 @@ export default function PatientLayout({
         setLoading(false);
       }
     })();
-  }, []);
+  }, [router]);
+
+  if (!isAuthorized) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-[#F8FAFC]">
+        <div className="flex flex-col items-center gap-2">
+          <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+          <p className="text-xs font-semibold text-slate-500">Verifying session...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-[#F8FAFC] overflow-hidden font-['Ubuntu',sans-serif]">

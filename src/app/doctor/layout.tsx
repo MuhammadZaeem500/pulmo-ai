@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import DoctorSidebar from "@/components/doctor/DoctorSidebar";
 import { Menu, Bell, Loader2 } from "lucide-react";
 import { doctorPortalService } from "@/services/doctor.service";
@@ -10,16 +11,24 @@ export default function DoctorLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [doctorInitials, setDoctorInitials] = useState("DR");
   const [loading, setLoading] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
-  // Fetch live doctor profile details on mount
+  // Check auth token and fetch live doctor profile details on mount
   useEffect(() => {
     (async () => {
+      const token = localStorage.getItem("accessToken") || localStorage.getItem("token");
+      if (!token) {
+        router.replace("/auth/doctor/sign-in");
+        return;
+      }
+      setIsAuthorized(true);
+
       try {
         const response = await doctorPortalService.getProfile();
-        // Adjust based on your response structure (e.g., response.data or response directly)
         const profile = response?.data || response;
         if (profile?.initials) {
           setDoctorInitials(profile.initials);
@@ -39,7 +48,18 @@ export default function DoctorLayout({
         setLoading(false);
       }
     })();
-  }, []);
+  }, [router]);
+
+  if (!isAuthorized) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-2">
+          <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+          <p className="text-xs font-semibold text-slate-500">Verifying session...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-white font-sans overflow-hidden">
