@@ -2,7 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { authService } from "@/services/auth.service";
 import { 
   Activity, 
   LayoutDashboard, 
@@ -28,6 +29,13 @@ export default function AdminSidebar({
   setMobileOpen,
 }: AdminSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    setMobileOpen(false);
+    await authService.logout();
+    router.push("/auth/admin/sign-in");
+  };
 
   const navItems = [
     { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
@@ -105,14 +113,14 @@ export default function AdminSidebar({
 
        
         <div className="p-3 border-t border-slate-100 space-y-1">
-          <Link
-            href="/auth/admin/sign-in"
-            onClick={() => setMobileOpen(false)}
-            className="flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors"
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
           >
             <LogOut className="w-4 h-4 shrink-0" />
             {(!collapsed || mobileOpen) && <span>Logout</span>}
-          </Link>
+          </button>
           <button
             onClick={() => setCollapsed(!collapsed)}
             className="hidden lg:flex w-full items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-colors cursor-pointer"

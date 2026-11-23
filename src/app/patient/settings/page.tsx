@@ -5,6 +5,7 @@ import { User, Bell, Globe, Moon, Loader2, KeyRound, X } from "lucide-react";
 import SettingSectionCard from "@/components/common/SettingSectionCard";
 import SettingToggleItem from "@/components/common/SettingToggleItem";
 import { settingsService } from "@/services/settings.service";
+import { authService } from "@/services/auth.service";
 
 // ─── Change Password Modal ───────────────────────────────────────────────────
 function ChangePasswordModal({ onClose }: { onClose: () => void }) {
@@ -159,7 +160,7 @@ export default function SettingsPage() {
     if (confirm("Are you sure you want to permanently delete your account and data? This action cannot be undone.")) {
       try {
         await settingsService.deleteAccount();
-        localStorage.clear();
+        await authService.logout();
         window.location.href = "/auth/patient/sign-in";
       } catch (error) {
         console.error("Failed to delete account", error);

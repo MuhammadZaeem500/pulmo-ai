@@ -4,13 +4,14 @@ import { authService } from "@/services/auth.service";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import Link from "next/link";
-import { Stethoscope, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { Stethoscope, ArrowLeft, Eye, EyeOff, Loader2 } from "lucide-react";
 import AuthHeroBanner from "@/components/doctor/AuthHeroBanner";
 
 export default function DoctorLoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -34,15 +35,17 @@ export default function DoctorLoginPage() {
     });
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccessMessage("");
     setLoading(true);
 
     try {
       const response = await authService.login({
         email: formData.email,
         password: formData.password,
+        expectedRole: "DOCTOR",
       });
 
       if (response.user && response.user.role && response.user.role !== "DOCTOR") {
@@ -53,30 +56,39 @@ const handleSubmit = async (e: React.FormEvent) => {
 
       router.push("/doctor/dashboard");
     } catch (err: any) {
-      setError(
-        err.response?.data?.message || "Invalid email or password. Please try again."
-      );
+      setError(authService.formatAuthError(err));
     } finally {
       setLoading(false);
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!formData.email) {
+      setError("Please enter your doctor email address to reset your password.");
+      return;
+    }
+    try {
+      await authService.resetPassword(formData.email);
+      setSuccessMessage(`Password reset link sent to ${formData.email}. Please check your inbox.`);
+      setError("");
+    } catch (err: any) {
+      setError(authService.formatAuthError(err));
+    }
+  };
+
   return (
     <div className="min-h-screen flex w-full bg-white font-sans overflow-hidden">
-     
       <AuthHeroBanner />
 
-     
       <div className="w-full lg:w-1/2 flex flex-col justify-between p-8 sm:p-12 overflow-y-auto max-h-screen">
         <div>
-         
           <div className="flex flex-col items-start gap-3 mb-6">
             <Link
               href="/"
               className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to Patient Portal
+              Back to Home
             </Link>
 
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold border border-blue-100">
@@ -85,7 +97,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             </div>
           </div>
 
-         <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900">
             Welcome back, Doctor
           </h2>
           <p className="text-sm text-slate-500 mt-1 mb-6">
@@ -95,6 +107,12 @@ const handleSubmit = async (e: React.FormEvent) => {
           {error && (
             <div className="mb-4 max-w-md p-3 bg-red-50 border border-red-200 text-red-600 text-xs rounded-xl font-medium">
               {error}
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="mb-4 max-w-md p-3 bg-teal-50 border border-teal-200 text-teal-700 text-xs rounded-xl font-medium">
+              {successMessage}
             </div>
           )}
 
@@ -131,14 +149,13 @@ const handleSubmit = async (e: React.FormEvent) => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
-           
             <div className="flex items-center justify-between text-xs py-1">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -150,26 +167,25 @@ const handleSubmit = async (e: React.FormEvent) => {
                 />
                 <span className="text-slate-600 font-medium">Keep me signed in</span>
               </label>
-              <Link
-                href="/auth/doctor/forgot-password"
-                className="text-blue-600 font-semibold hover:underline"
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="text-blue-600 font-semibold hover:underline cursor-pointer"
               >
                 Forgot password?
-              </Link>
+              </button>
             </div>
 
-           
-           <button
+            <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 text-white font-semibold text-sm hover:opacity-95 transition-opacity flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 disabled:opacity-50"
+              className="w-full py-3 px-4 rounded-xl bg-linear-to-r from-blue-600 to-teal-500 text-white font-semibold text-sm hover:opacity-95 transition-opacity flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 disabled:opacity-50 cursor-pointer"
             >
-              {loading ? "Signing in..." : "Sign In to Doctor Portal"}
+              {loading && <Loader2 className="w-4 h-4 animate-spin text-white" />}
+              <span>{loading ? "Signing in..." : "Sign In to Doctor Portal"}</span>
             </button>
           </form>
-          
 
-         
           <div className="mt-6 max-w-md flex items-center justify-center gap-1.5 text-xs text-slate-500">
             <span>New doctor?</span>
             <Link
@@ -180,7 +196,6 @@ const handleSubmit = async (e: React.FormEvent) => {
             </Link>
           </div>
 
-         
           <div
             onClick={handleDemoAccess}
             className="mt-8 max-w-md p-4 rounded-2xl border border-slate-200 bg-slate-50/50 hover:bg-slate-100/80 transition-all cursor-pointer group"
@@ -199,7 +214,6 @@ const handleSubmit = async (e: React.FormEvent) => {
           </div>
         </div>
 
-       
         <div className="mt-8" />
       </div>
     </div>

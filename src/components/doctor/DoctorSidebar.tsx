@@ -17,6 +17,7 @@ import {
   X
 } from "lucide-react";
 import { doctorPortalService } from "@/services/doctor.service";
+import { authService } from "@/services/auth.service";
 import { DoctorSidebarProps } from "@/types/doctor.types";
 
 
@@ -59,8 +60,8 @@ export default function DoctorSidebar({ mobileOpen, setMobileOpen }: DoctorSideb
     };
   }, []);
 
-  const handleLogout = () => {
-    localStorage.clear();
+  const handleLogout = async () => {
+    await authService.logout();
     router.push("/auth/doctor/sign-in");
   };
 

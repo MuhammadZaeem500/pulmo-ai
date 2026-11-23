@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import SidebarProps from "@/types/patient.types";
 import { useState } from "react";
+import { authService } from "@/services/auth.service";
 
 export default function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
   const router = useRouter();
@@ -38,7 +39,8 @@ export default function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
     { icon: SettingsIcon, label: 'Settings', path: '/patient/settings' },
   ];
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await authService.logout();
     router.push('/auth/patient/sign-in');
   };
 

@@ -18,19 +18,25 @@ export default function PatientLayout({
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
     (async () => {
-      const token = localStorage.getItem("accessToken") || localStorage.getItem("token");
+      const token =
+        localStorage.getItem("accessToken") || localStorage.getItem("token");
+
       if (!token) {
         router.replace("/auth/patient/sign-in");
         return;
       }
-      setIsAuthorized(true);
 
       try {
         const response = await api.get("/patient/profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
+        if (!isMounted) return;
+
+        setIsAuthorized(true);
         const data = response?.data?.data || response?.data;
         const fullName = data?.patientProfile?.fullName || data?.fullName;
 
@@ -43,12 +49,24 @@ export default function PatientLayout({
             .toUpperCase();
           setPatientInitials(initials || "PT");
         }
-      } catch (err) {
+      } catch (err: any) {
+        const status = err?.response?.status;
+        if (status === 401 || status === 403) {
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("token");
+          router.replace("/auth/patient/sign-in");
+          return;
+        }
         console.error("Failed to load patient profile initials", err);
+        if (isMounted) setIsAuthorized(true);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     })();
+
+    return () => {
+      isMounted = false;
+    };
   }, [router]);
 
   if (!isAuthorized) {
@@ -56,7 +74,9 @@ export default function PatientLayout({
       <div className="flex h-screen w-screen items-center justify-center bg-[#F8FAFC]">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
-          <p className="text-xs font-semibold text-slate-500">Verifying session...</p>
+          <p className="text-xs font-semibold text-slate-500">
+            Verifying session...
+          </p>
         </div>
       </div>
     );
@@ -67,7 +87,6 @@ export default function PatientLayout({
       <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
       <div className="flex-1 flex flex-col overflow-hidden w-full">
-       
         <header className="h-16 bg-white border-b border-slate-200 px-4 sm:px-8 flex items-center justify-between shrink-0 shadow-xs">
           <div className="flex items-center gap-3">
             <button
@@ -86,7 +105,7 @@ export default function PatientLayout({
               <Bell className="w-4 h-4" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500" />
             </button>
-            
+
             <div className="w-9 h-9 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-sm">
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin text-white" />
@@ -98,9 +117,7 @@ export default function PatientLayout({
         </header>
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-8 bg-[#F8FAFC]">
-          <div className="mx-auto max-w-7xl space-y-6">
-            {children}
-          </div>
+          <div className="mx-auto max-w-7xl space-y-6">{children}</div>
         </main>
       </div>
     </div>

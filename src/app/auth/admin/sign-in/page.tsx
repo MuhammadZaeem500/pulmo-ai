@@ -15,19 +15,39 @@ export default function AdminSignInPage() {
   const [email, setEmail] = useState("admin@pulmoai.com");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setSuccessMessage("");
 
     try {
-      await authService.login({ email, password });
+      const response = await authService.login({ email, password, expectedRole: "ADMIN" });
+      if (response?.user?.role && response.user.role !== "ADMIN") {
+        setError("Access denied. This portal is for administrators only.");
+        return;
+      }
       router.push("/admin/dashboard");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Invalid email or password");
+      setError(authService.formatAuthError(err));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError("Please enter your admin email address to reset your password.");
+      return;
+    }
+    try {
+      await authService.resetPassword(email);
+      setSuccessMessage(`Password reset email sent to ${email}. Please check your inbox.`);
+      setError("");
+    } catch (err: any) {
+      setError(authService.formatAuthError(err));
     }
   };
 
@@ -56,6 +76,12 @@ export default function AdminSignInPage() {
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-xs rounded-xl font-medium">
               {error}
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="p-3 bg-teal-50 border border-teal-200 text-teal-700 text-xs rounded-xl font-medium">
+              {successMessage}
             </div>
           )}
 
@@ -109,12 +135,13 @@ export default function AdminSignInPage() {
                 />
                 <span className="font-medium text-slate-600">Remember me</span>
               </label>
-              <Link
-                href="/admin/forgot-password"
-                className="font-semibold text-blue-600 hover:underline"
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="font-semibold text-blue-600 hover:underline cursor-pointer"
               >
                 Forgot password?
-              </Link>
+              </button>
             </div>
             <button
               type="submit"

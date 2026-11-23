@@ -35,10 +35,11 @@ export default function DoctorAppointmentsPage() {
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      const data = await appointmentService.getAppointments();
+      const res = await appointmentService.getAppointments();
+      const list = Array.isArray(res) ? res : (res?.data || []);
       // Normalize statuses from DB enum → display labels
       setAppointments(
-        data.map((appt: any) => ({ ...appt, status: normalizeStatus(appt.status) }))
+        list.map((appt: any) => ({ ...appt, status: normalizeStatus(appt.status) }))
       );
     } catch (err) {
       console.error("Failed to load appointments", err);
