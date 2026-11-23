@@ -160,7 +160,7 @@ export default function SettingsPage() {
     if (confirm("Are you sure you want to permanently delete your account and data? This action cannot be undone.")) {
       try {
         await settingsService.deleteAccount();
-        await authService.logout();
+        await authService.deleteAccount();
         window.location.href = "/auth/patient/sign-in";
       } catch (error) {
         console.error("Failed to delete account", error);

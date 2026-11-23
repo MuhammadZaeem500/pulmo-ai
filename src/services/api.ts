@@ -15,11 +15,20 @@ async function resolveBearerToken(forceRefresh = false): Promise<string | null> 
 
   try {
     const auth = getFirebaseAuth();
-    const currentUser = auth?.currentUser;
-    if (currentUser) {
-      const firebaseToken = await currentUser.getIdToken(forceRefresh);
-      if (firebaseToken) {
-        return firebaseToken;
+    if (auth) {
+      // Wait for Firebase to finish restoring authenticated user from storage
+      if (typeof (auth as any).authStateReady === 'function') {
+        await (auth as any).authStateReady();
+      }
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        // getIdToken automatically returns a fresh token using the Firebase refresh token
+        const firebaseToken = await currentUser.getIdToken(forceRefresh);
+        if (firebaseToken) {
+          localStorage.setItem('accessToken', firebaseToken);
+          localStorage.setItem('token', firebaseToken);
+          return firebaseToken;
+        }
       }
     }
   } catch {

@@ -488,6 +488,22 @@ export const authService = {
   },
 
   /**
+   * Delete current authenticated user from Firebase Auth and clear storage
+   */
+  async deleteAccount() {
+    try {
+      const auth = getFirebaseAuth();
+      if (auth && auth.currentUser) {
+        await auth.currentUser.delete();
+      }
+    } catch (err) {
+      console.warn('Firebase currentUser.delete notice:', err);
+    } finally {
+      this.clearAuthSession();
+    }
+  },
+
+  /**
    * Log out current user from Firebase and clear browser auth storage
    */
   async logout() {
