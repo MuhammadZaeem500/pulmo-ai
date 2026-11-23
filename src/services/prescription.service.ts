@@ -1,13 +1,15 @@
 import api from './api';
 
 const getAuthHeader = () => {
+  if (typeof window === 'undefined') return {};
   const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
 export const prescriptionService = {
   async getPrescriptions(searchQuery = '') {
-    const response = await api.get(`/doctor/prescriptions${searchQuery ? `?search=${searchQuery}` : ''}`, {
+    const query = searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : '';
+    const response = await api.get(`/doctor/prescriptions${query}`, {
       headers: getAuthHeader(),
     });
     return response.data;
@@ -40,4 +42,4 @@ export const prescriptionService = {
     });
     return response.data;
   },
-};  
+};

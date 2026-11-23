@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Activity, User, Mail, Phone, Lock, Calendar } from "lucide-react";
+import { Activity, User, Mail, Phone, Lock, Calendar, Loader2 } from "lucide-react";
 import AuthHeroBanner from "@/components/patient/AuthHeroBanner";
 import { authService } from "@/services/auth.service";
 
@@ -19,29 +19,40 @@ export default function SignUp() {
     confirmPassword: "",
   });
 
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
+      setError("Passwords do not match!");
       return;
     }
+
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      return;
+    }
+
+    setLoading(true);
 
     try {
       await authService.signupPatient({
         fullName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
+        age: formData.age,
         gender: formData.gender as "MALE" | "FEMALE" | "OTHER",
-        bloodGroup: formData.bloodGroup as any,
+        bloodGroup: formData.bloodGroup,
         password: formData.password,
       });
-      alert(
-        "Account created successfully! Please check your email to verify your account.",
-      );
-      router.push("/auth/patient/sign-in");
+      router.push("/patient/dashboard");
     } catch (err: any) {
-      alert(err.response?.data?.message || "Signup failed");
+      setError(authService.formatAuthError(err));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -59,7 +70,6 @@ export default function SignUp() {
         <div className="w-full max-w-md my-auto">
           <div className="mb-4">
             <div className="flex items-center gap-2 mb-6 lg:hidden">
-              {" "}
               <div className="p-1.5 bg-linear-to-br from-[#2F80ED] to-[#14B8A6] rounded-lg">
                 <Activity className="w-4 h-4 text-white" />
               </div>
@@ -74,6 +84,12 @@ export default function SignUp() {
               Join us and start your healthcare journey
             </p>
           </div>
+
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-xs rounded-xl font-medium">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -228,9 +244,11 @@ export default function SignUp() {
 
             <button
               type="submit"
-              className="w-full py-2.5 bg-linear-to-r from-[#2F80ED] to-[#14B8A6] text-white font-bold text-xs rounded-xl hover:opacity-90 transition-opacity shadow-md shadow-[#2F80ED]/20 cursor-pointer mt-2"
+              disabled={loading}
+              className="w-full py-2.5 bg-linear-to-r from-[#2F80ED] to-[#14B8A6] text-white font-bold text-xs rounded-xl hover:opacity-90 transition-opacity shadow-md shadow-[#2F80ED]/20 cursor-pointer mt-2 disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              Create Account
+              {loading && <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />}
+              <span>{loading ? "Creating Account..." : "Create Account"}</span>
             </button>
 
             <p className="text-center text-xs text-gray-500 pt-1">
@@ -238,7 +256,7 @@ export default function SignUp() {
               <button
                 type="button"
                 onClick={() => router.push("/auth/patient/sign-in")}
-                className="text-[#2F80ED] hover:underline font-bold"
+                className="text-[#2F80ED] hover:underline font-bold cursor-pointer"
               >
                 Sign In
               </button>

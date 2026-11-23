@@ -17,7 +17,7 @@ export default function AdminLayout({
 
   useEffect(() => {
     // Check for token existence in localStorage (or cookies if syncing)
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("accessToken") || localStorage.getItem("token");
     if (!token) {
       router.replace("/auth/admin/sign-in");
     } else {

@@ -44,6 +44,6 @@ next-env.d.ts
 package-lock.json
 package.json.
 
-/pack-repo.sh
+pack-repo.sh
+repomix-output.xml
 /Folder Structure Script.sh
-/repomix-output.xml

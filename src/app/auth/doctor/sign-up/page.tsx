@@ -64,6 +64,17 @@ export default function DoctorRegisterPage() {
     e.preventDefault();
     setError("");
 
+    if (step === 1) {
+      if (formData.password !== formData.confirmPassword) {
+        setError("Passwords do not match!");
+        return;
+      }
+      if (formData.password.length < 6) {
+        setError("Password must be at least 6 characters long.");
+        return;
+      }
+    }
+
     if (step < 4) {
       setStep(step + 1);
       return;
@@ -75,7 +86,7 @@ export default function DoctorRegisterPage() {
         await authService.signupDoctor(formData);
         router.push("/auth/doctor/sign-in");
       } catch (err: any) {
-        setError(err.response?.data?.message || "Failed to submit registration");
+        setError(authService.formatAuthError(err));
       } finally {
         setLoading(false);
       }

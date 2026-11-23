@@ -24,10 +24,18 @@ export default function AdminSignUpPage() {
     confirmPassword: "",
   });
 
-const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreed) {
-      alert("You must agree to the Terms of Service and Privacy Policy");
+      setError("You must agree to the Terms of Service and Privacy Policy");
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match!");
+      return;
+    }
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters long.");
       return;
     }
     setLoading(true);
@@ -37,7 +45,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       await authService.signupAdmin(formData);
       router.push("/auth/admin/sign-in");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to create account");
+      setError(authService.formatAuthError(err));
     } finally {
       setLoading(false);
     }
