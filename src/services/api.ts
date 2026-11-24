@@ -10,7 +10,7 @@ export const api = axios.create({
   },
 });
 
-async function resolveBearerToken(forceRefresh = false): Promise<string | null> {
+export async function resolveBearerToken(forceRefresh = false): Promise<string | null> {
   if (typeof window === 'undefined') return null;
 
   try {

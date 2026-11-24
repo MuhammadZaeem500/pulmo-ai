@@ -62,7 +62,7 @@ type ChatSessionItem = {
   updatedAt: string;
 };
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 const AVAILABILITY_URL = (doctorId: string) =>
   `${API_BASE_URL}/patient/appointments/doctors/${doctorId}/available-slots`;
@@ -107,7 +107,10 @@ export default function ChatbotPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const requestedDoctorsRef = useRef<Set<string>>(new Set());
 
-  const getToken = () => localStorage.getItem("token") || "";
+  const getToken = () => {
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem("accessToken") || localStorage.getItem("token") || "";
+  };
 
   useEffect(() => {
     fetchChatSessions();

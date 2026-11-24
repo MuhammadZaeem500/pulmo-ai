@@ -4,6 +4,7 @@ import { useState } from "react";
 import MedicineShapeCard from "@/components/common/MedicineShapeCard";
 import MedicineColorCard from "@/components/common/MedicineColorCard";
 import { Circle, Pill, Tablet, Disc, Loader2 } from "lucide-react";
+import api from "@/services/api";
 
 export default function KnowYourMedicinePage() {
   const [selectedShape, setSelectedShape] = useState("Round Tablet");
@@ -35,44 +36,22 @@ export default function KnowYourMedicinePage() {
     setLoading(true);
     setHasSearched(true);
     try {
-      const queryParams = new URLSearchParams({
-        shape: selectedShape,
-        color: selectedColor,
-        ...(imprint ? { imprint } : {}),
-      });
-
-      // 1. Retrieve the JWT token from localStorage (adjust key name if your app uses something else like "access_token")
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        alert("You must be logged in to use this feature.");
-        setLoading(false);
-        return;
-      }
-
-      // 2. Make the fetch request passing the Authorization header
-      const response = await fetch(`http://localhost:3000/medicines/identify?${queryParams.toString()}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`, // <-- This satisfies the JwtAuthGuard
+      const response = await api.get('/medicines/identify', {
+        params: {
+          shape: selectedShape,
+          color: selectedColor,
+          ...(imprint ? { imprint } : {}),
         },
       });
 
-      if (response.status === 401) {
-        alert("Your session has expired. Please log in again.");
-        setLoading(false);
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch medicine identification");
-      }
-
-      const data = await response.json();
-      setResults(data);
-    } catch (error) {
+      setResults(response.data || []);
+    } catch (error: any) {
       console.error("Error identifying medicine:", error);
+      if (error?.response?.status === 401) {
+        alert("Your session has expired or you are not logged in. Please log in again.");
+      } else {
+        alert("Failed to fetch medicine identification. Please try again.");
+      }
     } finally {
       setLoading(false);
     }

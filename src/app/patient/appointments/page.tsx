@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import AvailableDoctorCard from '@/components/common/AvailableDoctorCard';
 import PreviousAppointmentCard from '@/components/common/PreviousAppointmentCard';
 import { Loader2 } from 'lucide-react';
+import api from '@/services/api';
 
 export default function AppointmentsPage() {
   const [activeTab, setActiveTab] = useState<'book' | 'previous'>('book');
@@ -34,15 +35,8 @@ export default function AppointmentsPage() {
   const fetchDoctors = async () => {
     setLoadingDoctors(true);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/patient/directory/doctors', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to fetch doctors');
-      const result = await response.json();
+      const response = await api.get('/patient/directory/doctors');
+      const result = response.data;
       
       console.log('🩺 Fetched Doctors Directory Response:', result);
       console.log('🩺 Doctor Profiles Array:', result.data);
@@ -59,15 +53,8 @@ export default function AppointmentsPage() {
   const fetchAppointments = async () => {
     setLoadingAppointments(true);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/patient/appointments', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to fetch appointments');
-      const result = await response.json();
+      const response = await api.get('/patient/appointments');
+      const result = response.data;
       setAppointments(result.data || []);
     } catch (error) {
       console.error('Error fetching appointments:', error);
@@ -153,26 +140,15 @@ export default function AppointmentsPage() {
 
     setSubmitting(true);
     try {
-      const token = localStorage.getItem('token');
-      
       const formattedTime = time.length === 5 ? `${time}:00` : time;
       const scheduledAt = new Date(`${date}T${formattedTime}`).toISOString();
 
-      const response = await fetch('http://localhost:3000/patient/appointments', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          doctorId: selectedDoctorId,
-          clinicId: selectedClinicId || undefined,
-          scheduledAt,
-          reason,
-        }),
+      await api.post('/patient/appointments', {
+        doctorId: selectedDoctorId,
+        clinicId: selectedClinicId || undefined,
+        scheduledAt,
+        reason,
       });
-
-      if (!response.ok) throw new Error('Failed to book appointment');
 
       alert('Appointment booked successfully!');
       setReason('');

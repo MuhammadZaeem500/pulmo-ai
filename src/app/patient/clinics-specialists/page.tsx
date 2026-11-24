@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import DoctorClinicCard from "@/components/common/DoctorClinicCard";
 import { Search, Building2, User, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import api from "@/services/api";
 
 export default function ClinicsSpecialistsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,27 +21,13 @@ export default function ClinicsSpecialistsPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const token = localStorage.getItem("token");
-
         const endpoint =
           activeTab === "clinics"
-            ? "http://localhost:3000/patient/directory/clinics"
-            : "http://localhost:3000/patient/directory/doctors";
+            ? "/patient/directory/clinics"
+            : "/patient/directory/doctors";
 
-        const response = await fetch(endpoint, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch directory data");
-        }
-
-        const result = await response.json();
-        setData(result.data || []);
+        const response = await api.get(endpoint);
+        setData(response.data?.data || response.data || []);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
