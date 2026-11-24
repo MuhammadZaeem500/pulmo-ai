@@ -267,7 +267,7 @@ export default function AdminDashboardPage() {
                   <Send className="w-4 h-4" />
                 </div>
                 <span className="text-xs font-bold text-slate-700">
-                  Send Notification
+                Notification
                 </span>
               </button>
             </div>

@@ -1,4 +1,7 @@
+"use client";
+
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { Calendar, Clock, MapPin, MessageCircle } from 'lucide-react';
 import { PreviousAppointmentCardProps } from '@/types/common.types';
 
@@ -10,8 +13,23 @@ export default function PreviousAppointmentCard({
   clinic,
   status,
   notes,
+  doctorId,
   onChat,
 }: PreviousAppointmentCardProps) {
+  const router = useRouter();
+
+  const handleChat = () => {
+    if (onChat) {
+      onChat();
+      return;
+    }
+    router.push(
+      doctorId
+        ? `/patient/chat?doctorId=${encodeURIComponent(doctorId)}`
+        : "/patient/chat",
+    );
+  };
+
   return (
     <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-xs space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
@@ -38,14 +56,10 @@ export default function PreviousAppointmentCard({
         </span>
       </div>
 
-      {/* <div className="pt-4 border-t border-gray-100">
-        <p className="text-xs font-semibold text-gray-400 tracking-wider uppercase mb-1">Consultation Notes</p>
-        <p className="text-sm text-gray-700">{notes}</p>
-      </div> */}
-
       <div className="pt-2">
         <button
-          onClick={onChat}
+          type="button"
+          onClick={handleChat}
           className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-[#2F80ED] text-white text-xs sm:text-sm font-medium rounded-xl hover:bg-[#2668c7] transition-colors cursor-pointer shadow-xs"
         >
           <MessageCircle className="w-4 h-4" />

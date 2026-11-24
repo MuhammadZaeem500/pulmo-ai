@@ -14,7 +14,8 @@ import {
   Settings, 
   LogOut, 
   Stethoscope,
-  X
+  X,
+  MessageSquare
 } from "lucide-react";
 import { doctorPortalService } from "@/services/doctor.service";
 import { authService } from "@/services/auth.service";
@@ -72,6 +73,7 @@ export default function DoctorSidebar({ mobileOpen, setMobileOpen }: DoctorSideb
     { name: "Prescriptions", href: "/doctor/prescriptions", icon: Pill },
     { name: "Recommended Tests", href: "/doctor/tests", icon: TestTube },
     { name: "Appointments", href: "/doctor/appointments", icon: Calendar },
+    { name: "Chat", href: "/doctor/chat", icon: MessageSquare },
   ];
 
   const bottomNavItems = [

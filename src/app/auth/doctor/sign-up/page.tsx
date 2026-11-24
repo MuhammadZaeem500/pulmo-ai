@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { authService } from "@/services/auth.service";
 import { useRouter } from "next/navigation";
@@ -12,9 +12,25 @@ import {
   ChevronRight,
   Upload,
   ShieldCheck,
+  CheckCircle2,
+  FileText,
+  X,
 } from "lucide-react";
 import AuthHeroBanner from "@/components/doctor/AuthHeroBanner";
 import AuthStepper from "@/components/doctor/AuthStepper";
+import {
+  getAuth,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  ConfirmationResult,
+} from "firebase/auth";
+import "@/lib/firebase";
+
+type DocFieldKey =
+  | "cnicFront"
+  | "cnicBack"
+  | "practiceLicense"
+  | "pmdcCertificate";
 
 export default function DoctorRegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -22,7 +38,14 @@ export default function DoctorRegisterPage() {
   const [step, setStep] = useState(1);
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
   const [error, setError] = useState("");
+  const [recaptchaKey, setRecaptchaKey] = useState(0);
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
+  const [confirmationResult, setConfirmationResult] =
+    useState<ConfirmationResult | null>(null);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -44,20 +67,158 @@ export default function DoctorRegisterPage() {
     otp: ["", "", "", "", "", ""],
   });
 
+  useEffect(() => {
+    if (resendTimer <= 0) return;
+    const timer = setInterval(() => {
+      setResendTimer((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendTimer]);
+
+  useEffect(() => {
+    return () => {
+      if (recaptchaVerifierRef.current) {
+        try {
+          recaptchaVerifierRef.current.clear();
+        } catch {}
+        recaptchaVerifierRef.current = null;
+      }
+    };
+  }, []);
+
+  const formatE164Phone = (raw: string) => {
+    const digits = raw.replace(/[^\d+]/g, "");
+    if (digits.startsWith("+")) return digits;
+    if (digits.startsWith("0")) return `+92${digits.slice(1)}`;
+    if (digits.startsWith("92")) return `+${digits}`;
+    return `+92${digits}`;
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleFileChange = (field: string, file: File | null) => {
-    setFormData({ ...formData, [field]: file });
+  const handleFileChange = (field: DocFieldKey, file: File | null) => {
+    if (file) {
+      const allowedTypes = [
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "application/pdf",
+      ];
+      if (!allowedTypes.includes(file.type)) {
+        setError("Invalid file format. Please upload JPG, PNG, or PDF only.");
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        setError("File size must be under 10MB.");
+        return;
+      }
+    }
+    setError("");
+    setFormData((prev) => ({ ...prev, [field]: file }));
+  };
+
+  const triggerSendOtp = async (): Promise<boolean> => {
+    if (!formData.phone.trim()) {
+      setError("Phone number is required before sending OTP.");
+      return false;
+    }
+
+    setSendingOtp(true);
+    setError("");
+
+    try {
+      if (recaptchaVerifierRef.current) {
+        try {
+          recaptchaVerifierRef.current.clear();
+        } catch {}
+        recaptchaVerifierRef.current = null;
+      }
+
+      const containerId = `recaptcha-container-${Date.now()}`;
+      const mountEl = document.getElementById("recaptcha-host");
+      if (mountEl) {
+        mountEl.innerHTML = `<div id="${containerId}"></div>`;
+      }
+
+      const auth = getAuth();
+      const verifier = new RecaptchaVerifier(auth, containerId, {
+        size: "invisible",
+      });
+      await verifier.render();
+      recaptchaVerifierRef.current = verifier;
+
+      const formattedPhone = formatE164Phone(formData.phone);
+      const confirmation = await signInWithPhoneNumber(
+        auth,
+        formattedPhone,
+        verifier,
+      );
+
+      setConfirmationResult(confirmation);
+      setResendTimer(60);
+      return true;
+    } catch (err: any) {
+      if (recaptchaVerifierRef.current) {
+        try {
+          recaptchaVerifierRef.current.clear();
+        } catch {}
+        recaptchaVerifierRef.current = null;
+      }
+      const mountEl = document.getElementById("recaptcha-host");
+      if (mountEl) {
+        mountEl.innerHTML = "";
+      }
+      setRecaptchaKey((k) => k + 1);
+      setError(
+        err?.message ||
+          "Failed to send SMS OTP. Make sure the number uses +92 format.",
+      );
+      return false;
+    } finally {
+      setSendingOtp(false);
+    }
   };
 
   const handleOtpChange = (value: string, index: number) => {
-    const newOtp = [...formData.otp];
-    newOtp[index] = value;
-    setFormData({ ...formData, otp: newOtp });
+    const clean = value.replace(/\D/g, "");
+    if (!clean) {
+      const next = [...formData.otp];
+      next[index] = "";
+      setFormData((prev) => ({ ...prev, otp: next }));
+      return;
+    }
+
+    if (clean.length > 1) {
+      const digits = clean.slice(0, 6).split("");
+      const next = ["", "", "", "", "", ""];
+      digits.forEach((digit, idx) => {
+        next[idx] = digit;
+      });
+      setFormData((prev) => ({ ...prev, otp: next }));
+      otpRefs.current[Math.min(digits.length, 5)]?.focus();
+      return;
+    }
+
+    const next = [...formData.otp];
+    next[index] = clean;
+    setFormData((prev) => ({ ...prev, otp: next }));
+
+    if (index < 5) {
+      otpRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number,
+  ) => {
+    if (e.key === "Backspace" && !formData.otp[index] && index > 0) {
+      otpRefs.current[index - 1]?.focus();
+    }
   };
 
   const handleContinue = async (e: React.FormEvent) => {
@@ -65,6 +226,15 @@ export default function DoctorRegisterPage() {
     setError("");
 
     if (step === 1) {
+      if (
+        !formData.firstName.trim() ||
+        !formData.lastName.trim() ||
+        !formData.email.trim() ||
+        !formData.phone.trim()
+      ) {
+        setError("Please fill in all required personal information fields.");
+        return;
+      }
       if (formData.password !== formData.confirmPassword) {
         setError("Passwords do not match!");
         return;
@@ -75,18 +245,74 @@ export default function DoctorRegisterPage() {
       }
     }
 
+    if (step === 2) {
+      if (
+        !formData.specialty ||
+        !formData.hospital.trim() ||
+        !formData.pmdcNumber.trim()
+      ) {
+        setError(
+          "Specialty, Hospital Affiliation, and PMDC Number are required.",
+        );
+        return;
+      }
+    }
+
+    if (step === 3) {
+      if (
+        !formData.cnicFront ||
+        !formData.cnicBack ||
+        !formData.practiceLicense
+      ) {
+        setError(
+          "Please upload CNIC Front, CNIC Back, and your Approved Medical Practice License.",
+        );
+        return;
+      }
+      const sent = await triggerSendOtp();
+      if (sent) {
+        setStep(4);
+      }
+      return;
+    }
+
     if (step < 4) {
       setStep(step + 1);
       return;
     }
 
     if (step === 4) {
+      const otpCode = formData.otp.join("").trim();
+      if (otpCode.length !== 6) {
+        setError("Please enter the complete 6-digit OTP code.");
+        return;
+      }
+      if (!confirmationResult) {
+        setError("OTP session expired. Please click Resend OTP.");
+        return;
+      }
+
       setLoading(true);
       try {
-        await authService.signupDoctor(formData);
+        const credential = await confirmationResult.confirm(otpCode);
+        const phoneIdToken = await credential.user.getIdToken();
+
+        await authService.signupDoctor({
+          ...formData,
+          phone: formatE164Phone(formData.phone),
+          firebaseUid: credential.user.uid,
+          idToken: phoneIdToken,
+          otp: otpCode,
+        });
         router.push("/auth/doctor/sign-in");
       } catch (err: any) {
-        setError(authService.formatAuthError(err));
+        if (err?.code === "auth/invalid-verification-code") {
+          setError("Invalid 6-digit OTP code. Please try again.");
+        } else if (err?.code === "auth/code-expired") {
+          setError("OTP expired. Click Resend OTP to get a new code.");
+        } else {
+          setError(authService.formatAuthError(err));
+        }
       } finally {
         setLoading(false);
       }
@@ -94,15 +320,22 @@ export default function DoctorRegisterPage() {
   };
 
   const handleBack = () => {
-    if (step > 1) setStep(step - 1);
+    if (step > 1) {
+      setError("");
+      setStep(step - 1);
+    }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   };
 
   return (
     <div className="min-h-screen flex w-full bg-white font-sans overflow-hidden">
-     
+      <div key={recaptchaKey} id="recaptcha-host" />
       <AuthHeroBanner />
 
-     
       <div className="w-full lg:w-1/2 flex flex-col justify-between p-8 sm:p-12 overflow-y-auto max-h-screen">
         <div>
           <div className="flex flex-col items-start gap-3 mb-6">
@@ -128,10 +361,9 @@ export default function DoctorRegisterPage() {
             {step === 2 && "Enter your professional credentials."}
             {step === 3 && "Upload your verification documents."}
             {step === 4 &&
-              `Enter the 6-digit OTP sent to ${formData.phone || "+923414009812"}`}
+              `Enter the 6-digit OTP sent to ${formatE164Phone(formData.phone || "") || formData.email}`}
           </p>
 
-         
           <AuthStepper currentStep={step} />
 
           {error && (
@@ -141,7 +373,6 @@ export default function DoctorRegisterPage() {
           )}
 
           <form onSubmit={handleContinue} className="space-y-4 max-w-md mt-4">
-           
             <div className={step !== 1 ? "hidden" : "space-y-4"}>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -253,7 +484,6 @@ export default function DoctorRegisterPage() {
               </div>
             </div>
 
-           
             <div className={step !== 2 ? "hidden" : "space-y-4"}>
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
@@ -353,99 +583,156 @@ export default function DoctorRegisterPage() {
               </div>
             </div>
 
-           
             <div className={step !== 3 ? "hidden" : "space-y-4"}>
               <div className="p-4 rounded-xl bg-amber-50/80 border border-amber-200 text-amber-800 text-xs leading-relaxed">
                 <span className="font-semibold">Verification required.</span> All
                 documents are encrypted and reviewed by our medical compliance
                 team within 24–48 hours. Accepted formats: JPG, PNG, PDF.
               </div>
-              {[
-                {
-                  label: "CNIC — Front Side *",
-                  key: "cnicFront",
-                  desc: "Clear photo of your national ID (front)",
-                },
-                {
-                  label: "CNIC — Back Side *",
-                  key: "cnicBack",
-                  desc: "Clear photo of your national ID (back)",
-                },
-                {
-                  label: "Approved Medical Practice License *",
-                  key: "practiceLicense",
-                  desc: "Current, valid practice license issued by PMDC or provincial authority",
-                },
-                {
-                  label: "PMDC Registration Certificate",
-                  key: "pmdcCertificate",
-                  desc: "Official PMDC certificate (optional but recommended)",
-                },
-              ].map((doc) => (
-                <div key={doc.key}>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    {doc.label}
-                  </label>
-                  <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-200 hover:border-blue-400 rounded-xl cursor-pointer bg-slate-50/50 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600">
-                        <Upload className="w-5 h-5" />
+              {(
+                [
+                  {
+                    label: "CNIC — Front Side *",
+                    key: "cnicFront",
+                    desc: "Clear photo of your national ID (front)",
+                  },
+                  {
+                    label: "CNIC — Back Side *",
+                    key: "cnicBack",
+                    desc: "Clear photo of your national ID (back)",
+                  },
+                  {
+                    label: "Approved Medical Practice License *",
+                    key: "practiceLicense",
+                    desc: "Current, valid practice license issued by PMDC or provincial authority",
+                  },
+                  {
+                    label: "PMDC Registration Certificate",
+                    key: "pmdcCertificate",
+                    desc: "Official PMDC certificate (optional but recommended)",
+                  },
+                ] as const
+              ).map((doc) => {
+                const selectedFile = formData[doc.key];
+                return (
+                  <div key={doc.key}>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                      {doc.label}
+                    </label>
+
+                    {selectedFile ? (
+                      <div className="flex items-center justify-between p-3.5 border border-emerald-200 bg-emerald-50/50 rounded-xl">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="p-2 rounded-lg bg-emerald-100 text-emerald-700 shrink-0">
+                            <FileText className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-semibold text-slate-800 truncate flex items-center gap-1.5">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                              <span className="truncate">
+                                {selectedFile.name}
+                              </span>
+                            </p>
+                            <p className="text-[11px] text-slate-500">
+                              {formatFileSize(selectedFile.size)}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleFileChange(doc.key, null)}
+                          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+                          title="Remove file"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
                       </div>
-                      <div>
-                        <p className="text-xs font-semibold text-slate-800">
-                          Click to upload
-                        </p>
-                        <p className="text-[11px] text-slate-500">{doc.desc}</p>
-                      </div>
-                    </div>
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept=".jpg,.jpeg,.png,.pdf"
-                      onChange={(e) =>
-                        handleFileChange(doc.key, e.target.files?.[0] || null)
-                      }
-                    />
-                  </label>
-                </div>
-              ))}
+                    ) : (
+                      <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-200 hover:border-blue-400 rounded-xl cursor-pointer bg-slate-50/50 transition-colors">
+                        <div className="flex items-center gap-3 w-full">
+                          <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600 shrink-0">
+                            <Upload className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-semibold text-slate-800">
+                              Click to upload
+                            </p>
+                            <p className="text-[11px] text-slate-500">
+                              {doc.desc}
+                            </p>
+                          </div>
+                        </div>
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept=".jpg,.jpeg,.png,.pdf"
+                          onChange={(e) =>
+                            handleFileChange(
+                              doc.key,
+                              e.target.files?.[0] || null,
+                            )
+                          }
+                        />
+                      </label>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
-           
             <div className={step !== 4 ? "hidden" : "space-y-6"}>
               <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 text-center flex flex-col items-center">
                 <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3 border border-blue-100">
                   <ShieldCheck className="w-6 h-6" />
                 </div>
                 <h3 className="text-sm font-bold text-slate-800">
-                  OTP sent to your phone
+                  OTP sent via SMS to your phone
                 </h3>
                 <p className="text-xs text-blue-600 font-medium mt-0.5">
-                  {formData.phone || "+923414009812"}
+                  {formatE164Phone(formData.phone || "") || "No phone entered"}
                 </p>
                 <p className="text-xs text-slate-400 mt-1">
-                  Also check your email:{" "}
-                  {formData.email || "zaeemsheikh102@gmail.com"}
+                  Account email: {formData.email || "No email entered"}
                 </p>
               </div>
               <div className="flex justify-between gap-2">
                 {[0, 1, 2, 3, 4, 5].map((idx) => (
                   <input
                     key={idx}
+                    ref={(el) => {
+                      otpRefs.current[idx] = el;
+                    }}
                     type="text"
-                    maxLength={1}
+                    inputMode="numeric"
+                    maxLength={6}
                     value={formData.otp[idx]}
                     onChange={(e) => handleOtpChange(e.target.value, idx)}
+                    onKeyDown={(e) => handleOtpKeyDown(e, idx)}
                     className="w-12 h-14 text-center text-lg font-bold rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 bg-slate-50/50"
                   />
                 ))}
               </div>
               <div className="text-center text-xs text-slate-500">
-                Resend OTP in <span className="text-blue-600 font-semibold">26s</span>
+                {resendTimer > 0 ? (
+                  <>
+                    Resend OTP in{" "}
+                    <span className="text-blue-600 font-semibold">
+                      {resendTimer}s
+                    </span>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={sendingOtp}
+                    onClick={() => triggerSendOtp()}
+                    className="text-blue-600 font-semibold hover:underline cursor-pointer disabled:opacity-50"
+                  >
+                    {sendingOtp ? "Sending..." : "Resend OTP"}
+                  </button>
+                )}
               </div>
             </div>
 
-           
             <div className="flex gap-3 pt-2">
               {step > 1 && (
                 <button
@@ -458,21 +745,22 @@ export default function DoctorRegisterPage() {
               )}
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || sendingOtp}
                 className={`${step > 1 ? "w-2/3" : "w-full"} py-3 px-4 rounded-xl bg-linear-to-r from-blue-600 to-teal-500 text-white font-semibold text-sm hover:opacity-95 transition-opacity flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 disabled:opacity-50`}
               >
                 {loading
                   ? "Processing..."
-                  : step === 4
-                    ? "Complete Registration"
-                    : "Continue"}
+                  : sendingOtp
+                    ? "Sending OTP..."
+                    : step === 4
+                      ? "Complete Registration"
+                      : "Continue"}
                 {step < 4 && <ChevronRight className="w-4 h-4" />}
               </button>
             </div>
           </form>
         </div>
 
-       
         <div className="mt-8 w-full max-w-md flex items-center justify-center gap-1.5 text-xs text-slate-500">
           <span>Already registered?</span>
           <Link

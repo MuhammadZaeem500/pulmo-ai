@@ -1,8 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import DashboardCard from "@/components/common/DashboardCard";
-import { CheckCircle2, Clock, Check, ChevronRight, Loader2 } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock,
+  Check,
+  ChevronRight,
+  Loader2,
+  Calendar,
+} from "lucide-react";
 import { appointmentService } from "@/services/appointment.service";
 import { useRouter } from "next/navigation";
 
@@ -19,11 +26,58 @@ const normalizeStatus = (raw: string): string => {
 
 const statusStyle = (status: string): string => {
   switch (status) {
-    case "Completed":  return "text-emerald-600 bg-emerald-50";
-    case "Confirmed":  return "text-blue-600 bg-blue-50";
-    case "Cancelled":  return "text-red-500 bg-red-50";
-    default:           return "text-amber-600 bg-amber-50"; // Pending
+    case "Completed":
+      return "text-emerald-600 bg-emerald-50";
+    case "Confirmed":
+      return "text-blue-600 bg-blue-50";
+    case "Cancelled":
+      return "text-red-500 bg-red-50";
+    default:
+      return "text-amber-600 bg-amber-50"; // Pending
   }
+};
+
+// Extract a clean YYYY-MM-DD key from appointment date or scheduledAt
+const getDateKey = (appt: any): string => {
+  if (typeof appt.date === "string" && /^\d{4}-\d{2}-\d{2}/.test(appt.date)) {
+    return appt.date.slice(0, 10);
+  }
+  const raw = appt.scheduledAt || appt.date;
+  const parsed = raw ? new Date(raw) : null;
+  if (parsed && !Number.isNaN(parsed.getTime())) {
+    return parsed.toISOString().split("T")[0];
+  }
+  return "Unscheduled";
+};
+
+// Format YYYY-MM-DD into a readable heading with Today / Tomorrow labels
+const formatDateHeading = (dateKey: string): { title: string; subtitle: string } => {
+  if (dateKey === "Unscheduled") {
+    return { title: "Unscheduled", subtitle: "Date not set" };
+  }
+
+  const [year, month, day] = dateKey.split("-").map(Number);
+  const targetDate = new Date(year, (month || 1) - 1, day || 1);
+
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  const weekday = targetDate.toLocaleDateString("en-US", { weekday: "long" });
+  const readableDate = targetDate.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  if (targetDate.getTime() === today.getTime()) {
+    return { title: "Today", subtitle: `${weekday}, ${readableDate}` };
+  }
+  if (targetDate.getTime() === tomorrow.getTime()) {
+    return { title: "Tomorrow", subtitle: `${weekday}, ${readableDate}` };
+  }
+  return { title: dateKey, subtitle: `${weekday}, ${readableDate}` };
 };
 
 export default function DoctorAppointmentsPage() {
@@ -36,10 +90,13 @@ export default function DoctorAppointmentsPage() {
     try {
       setLoading(true);
       const res = await appointmentService.getAppointments();
-      const list = Array.isArray(res) ? res : (res?.data || []);
+      const list = Array.isArray(res) ? res : res?.data || [];
       // Normalize statuses from DB enum → display labels
       setAppointments(
-        list.map((appt: any) => ({ ...appt, status: normalizeStatus(appt.status) }))
+        list.map((appt: any) => ({
+          ...appt,
+          status: normalizeStatus(appt.status),
+        })),
       );
     } catch (err) {
       console.error("Failed to load appointments", err);
@@ -58,42 +115,86 @@ export default function DoctorAppointmentsPage() {
       await appointmentService.updateStatus(id, "Completed");
       setAppointments((prev) =>
         prev.map((appt) =>
-          appt.id === id ? { ...appt, status: "Completed" } : appt
-        )
+          appt.id === id ? { ...appt, status: "Completed" } : appt,
+        ),
       );
     } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to update appointment status.");
+      alert(
+        err.response?.data?.message || "Failed to update appointment status.",
+      );
     } finally {
       setCompleting(null);
     }
   };
 
-  const totalCount     = appointments.length;
-  const completedCount = appointments.filter((a) => a.status === "Completed").length;
+  // Group appointments by date (YYYY-MM-DD) and sort dates ascending
+  const groupedAppointments = useMemo(() => {
+    const map = new Map<string, any[]>();
+
+    for (const appt of appointments) {
+      const key = getDateKey(appt);
+      const existing = map.get(key) || [];
+      existing.push(appt);
+      map.set(key, existing);
+    }
+
+    return Array.from(map.entries())
+      .sort(([dateA], [dateB]) => {
+        if (dateA === "Unscheduled") return 1;
+        if (dateB === "Unscheduled") return -1;
+        return dateA.localeCompare(dateB);
+      })
+      .map(([dateKey, items]) => ({
+        dateKey,
+        ...formatDateHeading(dateKey),
+        items,
+      }));
+  }, [appointments]);
+
+  const totalCount = appointments.length;
+  const completedCount = appointments.filter(
+    (a) => a.status === "Completed",
+  ).length;
   const remainingCount = totalCount - completedCount;
-  const progressPct    = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+  const progressPct = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">Appointments</h1>
-          <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">Live Schedule Overview</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Appointments
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">
+            Live Schedule Overview · Organized by Date
+          </p>
         </div>
 
         <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full sm:w-auto">
           <div className="bg-white rounded-xl border border-slate-200/80 px-3 sm:px-4 py-2 text-center shadow-sm">
-            <span className="text-xs sm:text-sm font-extrabold text-blue-600 block">{totalCount}</span>
-            <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider text-slate-400">Total</span>
+            <span className="text-xs sm:text-sm font-extrabold text-blue-600 block">
+              {totalCount}
+            </span>
+            <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider text-slate-400">
+              Total
+            </span>
           </div>
           <div className="bg-white rounded-xl border border-slate-200/80 px-3 sm:px-4 py-2 text-center shadow-sm">
-            <span className="text-xs sm:text-sm font-extrabold text-emerald-600 block">{completedCount}</span>
-            <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider text-slate-400">Completed</span>
+            <span className="text-xs sm:text-sm font-extrabold text-emerald-600 block">
+              {completedCount}
+            </span>
+            <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider text-slate-400">
+              Completed
+            </span>
           </div>
           <div className="bg-white rounded-xl border border-slate-200/80 px-3 sm:px-4 py-2 text-center shadow-sm">
-            <span className="text-xs sm:text-sm font-extrabold text-amber-600 block">{remainingCount}</span>
-            <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider text-slate-400">Remaining</span>
+            <span className="text-xs sm:text-sm font-extrabold text-amber-600 block">
+              {remainingCount}
+            </span>
+            <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider text-slate-400">
+              Remaining
+            </span>
           </div>
         </div>
       </div>
@@ -117,88 +218,107 @@ export default function DoctorAppointmentsPage() {
         </div>
       </DashboardCard>
 
-      {/* Appointments list */}
+      {/* Appointments organized by date */}
       {loading ? (
         <div className="flex justify-center items-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
         </div>
-      ) : (
+      ) : groupedAppointments.length === 0 ? (
         <DashboardCard>
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-4 bg-blue-600 rounded-full" />
-              <h3 className="text-sm font-bold text-slate-900">Scheduled Appointments</h3>
-            </div>
-            <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full">
-              {appointments.length}
-            </span>
+          <div className="text-center py-12">
+            <p className="text-slate-500 text-sm">No appointments scheduled.</p>
           </div>
-
-          <div className="space-y-3">
-            {appointments.map((item) => (
-              <div
-                key={item.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-50/60 border border-slate-100"
-              >
-                {/* Left: time + avatar + name */}
-                <div className="flex items-center gap-3 sm:gap-4">
-                  <span className="text-xs font-bold text-slate-500 w-16 sm:w-24 shrink-0">{item.time}</span>
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-blue-600 text-white font-bold flex items-center justify-center text-xs shadow-sm shrink-0">
-                    {item.patientInitials || "PT"}
-                  </div>
+        </DashboardCard>
+      ) : (
+        <div className="space-y-5">
+          {groupedAppointments.map((group) => (
+            <DashboardCard key={group.dateKey}>
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-1.5 h-4 bg-blue-600 rounded-full" />
+                  <Calendar className="w-4 h-4 text-blue-600" />
                   <div>
-                    <h4 className="text-xs font-bold text-slate-800">{item.patientName}</h4>
+                    <h3 className="text-sm font-bold text-slate-900">
+                      {group.title}
+                    </h3>
                     <p className="text-[11px] text-slate-400 font-medium">
-                      {item.type} · {item.date}
+                      {group.subtitle}
                     </p>
                   </div>
                 </div>
+                <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full">
+                  {group.items.length}{" "}
+                  {group.items.length === 1 ? "appointment" : "appointments"}
+                </span>
+              </div>
 
-                {/* Right: status badge + actions */}
-                <div className="flex items-center gap-2 flex-wrap justify-end sm:justify-start">
-                  {item.status === "Completed" ? (
-                    <span className="text-xs font-semibold px-3 py-1.5 rounded-lg text-emerald-600 bg-emerald-50 flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Completed
-                    </span>
-                  ) : (
-                    <>
-                      <span className={`text-xs font-semibold px-3 py-1.5 rounded-lg ${statusStyle(item.status)}`}>
-                        {item.status}
-                      </span>
-                      {item.status !== "Cancelled" && (
-                        <button
-                          onClick={() => handleComplete(item.id)}
-                          disabled={completing === item.id}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-emerald-600 hover:bg-emerald-50 text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50"
-                        >
-                          {completing === item.id ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          ) : (
-                            <Check className="w-3.5 h-3.5" />
-                          )}
-                          Complete
-                        </button>
-                      )}
-                    </>
-                  )}
-                  <button
-                    onClick={() => router.push("/doctor/notes")}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs font-semibold transition-colors cursor-pointer"
+              <div className="space-y-3">
+                {group.items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-50/60 border border-slate-100"
                   >
-                    Record
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            ))}
+                    {/* Left: time + avatar + name */}
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <span className="text-xs font-bold text-slate-500 w-16 sm:w-24 shrink-0">
+                        {item.time}
+                      </span>
+                      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-blue-600 text-white font-bold flex items-center justify-center text-xs shadow-sm shrink-0">
+                        {item.patientInitials || "PT"}
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-800">
+                          {item.patientName}
+                        </h4>
+                        <p className="text-[11px] text-slate-400 font-medium">
+                          {item.type}
+                        </p>
+                      </div>
+                    </div>
 
-            {appointments.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-slate-500 text-sm">No appointments scheduled.</p>
+                    {/* Right: status badge + actions */}
+                    <div className="flex items-center gap-2 flex-wrap justify-end sm:justify-start">
+                      {item.status === "Completed" ? (
+                        <span className="text-xs font-semibold px-3 py-1.5 rounded-lg text-emerald-600 bg-emerald-50 flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Completed
+                        </span>
+                      ) : (
+                        <>
+                          <span
+                            className={`text-xs font-semibold px-3 py-1.5 rounded-lg ${statusStyle(item.status)}`}
+                          >
+                            {item.status}
+                          </span>
+                          {item.status !== "Cancelled" && (
+                            <button
+                              onClick={() => handleComplete(item.id)}
+                              disabled={completing === item.id}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-emerald-600 hover:bg-emerald-50 text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50"
+                            >
+                              {completing === item.id ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <Check className="w-3.5 h-3.5" />
+                              )}
+                              Complete
+                            </button>
+                          )}
+                        </>
+                      )}
+                      <button
+                        onClick={() => router.push("/doctor/notes")}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs font-semibold transition-colors cursor-pointer"
+                      >
+                        Record
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            )}
-          </div>
-        </DashboardCard>
+            </DashboardCard>
+          ))}
+        </div>
       )}
     </div>
   );

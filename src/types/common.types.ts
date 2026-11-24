@@ -102,7 +102,8 @@ export interface PreviousAppointmentCardProps {
   clinic: string;
   status: string;
   notes: string;
-  onChat: () => void;
+  doctorId?: string;
+  onChat?: () => void;
 }
 
 export interface ProfileFieldProps {

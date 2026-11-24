@@ -3,8 +3,30 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Activity, User, Mail, Phone, Lock, Calendar, Loader2 } from "lucide-react";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  GithubAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
+import { getApps, initializeApp } from "firebase/app";
+import axios from "axios";
 import AuthHeroBanner from "@/components/patient/AuthHeroBanner";
 import { authService } from "@/services/auth.service";
+
+function getFirebaseClientAuth() {
+  if (!getApps().length) {
+    initializeApp({
+      apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+      authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+      messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+      appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    });
+  }
+  return getAuth();
+}
 
 export default function SignUp() {
   const router = useRouter();
@@ -21,6 +43,7 @@ export default function SignUp() {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState<"google" | "github" | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,11 +79,48 @@ export default function SignUp() {
     }
   };
 
+  const handleSocialSignIn = async (providerType: "google" | "github") => {
+    setError("");
+    setSocialLoading(providerType);
+
+    try {
+      const auth = getFirebaseClientAuth();
+      const provider =
+        providerType === "google" ? new GoogleAuthProvider() : new GithubAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const idToken = await result.user.getIdToken();
+
+      const { data } = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/auth/social-sync`,
+        {
+          email: result.user.email,
+          fullName: result.user.displayName,
+          idToken,
+          role: "PATIENT",
+          provider: providerType.toUpperCase(),
+        },
+      );
+
+      if (data?.accessToken) {
+        localStorage.setItem("token", data.accessToken);
+        localStorage.setItem("accessToken", data.accessToken);
+      }
+
+      router.push("/patient/dashboard");
+    } catch (err: any) {
+      setError(authService.formatAuthError(err));
+    } finally {
+      setSocialLoading(null);
+    }
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  const isBusy = loading || socialLoading !== null;
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row w-full bg-white font-sans">
@@ -244,12 +304,73 @@ export default function SignUp() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={isBusy}
               className="w-full py-2.5 bg-linear-to-r from-[#2F80ED] to-[#14B8A6] text-white font-bold text-xs rounded-xl hover:opacity-90 transition-opacity shadow-md shadow-[#2F80ED]/20 cursor-pointer mt-2 disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />}
               <span>{loading ? "Creating Account..." : "Create Account"}</span>
             </button>
+
+            <div className="relative my-3 flex items-center">
+              <div className="grow border-t border-gray-200" />
+              <span className="mx-3 text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                Or continue with
+              </span>
+              <div className="grow border-t border-gray-200" />
+            </div>
+
+            <div className="grid grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                onClick={() => handleSocialSignIn("google")}
+                disabled={isBusy}
+                className="w-full py-2 px-3 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-slate-700 font-semibold text-xs transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {socialLoading === "google" ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-[#2F80ED]" />
+                ) : (
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      fill="#4285F4"
+                      d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"
+                    />
+                  </svg>
+                )}
+                <span>{socialLoading === "google" ? "Signing in..." : "Google"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSocialSignIn("github")}
+                disabled={isBusy}
+                className="w-full py-2 px-3 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-slate-700 font-semibold text-xs transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {socialLoading === "github" ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-900" />
+                ) : (
+                  <svg className="w-4 h-4 fill-slate-900" viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                      d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2Z"
+                    />
+                  </svg>
+                )}
+                <span>{socialLoading === "github" ? "Signing in..." : "GitHub"}</span>
+              </button>
+            </div>
 
             <p className="text-center text-xs text-gray-500 pt-1">
               Already have an account?{" "}

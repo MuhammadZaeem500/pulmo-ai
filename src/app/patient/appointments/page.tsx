@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import AvailableDoctorCard from '@/components/common/AvailableDoctorCard';
 import PreviousAppointmentCard from '@/components/common/PreviousAppointmentCard';
 import { Loader2 } from 'lucide-react';
 import api from '@/services/api';
 
 export default function AppointmentsPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'book' | 'previous'>('book');
   
   // State for fetched data
@@ -357,7 +359,11 @@ export default function AppointmentsPage() {
                 clinic={app.clinic?.name || 'General Clinic'}
                 status={app.status}
                 notes={app.reason || 'No notes provided'}
-                onChat={() => console.log(`Chat with doctor`)}
+                doctorId={app.doctorId || app.doctor?.id}
+                onChat={() => {
+                  const docId = app.doctorId || app.doctor?.id;
+                  router.push(docId ? `/patient/chat?doctorId=${encodeURIComponent(docId)}` : '/patient/chat');
+                }}
               />
             ))
           ) : (
