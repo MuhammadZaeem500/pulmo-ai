@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import api from "@/services/api";
-import { ShieldCheck, UserCheck, XCircle, Stethoscope, Mail, Eye, X } from "lucide-react";
+import { ShieldCheck, UserCheck, XCircle, Stethoscope, Mail, Eye, X, FileText, ExternalLink, Image as ImageIcon } from "lucide-react";
 
 export default function DoctorVerificationPage() {
   const [pendingDoctors, setPendingDoctors] = useState<any[]>([]);
@@ -10,6 +10,7 @@ export default function DoctorVerificationPage() {
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [selectedDoctor, setSelectedDoctor] = useState<any | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<{ url: string; label: string } | null>(null);
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -117,6 +118,13 @@ export default function DoctorVerificationPage() {
                       <span>{doc.user?.email || "N/A"}</span>
                     </div>
                   </div>
+                  {/* Document attachment badge */}
+                  {(doc.cnicFrontUrl || doc.cnicBackUrl || doc.practiceLicenseUrl || doc.pmdcCertificateUrl) && (
+                    <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 border border-blue-100 text-blue-600 text-[10px] font-bold">
+                      <FileText className="w-3 h-3" />
+                      {[doc.cnicFrontUrl, doc.cnicBackUrl, doc.practiceLicenseUrl, doc.pmdcCertificateUrl].filter(Boolean).length} Documents Attached
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -242,6 +250,66 @@ export default function DoctorVerificationPage() {
                 </div>
               </div>
 
+              {/* Submitted Verification Documents */}
+              <div className="bg-gradient-to-br from-blue-50 to-slate-50 p-4 rounded-2xl space-y-3 border border-blue-100">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-blue-600" />
+                  <span className="text-blue-700 font-bold text-xs uppercase tracking-wider">Submitted Verification Documents</span>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { key: 'cnicFrontUrl', label: 'CNIC Front' },
+                    { key: 'cnicBackUrl', label: 'CNIC Back' },
+                    { key: 'practiceLicenseUrl', label: 'Practice License' },
+                    { key: 'pmdcCertificateUrl', label: 'PMDC Certificate' },
+                  ].map(({ key, label }) => {
+                    const docUrl = selectedDoctor[key];
+                    const apiBase = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
+                    const fullUrl = docUrl?.startsWith('data:') ? docUrl : docUrl ? `${apiBase}${docUrl}` : null;
+
+                    return (
+                      <div key={key} className={`p-3 rounded-xl border ${docUrl ? 'bg-white border-blue-200' : 'bg-slate-100 border-slate-200'}`}>
+                        <span className="text-slate-500 font-semibold text-[10px] block mb-1.5">{label}</span>
+                        {docUrl ? (
+                          <div className="space-y-2">
+                            {/* Thumbnail preview for image documents */}
+                            {(docUrl.startsWith('data:image') || docUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i)) && (
+                              <img
+                                src={fullUrl!}
+                                alt={label}
+                                className="w-full h-16 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={() => setPreviewDoc({ url: fullUrl!, label })}
+                              />
+                            )}
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={() => setPreviewDoc({ url: fullUrl!, label })}
+                                className="flex-1 py-1.5 px-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 font-bold text-[10px] flex items-center justify-center gap-1 cursor-pointer transition-colors"
+                              >
+                                <Eye className="w-3 h-3" /> View
+                              </button>
+                              <a
+                                href={fullUrl!}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="py-1.5 px-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 font-bold text-[10px] flex items-center justify-center gap-1 transition-colors"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5 text-slate-400">
+                            <XCircle className="w-3.5 h-3.5" />
+                            <span className="text-[10px] font-medium">Not submitted</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
               <div className="bg-slate-50 p-3 rounded-2xl space-y-2">
                 <span className="text-slate-400 font-semibold block">Consultation Hours</span>
                 <div className="space-y-1">
@@ -280,6 +348,47 @@ export default function DoctorVerificationPage() {
               >
                 Verify & Approve Account
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* DOCUMENT PREVIEW MODAL */}
+      {previewDoc && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] p-6 space-y-4 shadow-2xl border border-slate-100">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-extrabold text-slate-900">{previewDoc.label}</h3>
+              <button
+                onClick={() => setPreviewDoc(null)}
+                className="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="rounded-2xl border border-slate-200 overflow-hidden bg-slate-50 flex items-center justify-center min-h-[300px] max-h-[70vh]">
+              {previewDoc.url.match(/\.pdf$/i) || previewDoc.url.startsWith('data:application/pdf') ? (
+                <iframe
+                  src={previewDoc.url}
+                  className="w-full h-[70vh] rounded-xl"
+                  title={previewDoc.label}
+                />
+              ) : (
+                <img
+                  src={previewDoc.url}
+                  alt={previewDoc.label}
+                  className="max-w-full max-h-[70vh] object-contain"
+                />
+              )}
+            </div>
+            <div className="flex justify-end">
+              <a
+                href={previewDoc.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 font-bold text-xs flex items-center gap-1.5 shadow-sm"
+              >
+                <ExternalLink className="w-3.5 h-3.5" /> Open in New Tab
+              </a>
             </div>
           </div>
         </div>

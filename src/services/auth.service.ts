@@ -358,7 +358,35 @@ export const authService = {
   },
 
   /**
-   * Register a new doctor
+   * Upload a single doctor verification document to backend.
+   * Returns the URL path or falls back to base64 data URL.
+   */
+  async uploadDoctorDocument(file: File, idToken: string): Promise<string> {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await api.post('/auth/doctor/upload-document', formData, {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data?.url || '';
+    } catch (err) {
+      console.warn('File upload failed, falling back to base64:', err);
+      // Fallback: convert to base64 data URL
+      return new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+  },
+
+  /**
+   * Register a new doctor with verification documents
    */
   async signupDoctor(data: any) {
     const auth = getFirebaseAuth();
@@ -390,7 +418,24 @@ export const authService = {
       role: 'DOCTOR',
     });
 
-    // 3. Send doctor profile to backend
+    // 3. Upload verification documents in parallel
+    const [cnicFrontUrl, cnicBackUrl, practiceLicenseUrl, pmdcCertificateUrl] =
+      await Promise.all([
+        data.cnicFront instanceof File
+          ? this.uploadDoctorDocument(data.cnicFront, idToken)
+          : Promise.resolve(null),
+        data.cnicBack instanceof File
+          ? this.uploadDoctorDocument(data.cnicBack, idToken)
+          : Promise.resolve(null),
+        data.practiceLicense instanceof File
+          ? this.uploadDoctorDocument(data.practiceLicense, idToken)
+          : Promise.resolve(null),
+        data.pmdcCertificate instanceof File
+          ? this.uploadDoctorDocument(data.pmdcCertificate, idToken)
+          : Promise.resolve(null),
+      ]);
+
+    // 4. Send doctor profile to backend with document URLs
     const payload = {
       fullName,
       email: data.email,
@@ -406,6 +451,10 @@ export const authService = {
       firebaseUid: firebaseUser.uid,
       idToken,
       role: 'DOCTOR',
+      cnicFrontUrl,
+      cnicBackUrl,
+      practiceLicenseUrl,
+      pmdcCertificateUrl,
     };
 
     try {
@@ -414,6 +463,10 @@ export const authService = {
           Authorization: `Bearer ${idToken}`,
         },
       });
+
+      // Clear auth session after signup — doctor must wait for admin approval
+      this.clearAuthSession();
+
       return response.data;
     } catch (err: any) {
       console.error('Backend doctor signup error:', err);

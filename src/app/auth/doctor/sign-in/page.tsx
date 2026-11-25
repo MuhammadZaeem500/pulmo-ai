@@ -4,7 +4,7 @@ import { authService } from "@/services/auth.service";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import Link from "next/link";
-import { Stethoscope, ArrowLeft, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Stethoscope, ArrowLeft, Eye, EyeOff, Loader2, ShieldAlert, Clock } from "lucide-react";
 import AuthHeroBanner from "@/components/doctor/AuthHeroBanner";
 
 export default function DoctorLoginPage() {
@@ -12,6 +12,7 @@ export default function DoctorLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [pendingVerification, setPendingVerification] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -56,7 +57,25 @@ export default function DoctorLoginPage() {
 
       router.push("/doctor/dashboard");
     } catch (err: any) {
-      setError(authService.formatAuthError(err));
+      // Detect pending/rejected verification messages from backend
+      const errorMessage =
+        err?.response?.data?.message || err?.message || "";
+
+      if (
+        errorMessage.toLowerCase().includes("pending verification") ||
+        errorMessage.toLowerCase().includes("pending review")
+      ) {
+        setPendingVerification(true);
+        authService.clearAuthSession();
+        setError("");
+      } else if (errorMessage.toLowerCase().includes("rejected")) {
+        setPendingVerification(false);
+        authService.clearAuthSession();
+        setError(errorMessage);
+      } else {
+        setPendingVerification(false);
+        setError(authService.formatAuthError(err));
+      }
     } finally {
       setLoading(false);
     }
@@ -103,6 +122,24 @@ export default function DoctorLoginPage() {
           <p className="text-sm text-slate-500 mt-1 mb-6">
             Sign in to access your patient management dashboard.
           </p>
+
+          {pendingVerification && (
+            <div className="mb-4 max-w-md p-4 bg-amber-50 border border-amber-200 rounded-xl">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-amber-100 shrink-0">
+                  <Clock className="w-4 h-4 text-amber-600" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-amber-800">Verification Pending</h4>
+                  <p className="text-xs text-amber-700 mt-1 leading-relaxed">
+                    Your doctor account is currently being reviewed by an administrator.
+                    You will be able to sign in once your credentials and submitted documents
+                    have been verified and approved. This typically takes 1–2 business days.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {error && (
             <div className="mb-4 max-w-md p-3 bg-red-50 border border-red-200 text-red-600 text-xs rounded-xl font-medium">

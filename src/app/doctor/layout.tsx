@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import DoctorSidebar from "@/components/doctor/DoctorSidebar";
 import { Menu, Bell, Loader2 } from "lucide-react";
 import { doctorPortalService } from "@/services/doctor.service";
+import { authService } from "@/services/auth.service";
 
 export default function DoctorLayout({
   children,
@@ -30,6 +31,14 @@ export default function DoctorLayout({
       try {
         const response = await doctorPortalService.getProfile();
         const profile = response?.data || response;
+
+        // Block unverified doctors from accessing the portal
+        if (profile?.verificationStatus && profile.verificationStatus !== 'APPROVED') {
+          authService.clearAuthSession();
+          router.replace("/auth/doctor/sign-in");
+          return;
+        }
+
         if (profile?.initials) {
           setDoctorInitials(profile.initials);
         } else if (profile?.fullName) {
