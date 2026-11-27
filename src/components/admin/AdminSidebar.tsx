@@ -21,6 +21,8 @@ import {
   Stethoscope
 } from "lucide-react";
 import  {AdminSidebarProps}  from "@/types/admin.types";
+import { useTheme } from "@/components/providers/ThemeProvider";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 export default function AdminSidebar({
   collapsed,
@@ -30,6 +32,14 @@ export default function AdminSidebar({
 }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { sidebarWidth } = useTheme();
+  const { t } = useLocale();
+  const expandedWidthClass =
+    sidebarWidth === "Compact"
+      ? "lg:w-56"
+      : sidebarWidth === "Wide"
+        ? "lg:w-72"
+        : "lg:w-64";
 
   const handleLogout = async () => {
     setMobileOpen(false);
@@ -38,15 +48,15 @@ export default function AdminSidebar({
   };
 
   const navItems = [
-    { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-    { label: "Clinics & Hospitals", href: "/admin/clinics", icon: Building2 },
-    { label: "Doctor Verification", href: "/admin/doctor-verification", icon: Stethoscope },
-    { label: "Users", href: "/admin/users", icon: Users },
-    { label: "Healthcare Analytics", href: "/admin/analytics", icon: BarChart3 },
-    { label: "Security Center", href: "/admin/security", icon: ShieldCheck },
-    { label: "Reports", href: "/admin/reports", icon: FileText },
-    { label: "Notifications", href: "/admin/notifications", icon: Bell },
-    { label: "Settings", href: "/admin/settings", icon: Settings },
+    { label: t("dashboard", "Dashboard"), href: "/admin/dashboard", icon: LayoutDashboard },
+    { label: t("clinicsHospitals", "Clinics & Hospitals"), href: "/admin/clinics", icon: Building2 },
+    { label: t("doctorVerification", "Doctor Verification"), href: "/admin/doctor-verification", icon: Stethoscope },
+    { label: t("users", "Users"), href: "/admin/users", icon: Users },
+    { label: t("healthcareAnalytics", "Healthcare Analytics"), href: "/admin/analytics", icon: BarChart3 },
+    { label: t("securityCenter", "Security Center"), href: "/admin/security", icon: ShieldCheck },
+    { label: t("reports", "Reports"), href: "/admin/reports", icon: FileText },
+    { label: t("notifications", "Notifications"), href: "/admin/notifications", icon: Bell },
+    { label: t("settings", "Settings"), href: "/admin/settings", icon: Settings },
   ];
 
   return (
@@ -63,7 +73,7 @@ export default function AdminSidebar({
       <aside
         className={`fixed lg:static inset-y-0 left-0 z-50 bg-white border-r border-slate-200/80 flex flex-col justify-between transition-transform duration-300 select-none shrink-0 ${
           mobileOpen ? "translate-x-0 w-64" : "-translate-x-full lg:translate-x-0"
-        } ${collapsed ? "lg:w-20" : "lg:w-64"}`}
+        } ${collapsed ? "lg:w-20" : expandedWidthClass}`}
       >
         <div>
          

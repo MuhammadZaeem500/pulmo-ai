@@ -21,40 +21,42 @@ import {
 import SidebarProps from "@/types/patient.types";
 import { useState } from "react";
 import { authService } from "@/services/auth.service";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 export default function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { t } = useLocale();
 
   const menuItems = [
-    { icon: LayoutDashboard, label: "Dashboard", path: "/patient/dashboard" },
-    { icon: MessageCircle, label: "Chatbot", path: "/patient/chatbot" },
+    { icon: LayoutDashboard, label: t("dashboard", "Dashboard"), path: "/patient/dashboard" },
+    { icon: MessageCircle, label: t("aiChatbot", "Chatbot"), path: "/patient/chatbot" },
     {
       icon: FileText,
-      label: "Medical History",
+      label: t("medicalHistory", "Medical History"),
       path: "/patient/medical-history",
     },
     {
       icon: Activity,
-      label: "Symptom Tracker",
+      label: t("symptomTracker", "Symptom Tracker"),
       path: "/patient/symptom-tracker",
     },
-    { icon: Pill, label: "Prescriptions", path: "/patient/prescriptions" },
+    { icon: Pill, label: t("prescriptions", "Prescriptions"), path: "/patient/prescriptions" },
     {
       icon: Search,
-      label: "Know Your Medicine",
+      label: t("knowYourMedicine", "Know Your Medicine"),
       path: "/patient/know-your-medicine",
     },
     {
       icon: MapPin,
-      label: "Clinics & Specialists",
+      label: t("clinicsSpecialists", "Clinics & Specialists"),
       path: "/patient/clinics-specialists",
     },
-    { icon: MessageSquare, label: "Chat", path: "/patient/chat" },
-    { icon: Calendar, label: "Appointments", path: "/patient/appointments" },
-    { icon: User, label: "Profile", path: "/patient/profile" },
-    { icon: SettingsIcon, label: "Settings", path: "/patient/settings" },
+    { icon: MessageSquare, label: t("messages", "Chat"), path: "/patient/chat" },
+    { icon: Calendar, label: t("appointments", "Appointments"), path: "/patient/appointments" },
+    { icon: User, label: t("profile", "Profile"), path: "/patient/profile" },
+    { icon: SettingsIcon, label: t("settings", "Settings"), path: "/patient/settings" },
   ];
 
   const handleLogout = async () => {

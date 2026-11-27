@@ -20,11 +20,13 @@ import {
 import { doctorPortalService } from "@/services/doctor.service";
 import { authService } from "@/services/auth.service";
 import { DoctorSidebarProps } from "@/types/doctor.types";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 
 export default function DoctorSidebar({ mobileOpen, setMobileOpen }: DoctorSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { t } = useLocale();
   
   const [doctor, setDoctor] = useState({
     name: "Dr. Doctor",
@@ -67,18 +69,18 @@ export default function DoctorSidebar({ mobileOpen, setMobileOpen }: DoctorSideb
   };
 
   const navItems = [
-    { name: "Dashboard", href: "/doctor/dashboard", icon: LayoutDashboard },
-    { name: "Patients", href: "/doctor/patients", icon: Users },
-    { name: "Consultation Notes", href: "/doctor/notes", icon: FileText },
-    { name: "Prescriptions", href: "/doctor/prescriptions", icon: Pill },
-    { name: "Recommended Tests", href: "/doctor/tests", icon: TestTube },
-    { name: "Appointments", href: "/doctor/appointments", icon: Calendar },
-    { name: "Chat", href: "/doctor/chat", icon: MessageSquare },
+    { name: t("dashboard", "Dashboard"), href: "/doctor/dashboard", icon: LayoutDashboard },
+    { name: t("patients", "Patients"), href: "/doctor/patients", icon: Users },
+    { name: t("consultationNotes", "Consultation Notes"), href: "/doctor/notes", icon: FileText },
+    { name: t("prescriptions", "Prescriptions"), href: "/doctor/prescriptions", icon: Pill },
+    { name: t("diagnosticTests", "Recommended Tests"), href: "/doctor/tests", icon: TestTube },
+    { name: t("appointments", "Appointments"), href: "/doctor/appointments", icon: Calendar },
+    { name: t("messages", "Chat"), href: "/doctor/chat", icon: MessageSquare },
   ];
 
   const bottomNavItems = [
-    { name: "Profile", href: "/doctor/profile", icon: User },
-    { name: "Settings", href: "/doctor/settings", icon: Settings },
+    { name: t("profile", "Profile"), href: "/doctor/profile", icon: User },
+    { name: t("settings", "Settings"), href: "/doctor/settings", icon: Settings },
   ];
 
   return (
