@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import DashboardCard from "@/components/common/DashboardCard";
 import { MessageCircle, FileText, Calendar, Pill, Activity } from "lucide-react";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
@@ -66,7 +67,7 @@ interface DashboardState {
 }
 
 const INITIAL_STATE: DashboardState = {
-  chatSummary: "Resume your chat about respiratory symptoms",
+  chatSummary: "Start a chat about respiratory symptoms",
   lastConsultationDate: null,
   lastDiagnosis: null,
   upcomingDoctor: null,
@@ -78,6 +79,7 @@ const INITIAL_STATE: DashboardState = {
 
 export default function PatientDashboard() {
   const router = useRouter();
+  const { t } = useLocale();
   const [data, setData] = useState<DashboardState>(INITIAL_STATE);
   const [loading, setLoading] = useState(true);
 
@@ -224,10 +226,10 @@ export default function PatientDashboard() {
       {/* Header Section */}
       <div className="mb-6 sm:mb-8">
         <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight mb-3">
-          Dashboard
+          {t("dashboard", "Dashboard")}
         </h1>
         <p className="text-slate-500 text-xs sm:text-sm font-medium">
-          Welcome back! Here&apos;s your health overview
+          {t("welcome", "Welcome back! Here's your health overview")}
         </p>
       </div>
 
@@ -235,10 +237,10 @@ export default function PatientDashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Continue Conversation Card */}
         <DashboardCard
-          title="Continue Last Conversation"
+          title={t("aiChatbot", "AI Symptom Chatbot")}
           icon={MessageCircle}
           iconGradient={true}
-          actionText="Open AI Chatbot →"
+          actionText={`${t("openAIChatbot", "Open AI Chatbot")} →`}
           onAction={handleOpenChatbot}
         >
           <p>{loading ? "Loading latest session..." : data.chatSummary}</p>
@@ -246,10 +248,10 @@ export default function PatientDashboard() {
 
         {/* Recent Medical History Card */}
         <DashboardCard
-          title="Recent Medical History"
+          title={t("medicalHistory", "Medical History")}
           icon={FileText}
           iconGradient={true}
-          actionText="View History →"
+          actionText={`${t("viewHistory", "View History")} →`}
           onAction={() => router.push("/patient/medical-history")}
         >
           {loading ? (
@@ -260,16 +262,16 @@ export default function PatientDashboard() {
               <p>Diagnosis: {data.lastDiagnosis || "Pending review"}</p>
             </>
           ) : (
-            <p>No consultation history recorded yet</p>
+            <p>{t("noConsultationHistory", "No consultation history recorded yet")}</p>
           )}
         </DashboardCard>
 
         {/* Upcoming Appointment Card */}
         <DashboardCard
-          title="Upcoming Appointment"
+          title={t("appointments", "Appointments")}
           icon={Calendar}
           iconGradient={true}
-          actionText="View Details →"
+          actionText={`${t("viewDetails", "View Details")} →`}
           onAction={() => router.push("/patient/appointments")}
         >
           {loading ? (
@@ -280,16 +282,16 @@ export default function PatientDashboard() {
               <p>{data.upcomingSchedule || "Schedule pending"}</p>
             </>
           ) : (
-            <p>No upcoming appointments scheduled</p>
+            <p>{t("noUpcomingAppointments", "No upcoming appointments scheduled")}</p>
           )}
         </DashboardCard>
 
         {/* Recent Prescription Card */}
         <DashboardCard
-          title="Recent Prescription"
+          title={t("prescriptions", "Prescriptions")}
           icon={Pill}
           iconGradient={true}
-          actionText="View All →"
+          actionText={`${t("viewAll", "View All")} →`}
           onAction={() => router.push("/patient/prescriptions")}
         >
           {loading ? (
@@ -300,23 +302,23 @@ export default function PatientDashboard() {
               <p>Prescribed: {data.prescribedDate || "N/A"}</p>
             </>
           ) : (
-            <p>No recent prescriptions found</p>
+            <p>{t("noRecentPrescriptions", "No recent prescriptions found")}</p>
           )}
         </DashboardCard>
 
         {/* Symptom Tracker Summary Card (Spans full width on medium/large screens) */}
         <DashboardCard
-          title="Symptom Tracker Summary"
+          title={t("symptomTracker", "Symptom Tracker")}
           icon={Activity}
           iconGradient={true}
-          actionText="Track Symptoms →"
+          actionText={`${t("trackSymptoms", "Track Symptoms")} →`}
           onAction={() => router.push("/patient/symptom-tracker")}
           className="sm:col-span-2 lg:col-span-2"
         >
           <p>
             {loading
               ? "Loading symptom logs..."
-              : data.symptomSummary || "No symptoms logged yet"}
+              : data.symptomSummary || t("noSymptomsLogged", "No symptoms logged yet")}
           </p>
         </DashboardCard>
       </div>

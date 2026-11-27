@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import Sidebar from "@/components/patient/PatientSidebar";
 import { Menu, Bell, Loader2, CheckCheck } from "lucide-react";
 import api from "@/services/api";
+import { settingsService } from "@/services/settings.service";
+import { useTheme } from "@/components/providers/ThemeProvider";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 interface PatientNotification {
   id: string;
@@ -53,6 +56,8 @@ export default function PatientLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const { setTheme } = useTheme();
+  const { setLanguage, setTimeZone, t } = useLocale();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [patientInitials, setPatientInitials] = useState("PT");
   const [loading, setLoading] = useState(true);
@@ -115,6 +120,16 @@ export default function PatientLayout({
         }
 
         loadNotifications();
+        settingsService
+          .getPreferences()
+          .then((prefs) => {
+            if (prefs?.darkMode !== undefined) {
+              setTheme(prefs.darkMode ? "dark" : "light");
+            }
+            if (prefs?.language) setLanguage(prefs.language);
+            if (prefs?.timeZone) setTimeZone(prefs.timeZone);
+          })
+          .catch(() => {});
       } catch (err: any) {
         const status = err?.response?.status;
         if (status === 401 || status === 403) {
@@ -215,7 +230,7 @@ export default function PatientLayout({
               <Menu className="w-5 h-5" />
             </button>
             <span className="font-extrabold text-slate-900 text-sm tracking-tight">
-              Patient Portal
+              {t("patientPortal", "Patient Portal")}
             </span>
           </div>
 

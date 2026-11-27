@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import DashboardCard from "@/components/common/DashboardCard";
 import { Shield, Lock, Bell, Palette, Sun, Moon, Check, Globe, Loader2 } from "lucide-react";
 import { doctorSettingsService } from "@/services/doctor.service";
+import { useTheme, type AppTheme } from "@/components/providers/ThemeProvider";
 
 export default function DoctorSettingsPage() {
+  const { setTheme: applyGlobalTheme } = useTheme();
   const [activeTab, setActiveTab] = useState("account");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -59,6 +61,7 @@ export default function DoctorSettingsPage() {
         }
 
         if (prefs) {
+          const loadedTheme = prefs.theme || (prefs.darkMode ? "dark" : "light");
           setNotifications({
             newAppointment: prefs.newAppointment ?? true,
             appointmentReminders: prefs.appointmentReminders ?? true,
@@ -67,7 +70,8 @@ export default function DoctorSettingsPage() {
             weeklySummaryReport: prefs.weeklySummaryReport ?? true,
             systemAlerts: prefs.systemAlerts ?? false,
           });
-          setTheme(prefs.theme || "light");
+          setTheme(loadedTheme);
+          applyGlobalTheme(loadedTheme as AppTheme);
           setLanguage(prefs.language || "English");
           setTimeZone(prefs.timeZone || "UTC-5 (Eastern Time)");
         }
@@ -77,7 +81,7 @@ export default function DoctorSettingsPage() {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [applyGlobalTheme]);
 
   const handleSaveAccount = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,7 +139,10 @@ export default function DoctorSettingsPage() {
   };
 
   const handlePreferenceChange = async (key: string, value: string) => {
-    if (key === "theme") setTheme(value);
+    if (key === "theme") {
+      setTheme(value);
+      applyGlobalTheme(value as AppTheme);
+    }
     if (key === "language") setLanguage(value);
     if (key === "timeZone") setTimeZone(value);
 

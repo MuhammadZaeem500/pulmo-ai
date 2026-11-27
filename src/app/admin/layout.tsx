@@ -3,7 +3,11 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AdminSidebar from "@/components/admin/AdminSidebar";
-import { Bell, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
+import PortalNotificationBell from "@/components/common/PortalNotificationBell";
+import api from "@/services/api";
+import { useTheme, type AppTheme, type SidebarWidthMode } from "@/components/providers/ThemeProvider";
+import { useLocale, type AppDateFormat } from "@/components/providers/LocaleProvider";
 
 export default function AdminLayout({
   children,
@@ -11,6 +15,8 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const { setTheme, setSidebarWidth } = useTheme();
+  const { setLanguage, setTimeZone, setDateFormat, t } = useLocale();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -22,8 +28,19 @@ export default function AdminLayout({
       router.replace("/auth/admin/sign-in");
     } else {
       setIsAuthorized(true);
+      api
+        .get("/admin/settings")
+        .then((res) => {
+          const s = res?.data?.settings || res?.data;
+          if (s?.theme) setTheme(s.theme as AppTheme);
+          if (s?.sidebarWidth) setSidebarWidth(s.sidebarWidth as SidebarWidthMode);
+          if (s?.language) setLanguage(s.language);
+          if (s?.timeZone) setTimeZone(s.timeZone);
+          if (s?.dateFormat) setDateFormat(s.dateFormat as AppDateFormat);
+        })
+        .catch(() => {});
     }
-  }, [router]);
+  }, [router, setTheme, setSidebarWidth]);
 
   // Prevent flashing protected content before redirect completes
   if (!isAuthorized) {
@@ -64,15 +81,15 @@ export default function AdminLayout({
               <span className="text-slate-900">Dashboard</span>
             </div>
             <span className="sm:hidden font-extrabold text-slate-900 text-sm tracking-tight">
-              PulmoAI Admin
+              {t("adminPortal", "PulmoAI Admin")}
             </span>
           </div>
 
           <div className="flex items-center gap-4">
-            <button className="relative p-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors cursor-pointer">
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500" />
-            </button>
+            <PortalNotificationBell
+              baseUrl="/admin/notifications"
+              viewAllHref="/admin/notifications"
+            />
             <div className="flex items-center gap-3 pl-3 border-l border-slate-200">
               <div className="w-9 h-9 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-sm">
                 AD

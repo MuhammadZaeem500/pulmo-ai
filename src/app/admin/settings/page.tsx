@@ -13,8 +13,10 @@ import {
   Loader2 
 } from "lucide-react";
 import api from "@/services/api";
+import { useTheme, type AppTheme, type SidebarWidthMode } from "@/components/providers/ThemeProvider";
 
 export default function AdminSettingsPage() {
+  const { setTheme: applyGlobalTheme, setSidebarWidth: applyGlobalSidebarWidth } = useTheme();
   const [activeTab, setActiveTab] = useState<"Account" | "Security" | "Notification" | "Language" | "Theme">("Account");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -57,15 +59,45 @@ export default function AdminSettingsPage() {
     async function loadSettings() {
       try {
         setLoading(true);
-        const res = await api.get('/admin/profile');
-        const data = res.data || res;
+        const [profileRes, settingsRes] = await Promise.all([
+          api.get('/admin/profile'),
+          api.get('/admin/settings').catch(() => null),
+        ]);
 
+        const data = profileRes.data || profileRes;
         if (data) {
           setFullName(data.fullName || data.adminProfile?.fullName || "Admin User");
           setEmail(data.email || "");
           setOrganization(data.organization || "PulmoAI Administration");
           setRole(data.adminRole || data.role || "Super Admin");
           setBio(data.bio || "");
+        }
+
+        const settings = settingsRes?.data?.settings || settingsRes?.data;
+        if (settings) {
+          setTwoFactor(settings.twoFactor ?? true);
+          setAutoSession(settings.autoSession ?? true);
+          setLoginAlerts(settings.loginAlerts ?? true);
+          setApiAccess(settings.apiAccess ?? false);
+
+          setNotifVerification(settings.notifVerification ?? true);
+          setNotifSecurity(settings.notifSecurity ?? true);
+          setNotifSystem(settings.notifSystem ?? true);
+          setNotifAdminUpdates(settings.notifAdminUpdates ?? false);
+          setNotifEmailDigest(settings.notifEmailDigest ?? true);
+          setNotifSms(settings.notifSms ?? false);
+
+          if (settings.language) setLanguage(settings.language);
+          if (settings.dateFormat) setDateFormat(settings.dateFormat);
+          if (settings.timeZone) setTimeZone(settings.timeZone);
+          if (settings.theme) {
+            setSelectedTheme(settings.theme);
+            applyGlobalTheme(settings.theme as AppTheme);
+          }
+          if (settings.sidebarWidth) {
+            setSidebarWidth(settings.sidebarWidth);
+            applyGlobalSidebarWidth(settings.sidebarWidth as SidebarWidthMode);
+          }
         }
       } catch (err: any) {
         setMessage({ type: 'error', text: err.response?.data?.message || "Failed to load settings." });
@@ -75,7 +107,7 @@ export default function AdminSettingsPage() {
     }
 
     loadSettings();
-  }, []);
+  }, [applyGlobalTheme, applyGlobalSidebarWidth]);
 
 const handleSave = async () => {
     try {
@@ -130,15 +162,31 @@ const handleSave = async () => {
           : 'Security settings saved successfully!';
         
         setMessage({ type: 'success', text: successText });
-      } else {
+      } else if (activeTab === "Notification") {
+        await api.patch('/admin/settings', {
+          notifVerification,
+          notifSecurity,
+          notifSystem,
+          notifAdminUpdates,
+          notifEmailDigest,
+          notifSms,
+        });
+        setMessage({ type: 'success', text: 'Notification preferences saved successfully!' });
+      } else if (activeTab === "Language") {
         await api.patch('/admin/settings', {
           language,
           dateFormat,
           timeZone,
+        });
+        setMessage({ type: 'success', text: 'Language & regional settings saved successfully!' });
+      } else {
+        applyGlobalTheme(selectedTheme as AppTheme);
+        applyGlobalSidebarWidth(sidebarWidth as SidebarWidthMode);
+        await api.patch('/admin/settings', {
           theme: selectedTheme,
           sidebarWidth,
         });
-        setMessage({ type: 'success', text: `${activeTab} settings saved successfully!` });
+        setMessage({ type: 'success', text: 'Theme settings saved successfully!' });
       }
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -463,7 +511,10 @@ const handleSave = async () => {
                       return (
                         <div
                           key={theme.name}
-                          onClick={() => setSelectedTheme(theme.name as any)}
+                          onClick={() => {
+                            setSelectedTheme(theme.name as any);
+                            applyGlobalTheme(theme.name as AppTheme);
+                          }}
                           className={`rounded-2xl border-2 p-4 cursor-pointer transition-all flex flex-col items-center gap-3 ${
                             isSelected ? "border-blue-600 bg-blue-50/20 shadow-md" : "border-slate-200 hover:border-slate-300"
                           }`}
@@ -488,7 +539,10 @@ const handleSave = async () => {
                     {(["Compact", "Default", "Wide"] as const).map((width) => (
                       <button
                         key={width}
-                        onClick={() => setSidebarWidth(width)}
+                        onClick={() => {
+                          setSidebarWidth(width);
+                          applyGlobalSidebarWidth(width as SidebarWidthMode);
+                        }}
                         className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                           sidebarWidth === width
                             ? "bg-blue-600 text-white shadow-sm shadow-blue-500/20"

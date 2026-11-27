@@ -1,42 +1,50 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { User, Bell, Globe, Moon, Loader2, KeyRound, X } from "lucide-react";
 import SettingSectionCard from "@/components/common/SettingSectionCard";
 import SettingToggleItem from "@/components/common/SettingToggleItem";
-import { settingsService } from "@/services/settings.service";
 import { authService } from "@/services/auth.service";
+import { useTheme } from "@/components/providers/ThemeProvider";
+import { useSettings } from "@/components/providers/SettingsProvider";
+import { useLocale } from "@/components/providers/LocaleProvider";
+import { useToast } from "@/hooks/useToast";
+import { ToastContainer } from "@/components/ui/ToastContainer";
+import { ConfirmationModal } from "@/components/ui/ConfirmationModal";
 
 // ─── Change Password Modal ───────────────────────────────────────────────────
-function ChangePasswordModal({ onClose }: { onClose: () => void }) {
+function ChangePasswordModal({ 
+  onClose,
+  onSuccess,
+}: { 
+  onClose: () => void;
+  onSuccess: (title: string, message?: string) => void;
+}) {
+  const { changePassword, saving, error: contextError } = useSettings();
   const [current, setCurrent] = useState("");
   const [next, setNext]       = useState("");
   const [confirm, setConfirm] = useState("");
-  const [saving, setSaving]   = useState(false);
-  const [error, setError]     = useState("");
+  const [localError, setLocalError]     = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setLocalError("");
 
     if (next.length < 6) {
-      setError("New password must be at least 6 characters.");
+      setLocalError("New password must be at least 6 characters.");
       return;
     }
     if (next !== confirm) {
-      setError("Passwords do not match.");
+      setLocalError("Passwords do not match.");
       return;
     }
 
-    setSaving(true);
     try {
-      await settingsService.changePassword(current, next);
-      alert("Password changed successfully!");
+      await changePassword(current, next);
+      onSuccess("Password Changed", "Your password has been updated successfully!");
       onClose();
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to change password.");
-    } finally {
-      setSaving(false);
+      setLocalError(err?.message || "Failed to change password.");
     }
   };
 
@@ -67,19 +75,23 @@ function ChangePasswordModal({ onClose }: { onClose: () => void }) {
                 type="password"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
+                disabled={saving}
                 required
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50"
               />
             </div>
           ))}
 
-          {error && <p className="text-xs text-rose-600 font-medium">{error}</p>}
+          {(localError || contextError) && (
+            <p className="text-xs text-rose-600 font-medium">{localError || contextError}</p>
+          )}
 
           <div className="flex gap-3 pt-1">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+              disabled={saving}
+              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50"
             >
               Cancel
             </button>
@@ -100,72 +112,85 @@ function ChangePasswordModal({ onClose }: { onClose: () => void }) {
 
 // ─── Main Settings Page ──────────────────────────────────────────────────────
 export default function SettingsPage() {
-  const [loading, setLoading]   = useState(true);
-  const [saving, setSaving]     = useState(false);
+  const { setTheme } = useTheme();
+  const { preferences, loading, saving, updatePreference, deleteAccount } = useSettings();
+  const { setLanguage, setTimeZone } = useLocale();
+  const { toasts, removeToast, success, error, warning, loading: showLoading } = useToast();
   const [showPwModal, setShowPwModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showFinalConfirm, setShowFinalConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Preferences state — mirrors UpdatePreferencesDto
-  const [emailNotifs,           setEmailNotifs]           = useState(true);
-  const [appointmentReminders,  setAppointmentReminders]  = useState(true);
-  const [healthTips,            setHealthTips]            = useState(false);
-  const [darkMode,              setDarkMode]              = useState(false);
-  const [language,              setLanguage]              = useState("English");
-  const [timeZone,              setTimeZone]              = useState("UTC");
-
-  // ── Load saved preferences on mount ────────────────────────────────────────
-  useEffect(() => {
-    (async () => {
-      try {
-        const prefs = await settingsService.getPreferences();
-        if (prefs) {
-          setEmailNotifs(prefs.emailNotifications  ?? true);
-          setAppointmentReminders(prefs.appointmentReminders ?? true);
-          setHealthTips(prefs.healthTips           ?? false);
-          setDarkMode(prefs.darkMode               ?? false);
-          setLanguage(prefs.language               ?? "English");
-          setTimeZone(prefs.timeZone               ?? "UTC");
-        }
-      } catch (err) {
-        console.error("Failed to load preferences", err);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
-
-  // ── Persist any preference change immediately ───────────────────────────────
-  const persist = async (patch: Parameters<typeof settingsService.updatePreferences>[0]) => {
-    setSaving(true);
+  // ── Handle preference toggle ───────────────────────────────────────────────
+  const handleToggle = async (key: string, currentValue: boolean) => {
     try {
-      await settingsService.updatePreferences(patch);
-    } catch (err) {
-      console.error("Failed to save preference", err);
-    } finally {
-      setSaving(false);
+      await updatePreference(key as any, !currentValue);
+      // Update theme globally if darkMode changed
+      if (key === "darkMode") {
+        setTheme(!currentValue ? "dark" : "light");
+      }
+    } catch (error) {
+      console.error("Failed to toggle preference", error);
     }
   };
 
-  const toggle = (
-    current: boolean,
-    setter: (v: boolean) => void,
-    key: Parameters<typeof settingsService.updatePreferences>[0]
-  ) => {
-    const next = !current;
-    setter(next);
-    persist({ ...key, ...{ [Object.keys(key)[0]]: next } });
+  // ── Handle dropdown change ─────────────────────────────────────────────────
+  const handleSelectChange = async (key: string, value: string) => {
+    try {
+      await updatePreference(key as any, value);
+      
+      // Update locale providers for real-time translation updates
+      if (key === "language") {
+        setLanguage(value);
+      } else if (key === "timeZone") {
+        setTimeZone(value);
+      }
+    } catch (error) {
+      console.error("Failed to update preference", error);
+    }
   };
 
   // ── Handle Account Deletion ────────────────────────────────────────────────
-  const handleDeleteAccount = async () => {
-    if (confirm("Are you sure you want to permanently delete your account and data? This action cannot be undone.")) {
-      try {
-        await settingsService.deleteAccount();
-        await authService.deleteAccount();
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = () => {
+    setShowDeleteConfirm(false);
+    setShowFinalConfirm(true);
+  };
+
+  const handleFinalConfirmDelete = async () => {
+    setShowFinalConfirm(false);
+    setIsDeleting(true);
+    
+    try {
+      // Show loading toast
+      showLoading("Deleting Account", "Please wait while we delete your account and data...");
+      
+      // Delete account from backend database
+      await deleteAccount();
+      
+      // Delete Firebase user
+      await authService.deleteAccount();
+      
+      // Show success message
+      success(
+        "Account Deleted Successfully",
+        "Your account and all associated data have been permanently deleted. You will be redirected to login."
+      );
+      
+      // Redirect after a short delay
+      setTimeout(() => {
         window.location.href = "/auth/patient/sign-in";
-      } catch (error) {
-        console.error("Failed to delete account", error);
-        alert("Failed to delete account. Please try again.");
-      }
+      }, 2000);
+    } catch (err: any) {
+      console.error("Failed to delete account", err);
+      setIsDeleting(false);
+      error(
+        "Failed to Delete Account",
+        err?.message || "An error occurred while deleting your account. Please try again or contact support."
+      );
     }
   };
 
@@ -177,9 +202,53 @@ export default function SettingsPage() {
     );
   }
 
+  if (!preferences) {
+    return (
+      <div className="flex justify-center items-center py-32">
+        <p className="text-gray-500">Failed to load preferences. Please refresh the page.</p>
+      </div>
+    );
+  }
+
   return (
     <>
-      {showPwModal && <ChangePasswordModal onClose={() => setShowPwModal(false)} />}
+      {showPwModal && (
+        <ChangePasswordModal 
+          onClose={() => setShowPwModal(false)} 
+          onSuccess={success}
+        />
+      )}
+
+      {showDeleteConfirm && (
+        <ConfirmationModal
+          title="Delete Account?"
+          description="⚠️ WARNING: This will permanently delete your account and ALL associated data."
+          details={[
+            "All medical records",
+            "All appointments",
+            "All prescriptions",
+            "All chat history",
+          ]}
+          confirmText="Proceed"
+          cancelText="Cancel"
+          isDangerous={true}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
+      )}
+
+      {showFinalConfirm && (
+        <ConfirmationModal
+          title="Final Confirmation"
+          description="Your account cannot be recovered after this action. This is permanent."
+          confirmText="Permanently Delete"
+          cancelText="Cancel"
+          isDangerous={true}
+          isLoading={isDeleting}
+          onConfirm={handleFinalConfirmDelete}
+          onCancel={() => setShowFinalConfirm(false)}
+        />
+      )}
 
       <div className="p-2 sm:p-4 lg:p-8 max-w-7xl mx-auto space-y-6 sm:space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 sm:mb-8">
@@ -217,7 +286,7 @@ export default function SettingsPage() {
                 <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5">Permanently delete your account and data</p>
               </div>
               <button
-                onClick={handleDeleteAccount}
+                onClick={handleDeleteClick}
                 className="w-full sm:w-auto px-4 py-2 rounded-xl border border-rose-200 text-rose-600 font-medium text-xs sm:text-sm hover:bg-rose-50 transition-all cursor-pointer text-center"
               >
                 Delete
@@ -230,23 +299,23 @@ export default function SettingsPage() {
             <SettingToggleItem
               title="Email Notifications"
               description="Receive updates via email"
-              enabled={emailNotifs}
-              onToggle={() => toggle(emailNotifs, setEmailNotifs, { emailNotifications: emailNotifs })}
+              enabled={preferences.emailNotifications}
+              onToggle={() => handleToggle("emailNotifications", preferences.emailNotifications)}
             />
             <div className="pt-4 border-t border-gray-100">
               <SettingToggleItem
                 title="Appointment Reminders"
                 description="Get reminded about upcoming appointments"
-                enabled={appointmentReminders}
-                onToggle={() => toggle(appointmentReminders, setAppointmentReminders, { appointmentReminders })}
+                enabled={preferences.appointmentReminders}
+                onToggle={() => handleToggle("appointmentReminders", preferences.appointmentReminders)}
               />
             </div>
             <div className="pt-4 border-t border-gray-100">
               <SettingToggleItem
                 title="Health Tips"
                 description="Receive personalized health recommendations"
-                enabled={healthTips}
-                onToggle={() => toggle(healthTips, setHealthTips, { healthTips })}
+                enabled={preferences.healthTips}
+                onToggle={() => handleToggle("healthTips", preferences.healthTips)}
               />
             </div>
           </SettingSectionCard>
@@ -259,12 +328,10 @@ export default function SettingsPage() {
                 <p className="text-xs text-gray-500 mt-0.5">Choose your preferred language</p>
               </div>
               <select
-                value={language}
-                onChange={(e) => {
-                  setLanguage(e.target.value);
-                  persist({ language: e.target.value });
-                }}
-                className="px-4 py-2 rounded-xl border border-gray-200 text-sm text-gray-700 bg-white focus:outline-none focus:border-blue-500 cursor-pointer shadow-xs"
+                value={preferences.language}
+                onChange={(e) => handleSelectChange("language", e.target.value)}
+                disabled={saving}
+                className="px-4 py-2 rounded-xl border border-gray-200 text-sm text-gray-700 bg-white focus:outline-none focus:border-blue-500 cursor-pointer shadow-xs disabled:opacity-50"
               >
                 <option value="English">English</option>
                 <option value="Spanish">Spanish</option>
@@ -278,12 +345,10 @@ export default function SettingsPage() {
                 <p className="text-xs text-gray-500 mt-0.5">Set your local time zone</p>
               </div>
               <select
-                value={timeZone}
-                onChange={(e) => {
-                  setTimeZone(e.target.value);
-                  persist({ timeZone: e.target.value });
-                }}
-                className="px-4 py-2 rounded-xl border border-gray-200 text-sm text-gray-700 bg-white focus:outline-none focus:border-blue-500 cursor-pointer shadow-xs"
+                value={preferences.timeZone}
+                onChange={(e) => handleSelectChange("timeZone", e.target.value)}
+                disabled={saving}
+                className="px-4 py-2 rounded-xl border border-gray-200 text-sm text-gray-700 bg-white focus:outline-none focus:border-blue-500 cursor-pointer shadow-xs disabled:opacity-50"
               >
                 <option value="EST (UTC-5)">EST (UTC-5)</option>
                 <option value="PST (UTC-8)">PST (UTC-8)</option>
@@ -299,13 +364,14 @@ export default function SettingsPage() {
             <SettingToggleItem
               title="Dark Mode"
               description="Switch to dark theme"
-              enabled={darkMode}
-              onToggle={() => toggle(darkMode, setDarkMode, { darkMode })}
+              enabled={preferences.darkMode}
+              onToggle={() => handleToggle("darkMode", preferences.darkMode)}
             />
           </SettingSectionCard>
 
         </div>
       </div>
+      <ToastContainer toasts={toasts} onClose={removeToast} />
     </>
   );
 }

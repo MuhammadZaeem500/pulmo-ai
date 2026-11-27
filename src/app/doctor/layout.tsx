@@ -3,9 +3,12 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import DoctorSidebar from "@/components/doctor/DoctorSidebar";
-import { Menu, Bell, Loader2 } from "lucide-react";
-import { doctorPortalService } from "@/services/doctor.service";
+import { Menu, Loader2 } from "lucide-react";
+import { doctorPortalService, doctorSettingsService } from "@/services/doctor.service";
 import { authService } from "@/services/auth.service";
+import PortalNotificationBell from "@/components/common/PortalNotificationBell";
+import { useTheme, type AppTheme } from "@/components/providers/ThemeProvider";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 export default function DoctorLayout({
   children,
@@ -13,6 +16,8 @@ export default function DoctorLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const { setTheme } = useTheme();
+  const { setLanguage, setTimeZone, t } = useLocale();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [doctorInitials, setDoctorInitials] = useState("DR");
   const [loading, setLoading] = useState(true);
@@ -51,13 +56,24 @@ export default function DoctorLayout({
             .toUpperCase();
           setDoctorInitials(initials || "DR");
         }
+
+        doctorSettingsService
+          .getPreferences()
+          .then((prefs) => {
+            if (prefs?.theme || prefs?.darkMode !== undefined) {
+              setTheme((prefs.theme || (prefs.darkMode ? "dark" : "light")) as AppTheme);
+            }
+            if (prefs?.language) setLanguage(prefs.language);
+            if (prefs?.timeZone) setTimeZone(prefs.timeZone);
+          })
+          .catch(() => {});
       } catch (err) {
         console.error("Failed to load doctor profile initials", err);
       } finally {
         setLoading(false);
       }
     })();
-  }, [router]);
+  }, [router, setTheme]);
 
   if (!isAuthorized) {
     return (
@@ -85,15 +101,12 @@ export default function DoctorLayout({
               <Menu className="w-5 h-5" />
             </button>
             <span className="font-extrabold text-slate-900 text-sm tracking-tight">
-              Doctor Portal
+              {t("doctorPortal", "Doctor Portal")}
             </span>
           </div>
 
           <div className="flex items-center gap-4">
-            <button className="relative p-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors cursor-pointer">
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500" />
-            </button>
+            <PortalNotificationBell baseUrl="/doctor/notifications" />
             
             {/* Live Doctor Initials Avatar */}
             <div className="w-9 h-9 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-sm">
