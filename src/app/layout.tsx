@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { LocaleProvider } from "@/components/providers/LocaleProvider";
+import { SettingsProvider } from "@/components/providers/SettingsProvider";
 
 export const metadata: Metadata = {
   title: "PulmoAI",
@@ -23,7 +26,13 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col font-sans">
-        <AuthProvider>{children}</AuthProvider>
+        <ThemeProvider>
+          <LocaleProvider>
+            <SettingsProvider>
+              <AuthProvider>{children}</AuthProvider>
+            </SettingsProvider>
+          </LocaleProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
