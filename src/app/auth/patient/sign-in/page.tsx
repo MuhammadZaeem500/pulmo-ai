@@ -23,7 +23,12 @@ export default function Login() {
     setLoading(true);
 
     try {
-      await authService.login({ email, password, expectedRole: "PATIENT" });
+      const response = await authService.login({ email, password, expectedRole: "PATIENT" });
+      if (response?.user?.role && response.user.role !== "PATIENT") {
+        authService.clearAuthSession();
+        setError("Access denied. This portal is for patients only.");
+        return;
+      }
       router.push("/patient/dashboard");
     } catch (err: any) {
       setError(authService.formatAuthError(err));
@@ -38,7 +43,14 @@ export default function Login() {
     setSocialLoading("google");
 
     try {
-      await authService.loginWithGoogle("PATIENT");
+      const response = await authService.loginWithGoogle("PATIENT");
+      if (response?.user?.role && response.user.role !== "PATIENT") {
+        await authService.logout().catch(() => authService.clearAuthSession());
+        setError(
+          `This account is registered as ${response.user.role}. Please sign in through the ${response.user.role.toLowerCase()} portal.`
+        );
+        return;
+      }
       router.push("/patient/dashboard");
     } catch (err: any) {
       setError(authService.formatAuthError(err));
@@ -53,7 +65,14 @@ export default function Login() {
     setSocialLoading("github");
 
     try {
-      await authService.loginWithGithub("PATIENT");
+      const response = await authService.loginWithGithub("PATIENT");
+      if (response?.user?.role && response.user.role !== "PATIENT") {
+        await authService.logout().catch(() => authService.clearAuthSession());
+        setError(
+          `This account is registered as ${response.user.role}. Please sign in through the ${response.user.role.toLowerCase()} portal.`
+        );
+        return;
+      }
       router.push("/patient/dashboard");
     } catch (err: any) {
       setError(authService.formatAuthError(err));

@@ -62,6 +62,8 @@ api.interceptors.response.use(
           if (auth?.currentUser) {
             const refreshedToken = await auth.currentUser.getIdToken(true);
             if (refreshedToken) {
+              localStorage.setItem('accessToken', refreshedToken);
+              localStorage.setItem('token', refreshedToken);
               originalRequest.headers = {
                 ...originalRequest.headers,
                 Authorization: `Bearer ${refreshedToken}`,
@@ -69,7 +71,8 @@ api.interceptors.response.use(
               return api(originalRequest);
             }
           }
-        } catch {
+        } catch (err) {
+          console.error('Token refresh failed:', err);
           // Token refresh failed; clear auth state below
         }
       }
@@ -77,6 +80,7 @@ api.interceptors.response.use(
       localStorage.removeItem('token');
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
+      localStorage.removeItem('firebaseUid');
       document.cookie = 'accessToken=; path=/; max-age=0';
       document.cookie = 'token=; path=/; max-age=0';
       document.cookie = 'userRole=; path=/; max-age=0';

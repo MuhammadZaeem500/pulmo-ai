@@ -53,6 +53,12 @@ export const authService = {
       if (user.uid) {
         localStorage.setItem('firebaseUid', user.uid);
       }
+      // Store user ID for user-specific preferences (theme, sidebar, etc.)
+      if (user.id) {
+        localStorage.setItem('userId', user.id);
+      } else if (user.uid) {
+        localStorage.setItem('userId', user.uid);
+      }
     }
   },
 
@@ -66,6 +72,7 @@ export const authService = {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('user');
     localStorage.removeItem('firebaseUid');
+    localStorage.removeItem('userId');
 
     document.cookie = 'accessToken=; path=/; max-age=0';
     document.cookie = 'token=; path=/; max-age=0';
@@ -79,12 +86,22 @@ export const authService = {
     if (!error) return 'An unexpected error occurred.';
 
     const code = error.code || '';
+    const message = error.response?.data?.message || error.message || '';
+
+    // Check for "user not found" in various places
+    const isUserNotFound =
+      code === 'auth/user-not-found' ||
+      message.toLowerCase().includes('user not found') ||
+      message.toLowerCase().includes('account does not exist') ||
+      message.toLowerCase().includes('account was deleted') ||
+      (error.response?.status === 400 && message.includes('User not found'));
+
     switch (code) {
       case 'auth/invalid-credential':
       case 'auth/wrong-password':
         return 'Invalid email or password. Please verify your credentials.';
       case 'auth/user-not-found':
-        return 'No registered account found with this email.';
+        return '❌ Account Does Not Exist\n\nThis email is not registered. The account may have been deleted.\n\nPlease check your email address or sign up for a new account.';
       case 'auth/email-already-in-use':
         return 'An account with this email address already exists.';
       case 'auth/weak-password':
@@ -100,9 +117,12 @@ export const authService = {
       case 'auth/network-request-failed':
         return 'Network connection error. Please check your internet connection.';
       default:
+        // If we detected user not found in the message
+        if (isUserNotFound) {
+          return '❌ Account Does Not Exist\n\nThis account has been deleted or no longer exists.\n\nPlease check your email address or sign up for a new account.';
+        }
         return (
-          error.response?.data?.message ||
-          error.message ||
+          message ||
           'Authentication failed. Please check your details and try again.'
         );
     }
@@ -113,16 +133,29 @@ export const authService = {
    */
   async login({ email, password, expectedRole }: LoginParams) {
     const auth = getFirebaseAuth();
-    if (!auth) {
-      throw new Error('Firebase Auth is not available.');
+    let firebaseUser: any = null;
+    let idToken = '';
+    let firebaseAuthError: any = null;
+
+    if (auth) {
+      try {
+        const credential = await signInWithEmailAndPassword(auth, email, password);
+        firebaseUser = credential.user;
+        idToken = await firebaseUser.getIdToken();
+      } catch (err: any) {
+        const code = err?.code || '';
+        const canFallbackToBackend =
+          code === 'auth/invalid-credential' ||
+          code === 'auth/user-not-found' ||
+          code === 'auth/wrong-password';
+        if (!canFallbackToBackend) {
+          throw err;
+        }
+        firebaseAuthError = err;
+      }
     }
 
-    // 1. Authenticate against Firebase
-    const credential = await signInWithEmailAndPassword(auth, email, password);
-    const firebaseUser = credential.user;
-    const idToken = await firebaseUser.getIdToken();
-
-    // 2. Synchronize with backend API
+    // 2. Synchronize / authenticate with backend API
     let backendData: any = null;
     try {
       const response = await api.post(
@@ -130,20 +163,25 @@ export const authService = {
         {
           email,
           password,
-          idToken,
-          firebaseUid: firebaseUser.uid,
+          ...(idToken ? { idToken } : {}),
+          ...(firebaseUser?.uid ? { firebaseUid: firebaseUser.uid } : {}),
+          ...(expectedRole ? { expectedRole } : {}),
         },
-        {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
-        },
+        idToken
+          ? {
+              headers: {
+                Authorization: `Bearer ${idToken}`,
+              },
+            }
+          : undefined,
       );
       backendData = response.data;
     } catch (err: any) {
-      // If backend returns 401 or 403, bubble it up so portal-specific checks fail
       if (err.response?.status === 401 || err.response?.status === 403) {
-        throw err;
+        throw firebaseAuthError && !err.response?.data?.message ? firebaseAuthError : err;
+      }
+      if (!firebaseUser) {
+        throw firebaseAuthError || err;
       }
       console.warn('Backend /auth/sign-in notice:', err?.response?.data || err?.message);
     }
@@ -154,13 +192,16 @@ export const authService = {
       expectedRole ||
       'PATIENT';
 
-    const activeToken = backendData?.accessToken || idToken;
+    const activeToken = idToken || backendData?.accessToken;
+    if (!activeToken) {
+      throw firebaseAuthError || new Error('Authentication failed.');
+    }
 
     const userProfile: AuthUser = backendData?.user || {
-      id: firebaseUser.uid,
-      uid: firebaseUser.uid,
-      email: firebaseUser.email,
-      fullName: firebaseUser.displayName,
+      id: firebaseUser?.uid,
+      uid: firebaseUser?.uid,
+      email: firebaseUser?.email || email,
+      fullName: firebaseUser?.displayName || email.split('@')[0],
       role: role as any,
     };
 
@@ -209,6 +250,9 @@ export const authService = {
       );
       backendData = response.data;
     } catch (err: any) {
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        throw err;
+      }
       console.warn('Backend /auth/social-sync notice:', err?.response?.data || err?.message);
     }
 
@@ -270,6 +314,9 @@ export const authService = {
       );
       backendData = response.data;
     } catch (err: any) {
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        throw err;
+      }
       console.warn('Backend /auth/social-sync notice:', err?.response?.data || err?.message);
     }
 
